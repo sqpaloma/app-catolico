@@ -11,6 +11,7 @@
   "dependencies": {
     "convex": "catalog:",
     "dotenv": "catalog:",
+    "openai": "^4.78.1",
     "zod": "catalog:"
   },
   "devDependencies": {

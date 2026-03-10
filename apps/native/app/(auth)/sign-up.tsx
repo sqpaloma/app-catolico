@@ -1,108 +1,148 @@
 import { useSignUp } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
-import * as React from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import { Alert, Text, TextInput, View } from "react-native";
+import { Button, Surface } from "heroui-native";
+
+import { Container } from "@/components/container";
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const router = useRouter();
 
-  const [emailAddress, setEmailAddress] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [pendingVerification, setPendingVerification] = React.useState(false);
-  const [code, setCode] = React.useState("");
+  const [emailAddress, setEmailAddress] = useState("");
+  const [password, setPassword] = useState("");
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [code, setCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Handle submission of sign-up form
   const onSignUpPress = async () => {
     if (!isLoaded) return;
+    setIsLoading(true);
 
-    // Start sign-up process using email and password provided
     try {
-      await signUp.create({
-        emailAddress,
-        password,
-      });
-
-      // Send user an email with verification code
+      await signUp.create({ emailAddress, password });
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-
-      // Set 'pendingVerification' to true to display second form
-      // and capture OTP code
       setPendingVerification(true);
-    } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2));
+    } catch {
+      Alert.alert("Erro", "Não foi possível criar a conta. Verifique os dados.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Handle submission of verification form
   const onVerifyPress = async () => {
     if (!isLoaded) return;
+    setIsLoading(true);
 
     try {
-      // Use the code the user provided to attempt verification
-      const signUpAttempt = await signUp.attemptEmailAddressVerification({
-        code,
-      });
+      const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
 
-      // If verification was completed, set the session to active
-      // and redirect the user
       if (signUpAttempt.status === "complete") {
         await setActive({ session: signUpAttempt.createdSessionId });
         router.replace("/");
       } else {
-        // If the status is not complete, check why. User may need to
-        // complete further steps.
-        console.error(JSON.stringify(signUpAttempt, null, 2));
+        Alert.alert("Erro", "Não foi possível verificar. Tente novamente.");
       }
-    } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2));
+    } catch {
+      Alert.alert("Erro", "Código inválido. Verifique e tente novamente.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   if (pendingVerification) {
     return (
-      <>
-        <Text>Verify your email</Text>
-        <TextInput
-          value={code}
-          placeholder="Enter your verification code"
-          onChangeText={(code) => setCode(code)}
-        />
-        <TouchableOpacity onPress={onVerifyPress}>
-          <Text>Verify</Text>
-        </TouchableOpacity>
-      </>
+      <Container className="px-6 justify-center">
+        <View className="items-center mb-8">
+          <View className="w-16 h-16 rounded-full bg-primary/20 items-center justify-center mb-4">
+            <Ionicons name="mail" size={28} color="#888" />
+          </View>
+          <Text className="text-foreground text-2xl font-bold">
+            Verificar Email
+          </Text>
+          <Text className="text-muted text-sm mt-1 text-center">
+            Enviamos um código para {emailAddress}
+          </Text>
+        </View>
+
+        <Surface variant="secondary" className="rounded-xl p-1 mb-4">
+          <TextInput
+            className="text-foreground text-base p-4 text-center tracking-widest"
+            value={code}
+            placeholder="000000"
+            placeholderTextColor="#888"
+            keyboardType="number-pad"
+            onChangeText={setCode}
+            editable={!isLoading}
+          />
+        </Surface>
+
+        <Button
+          size="lg"
+          color="primary"
+          isDisabled={!code || isLoading}
+          onPress={onVerifyPress}
+        >
+          <Button.Label>{isLoading ? "Verificando..." : "Verificar"}</Button.Label>
+        </Button>
+      </Container>
     );
   }
 
   return (
-    <View>
-      <Text>Sign up</Text>
-      <TextInput
-        autoCapitalize="none"
-        value={emailAddress}
-        placeholder="Enter email"
-        onChangeText={(email) => setEmailAddress(email)}
-      />
-      <TextInput
-        value={password}
-        placeholder="Enter password"
-        secureTextEntry={true}
-        onChangeText={(password) => setPassword(password)}
-      />
-      <TouchableOpacity onPress={onSignUpPress}>
-        <Text>Continue</Text>
-      </TouchableOpacity>
-      <View style={{ display: "flex", flexDirection: "row", gap: 3 }}>
-        <Text>Already have an account?</Text>
-        <Link href="/sign-in">
-          <Text>Sign in</Text>
+    <Container className="px-6 justify-center">
+      <View className="items-center mb-8">
+        <View className="w-16 h-16 rounded-full bg-primary/20 items-center justify-center mb-4">
+          <Ionicons name="heart" size={28} color="#888" />
+        </View>
+        <Text className="text-foreground text-2xl font-bold">Criar Conta</Text>
+        <Text className="text-muted text-sm mt-1">
+          Comece sua jornada de direção espiritual
+        </Text>
+      </View>
+
+      <Surface variant="secondary" className="rounded-xl p-1 mb-3">
+        <TextInput
+          className="text-foreground text-base p-4"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          value={emailAddress}
+          placeholder="Email"
+          placeholderTextColor="#888"
+          onChangeText={setEmailAddress}
+          editable={!isLoading}
+        />
+      </Surface>
+
+      <Surface variant="secondary" className="rounded-xl p-1 mb-4">
+        <TextInput
+          className="text-foreground text-base p-4"
+          value={password}
+          placeholder="Senha"
+          placeholderTextColor="#888"
+          secureTextEntry
+          onChangeText={setPassword}
+          editable={!isLoading}
+        />
+      </Surface>
+
+      <Button
+        size="lg"
+        color="primary"
+        isDisabled={!emailAddress || !password || isLoading}
+        onPress={onSignUpPress}
+      >
+        <Button.Label>{isLoading ? "Criando..." : "Criar Conta"}</Button.Label>
+      </Button>
+
+      <View className="flex-row items-center justify-center mt-6 gap-1">
+        <Text className="text-muted text-sm">Já tem conta?</Text>
+        <Link href="/(auth)/sign-in">
+          <Text className="text-primary text-sm font-semibold">Entrar</Text>
         </Link>
       </View>
-    </View>
+    </Container>
   );
 }
