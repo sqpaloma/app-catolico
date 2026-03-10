@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Redirect } from "expo-router";
 import { Tabs } from "expo-router";
-import { useThemeColor } from "heroui-native";
+import { Spinner, useThemeColor } from "heroui-native";
 import { useAuth } from "@clerk/clerk-expo";
+import { View } from "react-native";
 
 import { useUserRole } from "@/hooks/use-user-role";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -13,7 +14,17 @@ export default function TabLayout() {
   const foreground = useThemeColor("foreground");
   const background = useThemeColor("background");
 
-  if (isLoaded && !isSignedIn) {
+  if (!isLoaded) {
+    return (
+      <View
+        style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: background }}
+      >
+        <Spinner size="lg" />
+      </View>
+    );
+  }
+
+  if (!isSignedIn) {
     return <Redirect href="/(auth)/sign-in" />;
   }
 

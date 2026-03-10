@@ -25,8 +25,20 @@ export default function SignUpScreen() {
       await signUp.create({ emailAddress, password });
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setPendingVerification(true);
-    } catch {
-      Alert.alert("Erro", "Não foi possível criar a conta. Verifique os dados.");
+    } catch (err: unknown) {
+      const clerkErr = err as {
+        errors?: Array<{ longMessage?: string; message?: string }>;
+        longMessage?: string;
+        message?: string;
+      };
+      const message =
+        clerkErr?.errors?.[0]?.longMessage ??
+        clerkErr?.errors?.[0]?.message ??
+        clerkErr?.longMessage ??
+        clerkErr?.message ??
+        "Não foi possível criar a conta. Verifique os dados.";
+      console.error("Clerk sign-up error:", err);
+      Alert.alert("Erro", String(message));
     } finally {
       setIsLoading(false);
     }
