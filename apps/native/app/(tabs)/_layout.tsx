@@ -1,24 +1,21 @@
-import { Ionicons } from "@expo/vector-icons";
-import { Redirect } from "expo-router";
-import { Tabs } from "expo-router";
-import { Spinner, useThemeColor } from "heroui-native";
 import { useAuth } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
+import { Redirect, Tabs } from "expo-router";
+import { Spinner, useThemeColor } from "heroui-native";
 import { View } from "react-native";
 
-import { useUserRole } from "@/hooks/use-user-role";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function TabLayout() {
   const { isSignedIn, isLoaded } = useAuth();
-  const role = useUserRole();
+  const { isDirector } = useCurrentUser();
   const foreground = useThemeColor("foreground");
   const background = useThemeColor("background");
 
   if (!isLoaded) {
     return (
-      <View
-        style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: background }}
-      >
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: background }}>
         <Spinner size="lg" />
       </View>
     );
@@ -27,8 +24,6 @@ export default function TabLayout() {
   if (!isSignedIn) {
     return <Redirect href="/(auth)/sign-in" />;
   }
-
-  const isDirector = role === "director" || role === "admin";
 
   return (
     <Tabs
@@ -44,26 +39,28 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: isDirector ? "Perguntas" : "Escrever",
+          title: "Escrever",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name={isDirector ? "list-outline" : "create-outline"}
-              size={size}
-              color={color}
-            />
+            <Ionicons name="create-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="questions"
         options={{
-          title: isDirector ? "Respondidas" : "Minhas Perguntas",
+          title: "Minhas Perguntas",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name={isDirector ? "checkmark-done-outline" : "document-text-outline"}
-              size={size}
-              color={color}
-            />
+            <Ionicons name="document-text-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="available"
+        options={{
+          title: "Disponíveis",
+          href: isDirector ? "/available" : null,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="list-outline" size={size} color={color} />
           ),
         }}
       />

@@ -1,11 +1,13 @@
 import "@/global.css";
+import { api } from "@app-catolico/backend/convex/_generated/api";
 import { env } from "@app-catolico/env/native";
 import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
-import { ConvexReactClient } from "convex/react";
+import { ConvexReactClient, useMutation } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { Stack } from "expo-router";
 import { HeroUINativeProvider } from "heroui-native";
+import React, { useEffect, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
@@ -19,21 +21,67 @@ const convex = new ConvexReactClient(env.EXPO_PUBLIC_CONVEX_URL, {
   unsavedChangesWarning: false,
 });
 
+function EnsureUser() {
+  const { isSignedIn } = useAuth();
+  const ensureUser = useMutation(api.users.ensureUser);
+  const didEnsure = useRef(false);
+
+  useEffect(() => {
+    if (isSignedIn && !didEnsure.current) {
+      didEnsure.current = true;
+      ensureUser().catch(console.error);
+    }
+    if (!isSignedIn) {
+      didEnsure.current = false;
+    }
+  }, [isSignedIn, ensureUser]);
+
+  return null;
+}
+
 function StackLayout() {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen
-        name="question/[id]"
-        options={{
-          headerShown: true,
-          headerTitle: "Pergunta",
-          headerBackTitle: "Voltar",
-          presentation: "card",
-        }}
-      />
-    </Stack>
+    <>
+      <EnsureUser />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen
+          name="question/[id]"
+          options={{
+            headerShown: true,
+            headerTitle: "Pergunta",
+            headerBackTitle: "Voltar",
+            presentation: "card",
+          }}
+        />
+        <Stack.Screen
+          name="pricing"
+          options={{
+            headerShown: true,
+            headerTitle: "Plano Premium",
+            headerBackTitle: "Voltar",
+            presentation: "card",
+          }}
+        />
+        <Stack.Screen
+          name="invoices"
+          options={{
+            headerShown: true,
+            headerTitle: "Faturas",
+            headerBackTitle: "Voltar",
+            presentation: "card",
+          }}
+        />
+        <Stack.Screen
+          name="checkout"
+          options={{
+            headerShown: false,
+            presentation: "card",
+          }}
+        />
+      </Stack>
+    </>
   );
 }
 

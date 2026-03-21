@@ -1,11 +1,13 @@
-import { useUser } from "@clerk/clerk-expo";
+import { useCurrentUser } from "./use-current-user";
 
 export type UserRole = "user" | "director" | "admin";
 
+/**
+ * Backward-compatible hook. Prefers Convex `users` table as source of truth.
+ */
 export function useUserRole(): UserRole {
-  const { user } = useUser();
-  const role = (user?.publicMetadata as { role?: string })?.role;
+  const { isDirector } = useCurrentUser();
 
-  if (role === "director" || role === "admin") return role;
+  if (isDirector) return "director";
   return "user";
 }

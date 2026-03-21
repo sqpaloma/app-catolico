@@ -3,12 +3,13 @@
     "scheme": "app-catolico",
     "userInterfaceStyle": "automatic",
     "orientation": "default",
+    "owner": "upcraftcrew",
     "web": {
       "bundler": "metro"
     },
     "name": "app-catolico",
     "slug": "app-catolico",
-    "plugins": ["expo-font"],
+    "plugins": ["expo-font", "expo-secure-store"],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true

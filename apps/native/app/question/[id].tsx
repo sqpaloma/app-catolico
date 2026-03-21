@@ -10,7 +10,7 @@ import { Alert, Text, TextInput, View } from "react-native";
 import { AnswerCard } from "@/components/answer-card";
 import { ConsensusCard } from "@/components/consensus-card";
 import { Container } from "@/components/container";
-import { useUserRole } from "@/hooks/use-user-role";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 const statusConfig = {
   pending: { label: "Aguardando diretores", color: "warning" as const },
@@ -23,15 +23,16 @@ const statusConfig = {
 
 export default function QuestionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const role = useUserRole();
-  const isDirector = role === "director" || role === "admin";
+  const { isDirector } = useCurrentUser();
 
-  const question = useQuery(api.questions.getById, {
-    questionId: id as Id<"questions">,
-  });
-  const answers = useQuery(api.answers.getByQuestion, {
-    questionId: id as Id<"questions">,
-  });
+  const questionId = id as Id<"questions">;
+
+  const question = useQuery(api.questions.getById, { questionId });
+  const answers = useQuery(api.answers.getByQuestion, { questionId });
+  const history = useQuery(
+    api.questions.getHistoryByAnonymousId,
+    isDirector ? { questionId } : "skip",
+  );
 
   if (question === undefined || answers === undefined) {
     return (
@@ -55,10 +56,15 @@ export default function QuestionDetailScreen() {
 
   return (
     <Container className="px-4 pb-4 bg-background">
-      <View className="py-4">
+      <View className="py-4 flex-row items-center gap-2">
         <Chip variant="flat" color={config.color} size="sm">
           <Chip.Label>{config.label}</Chip.Label>
         </Chip>
+        {question.isPremium && (
+          <Chip variant="flat" color="warning" size="sm">
+            <Chip.Label>Premium</Chip.Label>
+          </Chip>
+        )}
       </View>
 
       <Surface variant="secondary" className="p-4 rounded-xl">
@@ -70,6 +76,34 @@ export default function QuestionDetailScreen() {
       {question.consensusResponse && (
         <View className="mt-4">
           <ConsensusCard text={question.consensusResponse} />
+        </View>
+      )}
+
+      {isDirector && question.isPremium && history && history.length > 0 && (
+        <View className="mt-6">
+          <Text className="text-foreground font-semibold text-lg mb-1">
+            Histórico do Usuário
+          </Text>
+          <Text className="text-muted text-xs mb-3">
+            Perguntas anteriores deste usuário (anônimo) — visível por ser Premium.
+          </Text>
+          <View className="gap-2">
+            {history.map((q) => (
+              <Surface key={q._id} variant="secondary" className="p-3 rounded-lg">
+                <Text className="text-foreground text-sm leading-6" numberOfLines={3}>
+                  {q.normalizedText}
+                </Text>
+                <Chip
+                  variant="flat"
+                  color={statusConfig[q.status].color}
+                  size="sm"
+                  className="mt-2 self-start"
+                >
+                  <Chip.Label>{statusConfig[q.status].label}</Chip.Label>
+                </Chip>
+              </Surface>
+            ))}
+          </View>
         </View>
       )}
 
@@ -100,7 +134,7 @@ export default function QuestionDetailScreen() {
 
       {isDirector && (
         <DirectorAnswerForm
-          questionId={id as Id<"questions">}
+          questionId={questionId}
           answers={answers}
         />
       )}

@@ -51,7 +51,7 @@ export const generateConsensus = internalAction({
     if (answers.length < 3) return;
 
     const answersText = answers
-      .map((a, i) => `Resposta ${i + 1}: ${a.text}`)
+      .map((a: { text: string }, i: number) => `Resposta ${i + 1}: ${a.text}`)
       .join("\n");
 
     const response = await openai.chat.completions.create({

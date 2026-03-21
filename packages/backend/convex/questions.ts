@@ -10,8 +10,17 @@ export const submit = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Não autenticado");
 
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) throw new Error("Usuário não encontrado. Faça login novamente.");
+
     const questionId = await ctx.db.insert("questions", {
       userId: identity.subject,
+      anonymousId: user.anonymousId,
+      isPremium: user.isPremium,
       originalText: text,
       normalizedText: text,
       status: "pending",
@@ -91,5 +100,33 @@ export const getById = query({
     if (!identity) return null;
 
     return await ctx.db.get(questionId);
+  },
+});
+
+export const getHistoryByAnonymousId = query({
+  args: { questionId: v.id("questions") },
+  handler: async (ctx, { questionId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    const caller = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!caller || !caller.isDirector) return [];
+
+    const question = await ctx.db.get(questionId);
+    if (!question || !question.isPremium) return [];
+
+    const history = await ctx.db
+      .query("questions")
+      .withIndex("by_anonymousId", (q) =>
+        q.eq("anonymousId", question.anonymousId),
+      )
+      .order("desc")
+      .collect();
+
+    return history.filter((q) => q._id !== questionId);
   },
 });

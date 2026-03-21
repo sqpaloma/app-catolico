@@ -7,8 +7,8 @@ import { Container } from "@/components/container";
 import { EmptyState } from "@/components/empty-state";
 import { QuestionCard } from "@/components/question-card";
 
-export default function QuestionsScreen() {
-  const questions = useQuery(api.questions.getMyQuestions);
+export default function AvailableQuestionsScreen() {
+  const questions = useQuery(api.questions.getAvailableQuestions);
 
   if (questions === undefined) {
     return (
@@ -22,10 +22,10 @@ export default function QuestionsScreen() {
     <Container isScrollable={false} className="px-4 pb-4">
       <View className="py-6">
         <Text className="text-3xl font-bold text-foreground tracking-tight">
-          Minhas Perguntas
+          Perguntas{"\n"}Disponíveis
         </Text>
         <Text className="text-muted text-sm mt-2">
-          Acompanhe o status das suas perguntas e veja as orientações recebidas.
+          Escolha uma pergunta para oferecer orientação espiritual.
         </Text>
       </View>
 
@@ -38,14 +38,15 @@ export default function QuestionsScreen() {
             text={item.normalizedText}
             status={item.status}
             answerCount={item.answerCount}
+            showStatus={false}
           />
         )}
         ItemSeparatorComponent={() => <View className="h-3" />}
         ListEmptyComponent={
           <EmptyState
-            icon="create-outline"
-            title="Nenhuma pergunta ainda"
-            description='Vá até "Escrever" para compartilhar o que está aflindo você.'
+            icon="checkmark-circle-outline"
+            title="Nenhuma pergunta disponível"
+            description="Todas as perguntas já foram respondidas. Volte mais tarde."
           />
         }
       />
