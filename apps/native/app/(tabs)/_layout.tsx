@@ -32,23 +32,25 @@ export default function TabLayout() {
         headerTintColor: foreground,
         headerTitleStyle: { fontWeight: "600", color: foreground },
         tabBarStyle: { backgroundColor: background, borderTopColor: background },
-        tabBarActiveTintColor: foreground,
+        tabBarActiveTintColor: "#8B1A1A",
+        tabBarInactiveTintColor: "#999",
         headerRight: () => <ThemeToggle />,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Escrever",
+          title: "Início",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="create-outline" size={size} color={color} />
+            <Ionicons name="home-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="feed"
         options={{
-          title: "Diário",
+          title: "Feed",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="newspaper-outline" size={size} color={color} />
           ),

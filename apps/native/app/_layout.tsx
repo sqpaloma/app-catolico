@@ -92,6 +92,15 @@ function StackLayout() {
           }}
         />
         <Stack.Screen
+          name="write"
+          options={{
+            headerShown: true,
+            headerTitle: "Escrever",
+            headerBackTitle: "Voltar",
+            presentation: "card",
+          }}
+        />
+        <Stack.Screen
           name="checkout"
           options={{
             headerShown: false,
