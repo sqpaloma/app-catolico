@@ -33,7 +33,7 @@ export default function TabLayout() {
         headerTitleStyle: { fontWeight: "600", color: foreground },
         tabBarStyle: { backgroundColor: background, borderTopColor: background },
         tabBarActiveTintColor: "#8B1A1A",
-        tabBarInactiveTintColor: "#999",
+        tabBarInactiveTintColor: "rgba(139, 26, 26, 0.4)",
         headerRight: () => <ThemeToggle />,
       }}
     >
@@ -50,28 +50,31 @@ export default function TabLayout() {
       <Tabs.Screen
         name="feed"
         options={{
-          title: "Feed",
+          title: "Diário",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="newspaper-outline" size={size} color={color} />
+            <Ionicons name="book-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="questions"
         options={{
-          title: "Minhas Perguntas",
+          title: "Confessar",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="document-text-outline" size={size} color={color} />
+            <Ionicons name="heart" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="available"
         options={{
-          title: "Disponíveis",
+          title: "Diretor",
+          headerShown: false,
           href: isDirector ? "/available" : null,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="list-outline" size={size} color={color} />
+            <Ionicons name="shield-outline" size={size} color={color} />
           ),
         }}
       />
@@ -79,6 +82,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Perfil",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
           ),

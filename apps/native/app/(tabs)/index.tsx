@@ -229,7 +229,7 @@ export default function HomeScreen() {
           </Pressable>
 
           <Pressable
-            onPress={() => router.push("/directees")}
+            onPress={() => router.push("/(tabs)/available")}
             style={({ pressed }) => ({
               flex: 1,
               backgroundColor: pressed ? "#f0e8e0" : "#fff",

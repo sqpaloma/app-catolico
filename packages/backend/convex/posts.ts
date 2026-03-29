@@ -1,7 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-const MAX_POST_LENGTH = 244;
+const MAX_POST_LENGTH = 250;
 
 export const generateUploadUrl = mutation({
   handler: async (ctx) => {

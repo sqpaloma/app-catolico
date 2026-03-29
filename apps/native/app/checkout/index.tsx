@@ -1,11 +1,19 @@
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { Button, Surface } from "heroui-native";
+import { Cross } from "lucide-react-native";
 import React, { useState } from "react";
-import { Alert, Pressable, Text, TextInput, View } from "react-native";
-
-import { Container } from "@/components/container";
+import {
+  Alert,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type BillingType = "PIX" | "CREDIT_CARD";
 
@@ -44,9 +52,59 @@ function onlyDigits(s: string): string {
   return s.replace(/\D/g, "");
 }
 
+function InputField({
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  keyboardType,
+  maxLength,
+  autoCapitalize,
+}: {
+  label: string;
+  value: string;
+  onChangeText: (v: string) => void;
+  placeholder: string;
+  keyboardType?: "default" | "email-address" | "number-pad" | "phone-pad";
+  maxLength?: number;
+  autoCapitalize?: "none" | "words" | "characters";
+}) {
+  return (
+    <View style={{ marginBottom: 14 }}>
+      <Text style={{ fontSize: 14, fontWeight: "600", color: "#1a1a1a", marginBottom: 6 }}>
+        {label}
+      </Text>
+      <View
+        style={{
+          backgroundColor: "#fff",
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: "#e0d8d0",
+        }}
+      >
+        <TextInput
+          style={{
+            fontSize: 15,
+            color: "#1a1a1a",
+            padding: 14,
+          }}
+          placeholder={placeholder}
+          placeholderTextColor="#999"
+          value={value}
+          onChangeText={onChangeText}
+          keyboardType={keyboardType}
+          maxLength={maxLength}
+          autoCapitalize={autoCapitalize}
+        />
+      </View>
+    </View>
+  );
+}
+
 export default function CheckoutScreen() {
   const { user: clerkUser } = useUser();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const [name, setName] = useState(
     clerkUser?.fullName ?? clerkUser?.firstName ?? "",
@@ -124,255 +182,369 @@ export default function CheckoutScreen() {
   };
 
   return (
-    <Container className="px-4 pb-4">
-      <Surface variant="secondary" className="rounded-xl p-4 mb-4 mt-2">
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center gap-3">
-            <View className="w-10 h-10 rounded-full bg-warning/20 items-center justify-center">
-              <Ionicons name="star" size={20} color="#f5a623" />
-            </View>
-            <View>
-              <Text className="text-foreground text-base font-bold">
-                Plano Premium
-              </Text>
-              <Text className="text-muted text-xs">Assinatura mensal</Text>
-            </View>
-          </View>
-          <View className="items-end">
-            <View className="flex-row items-baseline">
-              <Text className="text-foreground text-sm">R$</Text>
-              <Text className="text-foreground text-2xl font-bold mx-0.5">
-                9,90
-              </Text>
-            </View>
-            <Text className="text-muted text-xs">/mês</Text>
-          </View>
-        </View>
-      </Surface>
-
-      <Text className="text-foreground text-base font-semibold mb-3">
-        Dados pessoais
-      </Text>
-
-      <View className="gap-3 mb-5">
-        <View>
-          <Text className="text-foreground text-sm font-medium mb-1">Nome</Text>
-          <Surface variant="secondary" className="rounded-xl overflow-hidden">
-            <TextInput
-              className="text-foreground text-base p-3.5"
-              placeholder="Seu nome completo"
-              placeholderTextColor="#888"
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-            />
-          </Surface>
-        </View>
-
-        <View>
-          <Text className="text-foreground text-sm font-medium mb-1">
-            E-mail
-          </Text>
-          <Surface variant="secondary" className="rounded-xl overflow-hidden">
-            <TextInput
-              className="text-foreground text-base p-3.5"
-              placeholder="seu@email.com"
-              placeholderTextColor="#888"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </Surface>
-        </View>
-
-        <View>
-          <Text className="text-foreground text-sm font-medium mb-1">CPF</Text>
-          <Surface variant="secondary" className="rounded-xl overflow-hidden">
-            <TextInput
-              className="text-foreground text-base p-3.5"
-              placeholder="000.000.000-00"
-              placeholderTextColor="#888"
-              value={cpf}
-              onChangeText={(v) => setCpf(formatCpf(v))}
-              keyboardType="number-pad"
-              maxLength={14}
-            />
-          </Surface>
-        </View>
-
-        <View>
-          <Text className="text-foreground text-sm font-medium mb-1">
-            Telefone
-          </Text>
-          <Surface variant="secondary" className="rounded-xl overflow-hidden">
-            <TextInput
-              className="text-foreground text-base p-3.5"
-              placeholder="(00) 00000-0000"
-              placeholderTextColor="#888"
-              value={phone}
-              onChangeText={(v) => setPhone(formatPhone(v))}
-              keyboardType="phone-pad"
-              maxLength={15}
-            />
-          </Surface>
-        </View>
-      </View>
-
-      <Text className="text-foreground text-base font-semibold mb-3">
-        Endereço
-      </Text>
-
-      <View className="gap-3 mb-5">
-        <View>
-          <Text className="text-foreground text-sm font-medium mb-1">CEP</Text>
-          <Surface variant="secondary" className="rounded-xl overflow-hidden">
-            <TextInput
-              className="text-foreground text-base p-3.5"
-              placeholder="00000-000"
-              placeholderTextColor="#888"
-              value={cep}
-              onChangeText={(v) => setCep(formatCep(v))}
-              keyboardType="number-pad"
-              maxLength={9}
-            />
-          </Surface>
-        </View>
-
-        <View>
-          <Text className="text-foreground text-sm font-medium mb-1">Rua</Text>
-          <Surface variant="secondary" className="rounded-xl overflow-hidden">
-            <TextInput
-              className="text-foreground text-base p-3.5"
-              placeholder="Nome da rua"
-              placeholderTextColor="#888"
-              value={street}
-              onChangeText={setStreet}
-              autoCapitalize="words"
-            />
-          </Surface>
-        </View>
-
-        <View className="flex-row gap-3">
-          <View className="flex-1">
-            <Text className="text-foreground text-sm font-medium mb-1">
-              Número
-            </Text>
-            <Surface
-              variant="secondary"
-              className="rounded-xl overflow-hidden"
+    <View style={{ flex: 1, backgroundColor: "#f5f0eb" }}>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 24 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Header */}
+        <View
+          style={{
+            backgroundColor: "#8B1A1A",
+            paddingTop: insets.top + 8,
+            paddingBottom: 12,
+            paddingHorizontal: 20,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <Pressable
+              onPress={() => router.back()}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: "rgba(255,255,255,0.15)",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
-              <TextInput
-                className="text-foreground text-base p-3.5"
-                placeholder="Nº"
-                placeholderTextColor="#888"
+              <Ionicons name="arrow-back" size={20} color="#fff" />
+            </Pressable>
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: "rgba(255,255,255,0.15)",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Cross size={20} color="#fff" strokeWidth={2.5} />
+            </View>
+            <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800", letterSpacing: 1 }}>
+              SAFE
+            </Text>
+          </View>
+        </View>
+
+        {/* Hero gradient */}
+        <LinearGradient
+          colors={["#8B1A1A", "#A52422", "#c4948b", "#f5f0eb"]}
+          locations={[0, 0.3, 0.7, 1]}
+          style={{ paddingTop: 32, paddingBottom: 48, alignItems: "center", paddingHorizontal: 24 }}
+        >
+          <Ionicons name="star" size={44} color="#fff" style={{ marginBottom: 8 }} />
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: 30,
+              fontWeight: "800",
+              textAlign: "center",
+              marginBottom: 8,
+            }}
+          >
+            Plano Premium
+          </Text>
+          <Text
+            style={{
+              color: "rgba(255,255,255,0.85)",
+              fontSize: 15,
+              textAlign: "center",
+              lineHeight: 22,
+            }}
+          >
+            Acesse vantagens exclusivas
+          </Text>
+        </LinearGradient>
+
+        {/* Price card */}
+        <View style={{ paddingHorizontal: 20, marginTop: -28 }}>
+          <View
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 16,
+              padding: 20,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              ...Platform.select({
+                ios: {
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 12,
+                },
+                android: { elevation: 6 },
+              }),
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+              <View
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
+                  backgroundColor: "rgba(245,166,35,0.15)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Ionicons name="star" size={24} color="#f5a623" />
+              </View>
+              <View>
+                <Text style={{ fontSize: 16, fontWeight: "700", color: "#1a1a1a" }}>
+                  Plano Premium
+                </Text>
+                <Text style={{ fontSize: 13, color: "#888", marginTop: 2 }}>
+                  Assinatura mensal
+                </Text>
+              </View>
+            </View>
+            <View style={{ alignItems: "flex-end" }}>
+              <View style={{ flexDirection: "row", alignItems: "baseline" }}>
+                <Text style={{ fontSize: 14, color: "#1a1a1a" }}>R$</Text>
+                <Text style={{ fontSize: 26, fontWeight: "800", color: "#1a1a1a", marginHorizontal: 2 }}>
+                  9,90
+                </Text>
+              </View>
+              <Text style={{ fontSize: 12, color: "#888" }}>/mês</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Personal data section */}
+        <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
+          <Text
+            style={{
+              fontSize: 13,
+              fontWeight: "700",
+              color: "#1a1a1a",
+              letterSpacing: 1.5,
+              textTransform: "uppercase",
+              marginBottom: 16,
+            }}
+          >
+            Dados pessoais
+          </Text>
+
+          <InputField
+            label="Nome"
+            value={name}
+            onChangeText={setName}
+            placeholder="Seu nome completo"
+            autoCapitalize="words"
+          />
+          <InputField
+            label="E-mail"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="seu@email.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <InputField
+            label="CPF"
+            value={cpf}
+            onChangeText={(v) => setCpf(formatCpf(v))}
+            placeholder="000.000.000-00"
+            keyboardType="number-pad"
+            maxLength={14}
+          />
+          <InputField
+            label="Telefone"
+            value={phone}
+            onChangeText={(v) => setPhone(formatPhone(v))}
+            placeholder="(00) 00000-0000"
+            keyboardType="phone-pad"
+            maxLength={15}
+          />
+        </View>
+
+        {/* Address section */}
+        <View style={{ paddingHorizontal: 20, marginTop: 8 }}>
+          <Text
+            style={{
+              fontSize: 13,
+              fontWeight: "700",
+              color: "#1a1a1a",
+              letterSpacing: 1.5,
+              textTransform: "uppercase",
+              marginBottom: 16,
+            }}
+          >
+            Endereço
+          </Text>
+
+          <InputField
+            label="CEP"
+            value={cep}
+            onChangeText={(v) => setCep(formatCep(v))}
+            placeholder="00000-000"
+            keyboardType="number-pad"
+            maxLength={9}
+          />
+          <InputField
+            label="Rua"
+            value={street}
+            onChangeText={setStreet}
+            placeholder="Nome da rua"
+            autoCapitalize="words"
+          />
+
+          <View style={{ flexDirection: "row", gap: 12 }}>
+            <View style={{ flex: 1 }}>
+              <InputField
+                label="Número"
                 value={addressNumber}
                 onChangeText={setAddressNumber}
+                placeholder="Nº"
                 keyboardType="number-pad"
               />
-            </Surface>
-          </View>
-          <View className="flex-2">
-            <Text className="text-foreground text-sm font-medium mb-1">
-              Bairro
-            </Text>
-            <Surface
-              variant="secondary"
-              className="rounded-xl overflow-hidden"
-            >
-              <TextInput
-                className="text-foreground text-base p-3.5"
-                placeholder="Bairro"
-                placeholderTextColor="#888"
+            </View>
+            <View style={{ flex: 2 }}>
+              <InputField
+                label="Bairro"
                 value={neighborhood}
                 onChangeText={setNeighborhood}
+                placeholder="Bairro"
                 autoCapitalize="words"
               />
-            </Surface>
+            </View>
           </View>
-        </View>
 
-        <View className="flex-row gap-3">
-          <View className="flex-2">
-            <Text className="text-foreground text-sm font-medium mb-1">
-              Cidade
-            </Text>
-            <Surface
-              variant="secondary"
-              className="rounded-xl overflow-hidden"
-            >
-              <TextInput
-                className="text-foreground text-base p-3.5"
-                placeholder="Cidade"
-                placeholderTextColor="#888"
+          <View style={{ flexDirection: "row", gap: 12 }}>
+            <View style={{ flex: 2 }}>
+              <InputField
+                label="Cidade"
                 value={city}
                 onChangeText={setCity}
+                placeholder="Cidade"
                 autoCapitalize="words"
               />
-            </Surface>
-          </View>
-          <View className="flex-1">
-            <Text className="text-foreground text-sm font-medium mb-1">
-              Estado
-            </Text>
-            <Surface
-              variant="secondary"
-              className="rounded-xl overflow-hidden"
-            >
-              <TextInput
-                className="text-foreground text-base p-3.5"
-                placeholder="UF"
-                placeholderTextColor="#888"
+            </View>
+            <View style={{ flex: 1 }}>
+              <InputField
+                label="Estado"
                 value={state}
                 onChangeText={(v) => setState(v.toUpperCase().slice(0, 2))}
+                placeholder="UF"
                 autoCapitalize="characters"
                 maxLength={2}
               />
-            </Surface>
+            </View>
           </View>
         </View>
-      </View>
 
-      <Text className="text-foreground text-base font-semibold mb-3">
-        Forma de pagamento
-      </Text>
+        {/* Payment method section */}
+        <View style={{ paddingHorizontal: 20, marginTop: 8 }}>
+          <Text
+            style={{
+              fontSize: 13,
+              fontWeight: "700",
+              color: "#1a1a1a",
+              letterSpacing: 1.5,
+              textTransform: "uppercase",
+              marginBottom: 16,
+            }}
+          >
+            Forma de pagamento
+          </Text>
 
-      <View className="gap-2 mb-5">
-        {PAYMENT_METHODS.map((m) => (
-          <Pressable key={m.type} onPress={() => setSelectedMethod(m.type)}>
-            <Surface
-              variant={selectedMethod === m.type ? "primary" : "secondary"}
-              className="rounded-xl p-4 flex-row items-center gap-3"
-            >
-              <Ionicons
-                name={m.icon}
-                size={22}
-                color={selectedMethod === m.type ? "#f5a623" : "#888"}
-              />
-              <Text
-                className={
-                  selectedMethod === m.type
-                    ? "text-foreground font-semibold text-base flex-1"
-                    : "text-muted text-base flex-1"
-                }
+          <View style={{ gap: 10, marginBottom: 20 }}>
+            {PAYMENT_METHODS.map((m) => (
+              <Pressable
+                key={m.type}
+                onPress={() => setSelectedMethod(m.type)}
+                style={({ pressed }) => ({
+                  backgroundColor: pressed ? "#f0e8e0" : "#fff",
+                  borderRadius: 16,
+                  padding: 16,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 12,
+                  borderWidth: 2,
+                  borderColor: selectedMethod === m.type ? "#8B1A1A" : "rgba(139,26,26,0.12)",
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.06,
+                      shadowRadius: 8,
+                    },
+                    android: { elevation: 3 },
+                  }),
+                })}
               >
-                {m.label}
-              </Text>
-              {selectedMethod === m.type && (
-                <Ionicons name="checkmark-circle" size={22} color="#f5a623" />
-              )}
-            </Surface>
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: selectedMethod === m.type ? "rgba(139,26,26,0.1)" : "#f5f0eb",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Ionicons
+                    name={m.icon}
+                    size={22}
+                    color={selectedMethod === m.type ? "#8B1A1A" : "#888"}
+                  />
+                </View>
+                <Text
+                  style={{
+                    flex: 1,
+                    fontSize: 16,
+                    fontWeight: selectedMethod === m.type ? "700" : "500",
+                    color: selectedMethod === m.type ? "#1a1a1a" : "#666",
+                  }}
+                >
+                  {m.label}
+                </Text>
+                {selectedMethod === m.type && (
+                  <Ionicons name="checkmark-circle" size={22} color="#8B1A1A" />
+                )}
+              </Pressable>
+            ))}
+          </View>
+
+          {/* Continue button */}
+          <Pressable
+            onPress={handleContinue}
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? "#7B1616" : "#8B1A1A",
+              borderRadius: 14,
+              paddingVertical: 16,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+            })}
+          >
+            <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
+              Continuar
+            </Text>
+            <Ionicons name="arrow-forward" size={18} color="#fff" />
           </Pressable>
-        ))}
-      </View>
 
-      <Button size="lg" color="warning" onPress={handleContinue}>
-        <Button.Label>Continuar</Button.Label>
-      </Button>
-
-      <Text className="text-muted text-xs text-center mt-3">
-        Pagamento processado com segurança pelo Asaas.
-      </Text>
-    </Container>
+          <Text
+            style={{
+              fontSize: 13,
+              color: "#888",
+              textAlign: "center",
+              marginTop: 12,
+              lineHeight: 19,
+            }}
+          >
+            Pagamento processado com segurança pelo Asaas.
+          </Text>
+        </View>
+      </ScrollView>
+    </View>
   );
 }

@@ -5,8 +5,9 @@ import { v } from "convex/values";
 export const submit = mutation({
   args: {
     text: v.string(),
+    category: v.optional(v.string()),
   },
-  handler: async (ctx, { text }) => {
+  handler: async (ctx, { text, category }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Não autenticado");
 
@@ -21,6 +22,7 @@ export const submit = mutation({
       userId: identity.subject,
       anonymousId: user.anonymousId,
       isPremium: user.isPremium,
+      category,
       originalText: text,
       normalizedText: text,
       status: "pending",

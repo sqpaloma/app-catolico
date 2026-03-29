@@ -18,6 +18,7 @@ export default defineSchema({
     userId: v.string(),
     anonymousId: v.string(),
     isPremium: v.boolean(),
+    category: v.optional(v.string()),
     originalText: v.string(),
     normalizedText: v.string(),
     status: v.union(

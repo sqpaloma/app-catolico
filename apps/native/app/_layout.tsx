@@ -58,9 +58,7 @@ function StackLayout() {
         <Stack.Screen
           name="pricing"
           options={{
-            headerShown: true,
-            headerTitle: "Plano Premium",
-            headerBackTitle: "Voltar",
+            headerShown: false,
             presentation: "card",
           }}
         />

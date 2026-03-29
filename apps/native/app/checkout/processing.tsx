@@ -2,9 +2,10 @@ import { api } from "@app-catolico/backend/convex/_generated/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAction } from "convex/react";
-import { Spinner } from "heroui-native";
+import { Cross } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
-import { Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type CustomerData = {
   name: string;
@@ -49,6 +50,7 @@ function actionErrorMessage(e: unknown): string {
 export default function ProcessingScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ data: string }>();
+  const insets = useSafeAreaInsets();
   const createCardPayment = useAction(api.asaas.createCardPayment);
   const didRun = useRef(false);
 
@@ -99,17 +101,74 @@ export default function ProcessingScreen() {
   }, []);
 
   return (
-    <View className="flex-1 bg-background items-center justify-center px-6">
-      <View className="w-20 h-20 rounded-full bg-warning/20 items-center justify-center mb-6">
-        <Ionicons name="card" size={36} color="#f5a623" />
+    <View style={{ flex: 1, backgroundColor: "#f5f0eb" }}>
+      {/* Header */}
+      <View
+        style={{
+          backgroundColor: "#8B1A1A",
+          paddingTop: insets.top + 8,
+          paddingBottom: 12,
+          paddingHorizontal: 20,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 10,
+        }}
+      >
+        <View
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: "rgba(255,255,255,0.15)",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Cross size={20} color="#fff" strokeWidth={2.5} />
+        </View>
+        <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800", letterSpacing: 1 }}>
+          SAFE
+        </Text>
       </View>
-      <Spinner size="lg" />
-      <Text className="text-foreground text-xl font-bold text-center mt-6">
-        Processando pagamento...
-      </Text>
-      <Text className="text-muted text-sm text-center mt-2">
-        Aguarde enquanto processamos seu pagamento com segurança.
-      </Text>
+
+      {/* Content */}
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 }}>
+        <View
+          style={{
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+            backgroundColor: "rgba(139,26,26,0.1)",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 24,
+          }}
+        >
+          <Ionicons name="card" size={40} color="#8B1A1A" />
+        </View>
+        <ActivityIndicator size="large" color="#8B1A1A" style={{ marginBottom: 24 }} />
+        <Text
+          style={{
+            fontSize: 22,
+            fontWeight: "800",
+            color: "#1a1a1a",
+            textAlign: "center",
+            marginBottom: 8,
+          }}
+        >
+          Processando pagamento...
+        </Text>
+        <Text
+          style={{
+            fontSize: 15,
+            color: "#666",
+            textAlign: "center",
+            lineHeight: 22,
+          }}
+        >
+          Aguarde enquanto processamos seu pagamento com segurança.
+        </Text>
+      </View>
     </View>
   );
 }

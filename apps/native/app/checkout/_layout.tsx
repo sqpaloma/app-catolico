@@ -5,32 +5,23 @@ export default function CheckoutLayout() {
   return (
     <Stack
       screenOptions={{
-        headerBackTitle: "Voltar",
+        headerShown: false,
       }}
     >
-      <Stack.Screen
-        name="index"
-        options={{ headerTitle: "Checkout" }}
-      />
-      <Stack.Screen
-        name="pix"
-        options={{ headerTitle: "Pagamento PIX" }}
-      />
-      <Stack.Screen
-        name="card-details"
-        options={{ headerTitle: "Dados do Cartão" }}
-      />
+      <Stack.Screen name="index" />
+      <Stack.Screen name="pix" />
+      <Stack.Screen name="card-details" />
       <Stack.Screen
         name="processing"
-        options={{ headerShown: false, gestureEnabled: false }}
+        options={{ gestureEnabled: false }}
       />
       <Stack.Screen
         name="success"
-        options={{ headerShown: false, gestureEnabled: false }}
+        options={{ gestureEnabled: false }}
       />
       <Stack.Screen
         name="error"
-        options={{ headerShown: false, gestureEnabled: false }}
+        options={{ gestureEnabled: false }}
       />
     </Stack>
   );
