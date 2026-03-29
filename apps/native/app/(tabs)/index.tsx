@@ -43,7 +43,7 @@ export default function HomeScreen() {
     <Container className="px-4 pb-4">
       <View className="py-8">
         <Text className="text-3xl font-bold text-foreground tracking-tight">
-          O que está{"\n"}aflindo você?
+          O que está{"\n"}aflingindo você?
         </Text>
         <Text className="text-muted text-sm mt-2">
           Escreva livremente. Sua mensagem será tratada com respeito e sigilo.
@@ -66,7 +66,7 @@ export default function HomeScreen() {
       <Button
         className="mt-4"
         size="lg"
-        color="primary"
+        variant="primary"
         isDisabled={!text.trim() || isSubmitting}
         onPress={handleSubmit}
       >

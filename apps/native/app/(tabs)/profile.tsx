@@ -224,6 +224,28 @@ export default function ProfileScreen() {
         </View>
       </Surface>
 
+      {isDirector && !isLoading && (
+        <Surface variant="secondary" className="rounded-xl overflow-hidden mt-4 p-4">
+          <View className="flex-row items-center gap-3 mb-2">
+            <Ionicons name="people-outline" size={20} color="#888" />
+            <Text className="text-foreground text-base font-semibold">
+              Meus Dirigidos
+            </Text>
+          </View>
+          <Text className="text-muted text-sm mb-3">
+            Veja o diário espiritual dos fiéis que você acompanha.
+          </Text>
+          <Button
+            size="md"
+            color="primary"
+            variant="flat"
+            onPress={() => router.push("/directees")}
+          >
+            <Button.Label>Ver Dirigidos</Button.Label>
+          </Button>
+        </Surface>
+      )}
+
       {!isDirector && !isLoading && (
         <Surface variant="secondary" className="rounded-xl overflow-hidden mt-4 p-4">
           <View className="flex-row items-center gap-3 mb-2">

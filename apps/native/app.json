@@ -9,7 +9,11 @@
     },
     "name": "app-catolico",
     "slug": "app-catolico",
-    "plugins": ["expo-font", "expo-secure-store"],
+    "plugins": [
+      "expo-font",
+      "expo-secure-store",
+      "expo-image"
+    ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true

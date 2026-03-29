@@ -65,6 +65,29 @@ export default defineSchema({
     .index("by_userId", ["userId"])
     .index("by_asaasSubscriptionId", ["asaasSubscriptionId"]),
 
+  posts: defineTable({
+    userId: v.string(),
+    text: v.string(),
+    imageStorageId: v.optional(v.id("_storage")),
+    visibleToDirector: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_userId", ["userId", "createdAt"])
+    .index("by_userId_visible", ["userId", "visibleToDirector"]),
+
+  directorships: defineTable({
+    directorId: v.string(),
+    directeeId: v.string(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("active"),
+      v.literal("rejected"),
+    ),
+    createdAt: v.number(),
+  })
+    .index("by_directorId", ["directorId"])
+    .index("by_directeeId", ["directeeId"]),
+
   invoices: defineTable({
     userId: v.string(),
     orderId: v.id("orders"),

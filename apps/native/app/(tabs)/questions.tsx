@@ -45,7 +45,7 @@ export default function QuestionsScreen() {
           <EmptyState
             icon="create-outline"
             title="Nenhuma pergunta ainda"
-            description='Vá até "Escrever" para compartilhar o que está aflindo você.'
+            description='Vá até "Escrever" para compartilhar o que está aflingindo você.'
           />
         }
       />

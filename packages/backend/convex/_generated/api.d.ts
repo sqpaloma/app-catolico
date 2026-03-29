@@ -11,10 +11,12 @@
 import type * as ai from "../ai.js";
 import type * as answers from "../answers.js";
 import type * as asaas from "../asaas.js";
+import type * as directorships from "../directorships.js";
 import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
 import type * as invoices from "../invoices.js";
 import type * as orders from "../orders.js";
+import type * as posts from "../posts.js";
 import type * as privateData from "../privateData.js";
 import type * as questions from "../questions.js";
 import type * as seed from "../seed.js";
@@ -30,10 +32,12 @@ declare const fullApi: ApiFromModules<{
   ai: typeof ai;
   answers: typeof answers;
   asaas: typeof asaas;
+  directorships: typeof directorships;
   healthCheck: typeof healthCheck;
   http: typeof http;
   invoices: typeof invoices;
   orders: typeof orders;
+  posts: typeof posts;
   privateData: typeof privateData;
   questions: typeof questions;
   seed: typeof seed;
