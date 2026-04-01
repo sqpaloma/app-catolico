@@ -10,7 +10,6 @@ import { Alert, Text, TextInput, View } from "react-native";
 import { AnswerCard } from "@/components/answer-card";
 import { ConsensusCard } from "@/components/consensus-card";
 import { Container } from "@/components/container";
-import { useCurrentUser } from "@/hooks/use-current-user";
 
 const statusConfig = {
   pending: { label: "Aguardando diretores", color: "warning" as const },
@@ -23,16 +22,11 @@ const statusConfig = {
 
 export default function QuestionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { isDirector } = useCurrentUser();
-
   const questionId = id as Id<"questions">;
 
   const question = useQuery(api.questions.getById, { questionId });
   const answers = useQuery(api.answers.getByQuestion, { questionId });
-  const history = useQuery(
-    api.questions.getHistoryByAnonymousId,
-    isDirector ? { questionId } : "skip",
-  );
+  const history = useQuery(api.questions.getHistoryByAnonymousId, { questionId });
 
   if (question === undefined || answers === undefined) {
     return (
@@ -79,7 +73,7 @@ export default function QuestionDetailScreen() {
         </View>
       )}
 
-      {isDirector && question.isPremium && history && history.length > 0 && (
+      {question.isPremium && history && history.length > 0 && (
         <View className="mt-6">
           <Text className="text-foreground font-semibold text-lg mb-1">
             Histórico do Usuário
@@ -124,20 +118,10 @@ export default function QuestionDetailScreen() {
         </View>
       )}
 
-      {answers.length === 0 && !isDirector && (
-        <View className="mt-6 items-center py-8">
-          <Text className="text-muted text-sm text-center">
-            Ainda não há respostas. Os diretores espirituais serão notificados.
-          </Text>
-        </View>
-      )}
-
-      {isDirector && (
-        <DirectorAnswerForm
-          questionId={questionId}
-          answers={answers}
-        />
-      )}
+      <DirectorAnswerForm
+        questionId={questionId}
+        answers={answers}
+      />
     </Container>
   );
 }

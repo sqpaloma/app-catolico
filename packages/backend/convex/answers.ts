@@ -11,15 +11,6 @@ export const submit = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Não autenticado");
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user || !user.isDirector) {
-      throw new Error("Apenas diretores espirituais podem responder perguntas");
-    }
-
     const question = await ctx.db.get(questionId);
     if (!question) throw new Error("Pergunta não encontrada");
 

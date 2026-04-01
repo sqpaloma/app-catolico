@@ -25,7 +25,7 @@ export const ensureUser = mutation({
     const userId = await ctx.db.insert("users", {
       clerkId: identity.subject,
       anonymousId: generateAnonymousId(),
-      isDirector: false,
+      isDirector: true,
       isPremium: false,
     });
 
@@ -42,42 +42,6 @@ export const getMe = query({
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
       .unique();
-  },
-});
-
-export const becomeDirector = mutation({
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Não autenticado");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("Usuário não encontrado");
-    if (user.isDirector) return user;
-
-    await ctx.db.patch(user._id, { isDirector: true });
-    return await ctx.db.get(user._id);
-  },
-});
-
-export const leaveDirector = mutation({
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Não autenticado");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("Usuário não encontrado");
-    if (!user.isDirector) return user;
-
-    await ctx.db.patch(user._id, { isDirector: false });
-    return await ctx.db.get(user._id);
   },
 });
 

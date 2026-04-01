@@ -12,8 +12,8 @@ export const request = mutation({
       .withIndex("by_clerkId", (q) => q.eq("clerkId", directorId))
       .unique();
 
-    if (!director || !director.isDirector) {
-      throw new Error("Diretor espiritual não encontrado.");
+    if (!director) {
+      throw new Error("Usuário não encontrado.");
     }
 
     if (directorId === identity.subject) {

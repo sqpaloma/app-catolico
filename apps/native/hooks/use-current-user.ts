@@ -7,7 +7,6 @@ export function useCurrentUser() {
   return {
     user,
     isLoading: user === undefined,
-    isDirector: user?.isDirector ?? false,
     isPremium: user?.isPremium ?? false,
   };
 }

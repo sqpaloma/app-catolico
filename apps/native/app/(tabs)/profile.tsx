@@ -2,13 +2,12 @@ import { api } from "@app-catolico/backend/convex/_generated/api";
 import { useClerk, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { Cross } from "lucide-react-native";
 import { Spinner } from "heroui-native";
-import React, { useState } from "react";
+import React from "react";
 import {
-  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -24,12 +23,8 @@ export default function ProfileScreen() {
   const { signOut } = useClerk();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user, isDirector, isPremium, isLoading } = useCurrentUser();
+  const { isPremium, isLoading } = useCurrentUser();
   const posts = useQuery(api.posts.listMine);
-
-  const [becomingDirector, setBecomingDirector] = useState(false);
-  const becomeDirector = useMutation(api.users.becomeDirector);
-  const leaveDirector = useMutation(api.users.leaveDirector);
 
   const handleSignOut = async () => {
     try {
@@ -38,42 +33,6 @@ export default function ProfileScreen() {
     } catch (err) {
       console.error(err);
     }
-  };
-
-  const handleBecomeDirector = async () => {
-    setBecomingDirector(true);
-    try {
-      await becomeDirector();
-      Alert.alert(
-        "Parabéns!",
-        "Você agora é um Diretor Espiritual. Uma nova aba estará disponível para responder perguntas.",
-      );
-    } catch {
-      Alert.alert("Erro", "Não foi possível ativar. Tente novamente.");
-    } finally {
-      setBecomingDirector(false);
-    }
-  };
-
-  const handleLeaveDirector = () => {
-    Alert.alert(
-      "Sair como Diretor",
-      "Você deixará de ser Diretor Espiritual. Deseja continuar?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Confirmar",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await leaveDirector();
-            } catch {
-              Alert.alert("Erro", "Não foi possível sair. Tente novamente.");
-            }
-          },
-        },
-      ],
-    );
   };
 
   const postCount = posts?.length ?? 0;
@@ -159,22 +118,6 @@ export default function ProfileScreen() {
               <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 13, marginTop: 2 }}>
                 {displayEmail}
               </Text>
-              {isDirector && (
-                <View
-                  style={{
-                    backgroundColor: "rgba(255,255,255,0.2)",
-                    paddingHorizontal: 10,
-                    paddingVertical: 3,
-                    borderRadius: 12,
-                    alignSelf: "flex-start",
-                    marginTop: 6,
-                  }}
-                >
-                  <Text style={{ color: "#fff", fontSize: 11, fontWeight: "600" }}>
-                    🤝 Diretor Espiritual
-                  </Text>
-                </View>
-              )}
             </View>
 
             {/* Settings + Logout */}
@@ -263,74 +206,6 @@ export default function ProfileScreen() {
             </Text>
           </Pressable>
 
-          {/* Director Card */}
-          {isDirector ? (
-            <Pressable
-              onPress={handleLeaveDirector}
-              style={({ pressed }) => ({
-                flex: 1,
-                backgroundColor: pressed ? "#f5d5d5" : "#FDEAEB",
-                borderRadius: 16,
-                padding: 16,
-              })}
-            >
-              <Ionicons name="notifications-off-outline" size={28} color="#B22222" />
-              <Text
-                style={{
-                  fontSize: 15,
-                  fontWeight: "700",
-                  color: "#B22222",
-                  marginTop: 8,
-                }}
-              >
-                Diretor Ativo
-              </Text>
-              <Text style={{ fontSize: 12, color: "#C75050", marginTop: 4 }}>
-                Clique para sair
-              </Text>
-            </Pressable>
-          ) : (
-            <Pressable
-              onPress={handleBecomeDirector}
-              disabled={becomingDirector}
-              style={({ pressed }) => ({
-                flex: 1,
-                backgroundColor: pressed ? "#f0e8e0" : "#fff",
-                borderRadius: 16,
-                padding: 16,
-                ...Platform.select({
-                  ios: {
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 8,
-                  },
-                  android: { elevation: 4 },
-                }),
-              })}
-            >
-              {becomingDirector ? (
-                <Spinner size="sm" />
-              ) : (
-                <>
-                  <Ionicons name="shield-outline" size={28} color="#888" />
-                  <Text
-                    style={{
-                      fontSize: 15,
-                      fontWeight: "700",
-                      color: "#1a1a1a",
-                      marginTop: 8,
-                    }}
-                  >
-                    Ser Diretor
-                  </Text>
-                  <Text style={{ fontSize: 12, color: "#888", marginTop: 4 }}>
-                    Ajude outros fiéis
-                  </Text>
-                </>
-              )}
-            </Pressable>
-          )}
         </View>
 
         {/* MINHAS PARTILHAS */}

@@ -4,12 +4,10 @@ import { Redirect, Tabs } from "expo-router";
 import { Spinner, useThemeColor } from "heroui-native";
 import { View } from "react-native";
 
-import { useCurrentUser } from "@/hooks/use-current-user";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function TabLayout() {
   const { isSignedIn, isLoaded } = useAuth();
-  const { isDirector } = useCurrentUser();
   const foreground = useThemeColor("foreground");
   const background = useThemeColor("background");
 
@@ -72,7 +70,7 @@ export default function TabLayout() {
         options={{
           title: "Diretor",
           headerShown: false,
-          href: isDirector ? "/available" : null,
+          href: "/available",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="shield-outline" size={size} color={color} />
           ),

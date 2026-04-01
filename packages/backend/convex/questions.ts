@@ -111,13 +111,6 @@ export const getHistoryByAnonymousId = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return [];
 
-    const caller = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!caller || !caller.isDirector) return [];
-
     const question = await ctx.db.get(questionId);
     if (!question || !question.isPremium) return [];
 
