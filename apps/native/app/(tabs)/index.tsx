@@ -287,8 +287,7 @@ export default function HomeScreen() {
             </View>
             <Text style={{ fontSize: 14, color: "#555", lineHeight: 22 }}>
               Você escreve o que está no seu coração de forma completamente anônima. Um diretor
-              espiritual lê e responde com orientação baseada na fé católica. Nenhuma identidade é
-              revelada.
+              espiritual lê e responde com orientação baseada na fé católica.
             </Text>
           </View>
         </View>
