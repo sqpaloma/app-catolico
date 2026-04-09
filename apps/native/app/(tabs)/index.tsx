@@ -197,6 +197,54 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
+        {/* Minhas Perguntas */}
+        <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
+          <Pressable
+            onPress={() => router.push("/my-questions")}
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? "#f0e8e0" : "#fff",
+              borderRadius: 16,
+              padding: 20,
+              flexDirection: "row",
+              alignItems: "center",
+              borderWidth: 1,
+              borderColor: "rgba(139,26,26,0.12)",
+              ...Platform.select({
+                ios: {
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.06,
+                  shadowRadius: 8,
+                },
+                android: { elevation: 3 },
+              }),
+            })}
+          >
+            <View
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: "rgba(139,26,26,0.08)",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 14,
+              }}
+            >
+              <Ionicons name="help-circle-outline" size={26} color="#8B1A1A" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 17, fontWeight: "700", color: "#1a1a1a", marginBottom: 4 }}>
+                Minhas Perguntas
+              </Text>
+              <Text style={{ color: "#888", fontSize: 13 }}>
+                Veja respostas e acompanhe o status
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={22} color="rgba(139,26,26,0.4)" />
+          </Pressable>
+        </View>
+
         {/* Quick access cards */}
         <View
           style={{

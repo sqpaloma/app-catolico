@@ -1,6 +1,6 @@
 import { api } from "@app-catolico/backend/convex/_generated/api";
 import type { Id } from "@app-catolico/backend/convex/_generated/dataModel";
-import { useUser } from "@clerk/clerk-expo";
+import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -9,8 +9,8 @@ import { useLocalSearchParams } from "expo-router";
 import { Spinner } from "heroui-native";
 import React, { useState } from "react";
 import {
-  Alert,
   Image,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -32,6 +32,7 @@ export default function QuestionDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
+  const { userId } = useAuth();
   const question = useQuery(api.questions.getById, { questionId });
   const answers = useQuery(api.answers.getByQuestion, { questionId });
   const history = useQuery(api.questions.getHistoryByAnonymousId, { questionId });
@@ -329,10 +330,124 @@ export default function QuestionDetailScreen() {
           </View>
         )}
 
-        {/* Director answer form */}
-        <DirectorAnswerForm questionId={questionId} answers={answers} />
+        {/* Director answer form — hidden for the question author */}
+        {userId !== question.userId && (
+          <DirectorAnswerForm questionId={questionId} answers={answers} />
+        )}
       </ScrollView>
     </View>
+  );
+}
+
+type ModalInfo = {
+  visible: boolean;
+  icon: keyof typeof Ionicons.glyphMap;
+  iconColor: string;
+  title: string;
+  message: string;
+};
+
+const MODAL_INITIAL: ModalInfo = {
+  visible: false,
+  icon: "checkmark-circle",
+  iconColor: "#2E7D32",
+  title: "",
+  message: "",
+};
+
+function AppModal({ modal, onClose }: { modal: ModalInfo; onClose: () => void }) {
+  return (
+    <Modal
+      visible={modal.visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <Pressable
+        onPress={onClose}
+        style={{
+          flex: 1,
+          backgroundColor: "rgba(0,0,0,0.5)",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 32,
+        }}
+      >
+        <Pressable
+          onPress={(e) => e.stopPropagation()}
+          style={{
+            backgroundColor: "#fff",
+            borderRadius: 20,
+            width: "100%",
+            maxWidth: 320,
+            paddingTop: 32,
+            paddingBottom: 20,
+            paddingHorizontal: 24,
+            alignItems: "center",
+            ...Platform.select({
+              ios: {
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.15,
+                shadowRadius: 24,
+              },
+              android: { elevation: 10 },
+            }),
+          }}
+        >
+          <View
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              backgroundColor: `${modal.iconColor}18`,
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 16,
+            }}
+          >
+            <Ionicons name={modal.icon} size={30} color={modal.iconColor} />
+          </View>
+          <Text
+            style={{
+              fontSize: 20,
+              fontWeight: "800",
+              color: "#1a1a1a",
+              textAlign: "center",
+              marginBottom: 8,
+            }}
+          >
+            {modal.title}
+          </Text>
+          <Text
+            style={{
+              fontSize: 15,
+              color: "#666",
+              textAlign: "center",
+              lineHeight: 22,
+              marginBottom: 24,
+            }}
+          >
+            {modal.message}
+          </Text>
+          <Pressable
+            onPress={onClose}
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? "#7B1616" : "#8B1A1A",
+              borderRadius: 14,
+              paddingVertical: 14,
+              paddingHorizontal: 32,
+              width: "100%",
+              alignItems: "center",
+            })}
+          >
+            <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
+              OK
+            </Text>
+          </Pressable>
+        </Pressable>
+      </Pressable>
+    </Modal>
   );
 }
 
@@ -345,10 +460,23 @@ function DirectorAnswerForm({
 }) {
   const [text, setText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [modal, setModal] = useState<ModalInfo>(MODAL_INITIAL);
+  const [shouldGoBack, setShouldGoBack] = useState(false);
   const submitAnswer = useMutation(api.answers.submit);
   const { user } = useUser();
+  const router = useRouter();
 
   const alreadyAnswered = answers.some((a) => a.directorId === user?.id);
+
+  const showModal = (info: Omit<ModalInfo, "visible">) =>
+    setModal({ ...info, visible: true });
+
+  const closeModal = () => {
+    setModal(MODAL_INITIAL);
+    if (shouldGoBack) {
+      router.replace("/(tabs)/available");
+    }
+  };
 
   if (alreadyAnswered) {
     return (
@@ -372,7 +500,12 @@ function DirectorAnswerForm({
   const handleSubmit = async () => {
     const trimmed = text.trim();
     if (!trimmed) {
-      Alert.alert("Atenção", "Escreva sua orientação antes de enviar.");
+      showModal({
+        icon: "alert-circle",
+        iconColor: "#E65100",
+        title: "Atenção",
+        message: "Escreva sua orientação antes de enviar.",
+      });
       return;
     }
 
@@ -380,9 +513,20 @@ function DirectorAnswerForm({
     try {
       await submitAnswer({ questionId, text: trimmed });
       setText("");
-      Alert.alert("Enviado!", "Sua orientação foi registrada. Obrigado!");
+      setShouldGoBack(true);
+      showModal({
+        icon: "checkmark-circle",
+        iconColor: "#2E7D32",
+        title: "Enviado!",
+        message: "Sua orientação foi registrada. Obrigado!",
+      });
     } catch {
-      Alert.alert("Erro", "Não foi possível enviar. Tente novamente.");
+      showModal({
+        icon: "close-circle",
+        iconColor: "#B71C1C",
+        title: "Erro",
+        message: "Não foi possível enviar. Tente novamente.",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -390,6 +534,8 @@ function DirectorAnswerForm({
 
   return (
     <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
+      <AppModal modal={modal} onClose={closeModal} />
+
       <View
         style={{
           height: 1,

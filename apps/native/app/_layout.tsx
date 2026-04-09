@@ -47,6 +47,13 @@ function StackLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen
+          name="my-questions"
+          options={{
+            headerShown: false,
+            presentation: "card",
+          }}
+        />
+        <Stack.Screen
           name="question/[id]"
           options={{
             headerShown: false,

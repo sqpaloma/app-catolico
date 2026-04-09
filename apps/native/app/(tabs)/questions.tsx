@@ -4,7 +4,6 @@ import { useMutation } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   Animated,
   Image,
   Modal,
@@ -27,6 +26,22 @@ const CATEGORIES = [
   "Outro",
 ] as const;
 
+type FeedbackModal = {
+  visible: boolean;
+  icon: keyof typeof Ionicons.glyphMap;
+  iconColor: string;
+  title: string;
+  message: string;
+};
+
+const MODAL_HIDDEN: FeedbackModal = {
+  visible: false,
+  icon: "checkmark-circle",
+  iconColor: "#2E7D32",
+  title: "",
+  message: "",
+};
+
 export default function ConfessarScreen() {
   const insets = useSafeAreaInsets();
   const [text, setText] = useState("");
@@ -34,6 +49,7 @@ export default function ConfessarScreen() {
   const [showPicker, setShowPicker] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showInfoAlert, setShowInfoAlert] = useState(true);
+  const [feedback, setFeedback] = useState<FeedbackModal>(MODAL_HIDDEN);
   const fadeAnim = useState(() => new Animated.Value(0))[0];
   const submitQuestion = useMutation(api.questions.submit);
 
@@ -55,10 +71,20 @@ export default function ConfessarScreen() {
     }).start(() => setShowInfoAlert(false));
   };
 
+  const showFeedback = (info: Omit<FeedbackModal, "visible">) =>
+    setFeedback({ ...info, visible: true });
+
+  const closeFeedback = () => setFeedback(MODAL_HIDDEN);
+
   const handleSubmit = async () => {
     const trimmed = text.trim();
     if (!trimmed) {
-      Alert.alert("Atenção", "Escreva algo antes de enviar.");
+      showFeedback({
+        icon: "alert-circle",
+        iconColor: "#E65100",
+        title: "Atenção",
+        message: "Escreva algo antes de enviar.",
+      });
       return;
     }
 
@@ -67,12 +93,19 @@ export default function ConfessarScreen() {
       await submitQuestion({ text: trimmed, category });
       setText("");
       setCategory("Outro");
-      Alert.alert(
-        "Enviado!",
-        "Sua mensagem foi enviada. Um diretor espiritual responderá em breve com orientação e oração.",
-      );
+      showFeedback({
+        icon: "checkmark-circle",
+        iconColor: "#2E7D32",
+        title: "Enviado!",
+        message: "Sua mensagem foi enviada. Um diretor espiritual responderá em breve com orientação e oração.",
+      });
     } catch {
-      Alert.alert("Erro", "Não foi possível enviar. Tente novamente.");
+      showFeedback({
+        icon: "close-circle",
+        iconColor: "#B71C1C",
+        title: "Erro",
+        message: "Não foi possível enviar. Tente novamente.",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -291,6 +324,94 @@ export default function ConfessarScreen() {
         </View>
 
       </ScrollView>
+
+      {/* Feedback modal */}
+      <Modal visible={feedback.visible} transparent animationType="fade" onRequestClose={closeFeedback}>
+        <Pressable
+          onPress={closeFeedback}
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 32,
+          }}
+        >
+          <Pressable
+            onPress={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 20,
+              width: "100%",
+              maxWidth: 320,
+              paddingTop: 32,
+              paddingBottom: 20,
+              paddingHorizontal: 24,
+              alignItems: "center",
+              ...Platform.select({
+                ios: {
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 8 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 24,
+                },
+                android: { elevation: 10 },
+              }),
+            }}
+          >
+            <View
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: `${feedback.iconColor}18`,
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 16,
+              }}
+            >
+              <Ionicons name={feedback.icon} size={30} color={feedback.iconColor} />
+            </View>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "800",
+                color: "#1a1a1a",
+                textAlign: "center",
+                marginBottom: 8,
+              }}
+            >
+              {feedback.title}
+            </Text>
+            <Text
+              style={{
+                fontSize: 15,
+                color: "#666",
+                textAlign: "center",
+                lineHeight: 22,
+                marginBottom: 24,
+              }}
+            >
+              {feedback.message}
+            </Text>
+            <Pressable
+              onPress={closeFeedback}
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? "#7B1616" : "#8B1A1A",
+                borderRadius: 14,
+                paddingVertical: 14,
+                paddingHorizontal: 32,
+                width: "100%",
+                alignItems: "center",
+              })}
+            >
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
+                OK
+              </Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* Info alert overlay */}
       <Modal visible={showInfoAlert} transparent animationType="none">

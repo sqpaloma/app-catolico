@@ -8,26 +8,18 @@ import { Image, Platform, Pressable, ScrollView, Text, View } from "react-native
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function AvailableQuestionsScreen() {
-  const myQuestions = useQuery(api.questions.getMyQuestions);
   const availableQuestions = useQuery(api.questions.getAvailableQuestions);
   const myAnswers = useQuery(api.answers.getMyAnswers);
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  if (myQuestions === undefined || availableQuestions === undefined || myAnswers === undefined) {
+  if (availableQuestions === undefined || myAnswers === undefined) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f5f0eb" }}>
         <Spinner size="lg" />
       </View>
     );
   }
-
-  const pendingCount = myQuestions.filter(
-    (q) => q.status === "pending" || q.status === "answering",
-  ).length;
-  const answeredCount = myQuestions.filter(
-    (q) => q.status === "consensus_ready",
-  ).length;
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f5f0eb" }}>
@@ -110,7 +102,7 @@ export default function AvailableQuestionsScreen() {
           </Text>
         </LinearGradient>
 
-        {/* Personal stats cards */}
+        {/* Minhas Perguntas + Respondidas por mim */}
         <View
           style={{
             flexDirection: "row",
@@ -119,10 +111,11 @@ export default function AvailableQuestionsScreen() {
             gap: 12,
           }}
         >
-          <View
-            style={{
+          <Pressable
+            onPress={() => router.push("/my-questions")}
+            style={({ pressed }) => ({
               flex: 1,
-              backgroundColor: "#fff",
+              backgroundColor: pressed ? "#f0e8e0" : "#fff",
               borderRadius: 16,
               paddingVertical: 20,
               alignItems: "center",
@@ -135,15 +128,16 @@ export default function AvailableQuestionsScreen() {
                 },
                 android: { elevation: 4 },
               }),
-            }}
+            })}
           >
-            <Text style={{ fontSize: 28, fontWeight: "800", color: "#B71C1C" }}>
-              {pendingCount}
+            <Ionicons name="help-circle-outline" size={28} color="#8B1A1A" style={{ marginBottom: 4 }} />
+            <Text style={{ fontSize: 13, fontWeight: "700", color: "#1a1a1a", textAlign: "center" }}>
+              Minhas Perguntas
             </Text>
-            <Text style={{ fontSize: 13, color: "#666", marginTop: 4, textAlign: "center" }}>
-              Aguardando resposta
+            <Text style={{ fontSize: 11, color: "#888", marginTop: 2, textAlign: "center" }}>
+              Ver status e respostas
             </Text>
-          </View>
+          </Pressable>
 
           <View
             style={{
@@ -164,10 +158,10 @@ export default function AvailableQuestionsScreen() {
             }}
           >
             <Text style={{ fontSize: 28, fontWeight: "800", color: "#2E7D32" }}>
-              {answeredCount}
+              {myAnswers.length}
             </Text>
             <Text style={{ fontSize: 13, color: "#666", marginTop: 4, textAlign: "center" }}>
-              Respondidas
+              Respondidas por mim
             </Text>
           </View>
         </View>
