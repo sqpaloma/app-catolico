@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { Cross } from "lucide-react-native";
 import React from "react";
 import {
+  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -50,7 +50,11 @@ export default function HomeScreen() {
                 justifyContent: "center",
               }}
             >
-              <Cross size={20} color="#fff" strokeWidth={2.5} />
+              <Image
+                source={require("../../assets/images/logo.png")}
+                style={{ width: 20, height: 20 }}
+                resizeMode="contain"
+              />
             </View>
             <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800", letterSpacing: 1 }}>
               SAFE
@@ -74,9 +78,13 @@ export default function HomeScreen() {
         <LinearGradient
           colors={["#8B1A1A", "#A52422", "#c4948b", "#f5f0eb"]}
           locations={[0, 0.3, 0.7, 1]}
-          style={{ paddingTop: 40, paddingBottom: 48, alignItems: "center", paddingHorizontal: 24 }}
+          style={{ paddingTop: 20, paddingBottom: 48, alignItems: "center", paddingHorizontal: 24 }}
         >
-          <Cross size={44} color="#fff" strokeWidth={1.5} style={{ marginBottom: 8 }} />
+          <Image
+            source={require("../../assets/images/logo.png")}
+            style={{ width: 44, height: 44, marginBottom: 8 }}
+            resizeMode="contain"
+          />
           <Text
             style={{
               color: "#fff",
@@ -155,7 +163,7 @@ export default function HomeScreen() {
         {/* Compartilhe o que te aflige */}
         <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
           <Pressable
-            onPress={() => router.push("/write")}
+            onPress={() => router.push("/(tabs)/questions")}
             style={({ pressed }) => ({
               backgroundColor: pressed ? "#7B1616" : "#8B1A1A",
               borderRadius: 16,

@@ -2,9 +2,8 @@ import { api } from "@app-catolico/backend/convex/_generated/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAction } from "convex/react";
-import { Cross } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Image, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type CustomerData = {
@@ -124,7 +123,11 @@ export default function ProcessingScreen() {
             justifyContent: "center",
           }}
         >
-          <Cross size={20} color="#fff" strokeWidth={2.5} />
+          <Image
+            source={require("../../assets/images/logo.png")}
+            style={{ width: 20, height: 20 }}
+            resizeMode="contain"
+          />
         </View>
         <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800", letterSpacing: 1 }}>
           SAFE

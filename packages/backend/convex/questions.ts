@@ -91,7 +91,9 @@ export const getAvailableQuestions = query({
       .order("desc")
       .collect();
 
-    return [...pending, ...answering];
+    return [...pending, ...answering].filter(
+      (q) => q.userId !== identity.subject,
+    );
   },
 });
 

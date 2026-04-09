@@ -1,9 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { Cross } from "lucide-react-native";
 import React from "react";
-import { Platform, Pressable, Text, View } from "react-native";
+import { Image, Platform, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function SuccessScreen() {
@@ -39,7 +38,11 @@ export default function SuccessScreen() {
             justifyContent: "center",
           }}
         >
-          <Cross size={20} color="#fff" strokeWidth={2.5} />
+          <Image
+            source={require("../../assets/images/logo.png")}
+            style={{ width: 20, height: 20 }}
+            resizeMode="contain"
+          />
         </View>
         <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800", letterSpacing: 1 }}>
           SAFE

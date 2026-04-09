@@ -3,7 +3,7 @@ import type { Id } from "@app-catolico/backend/convex/_generated/dataModel";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
-import { Cross } from "lucide-react-native";
+
 import { useMutation, useQuery } from "convex/react";
 import React, { useState } from "react";
 import {
@@ -212,7 +212,11 @@ export default function DiarioScreen() {
               justifyContent: "center",
             }}
           >
-            <Cross size={20} color="#fff" strokeWidth={2.5} />
+            <Image
+              source={require("../../assets/images/logo.png")}
+              style={{ width: 20, height: 20 }}
+              resizeMode="contain"
+            />
           </View>
           <Text
             style={{
@@ -244,18 +248,12 @@ export default function DiarioScreen() {
         colors={["#8B1A1A", "#A52422", "#c4948b", "#f5f0eb"]}
         locations={[0, 0.3, 0.7, 1]}
         style={{
-          paddingTop: 32,
+          paddingTop: 20,
           paddingBottom: 48,
           alignItems: "center",
           paddingHorizontal: 24,
         }}
       >
-        <Ionicons
-          name="book"
-          size={40}
-          color="#fff"
-          style={{ marginBottom: 8 }}
-        />
         <Text
           style={{
             color: "#fff",

@@ -4,10 +4,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
-import { Cross } from "lucide-react-native";
 import { Spinner } from "heroui-native";
 import React from "react";
 import {
+  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -69,7 +69,11 @@ export default function ProfileScreen() {
                 justifyContent: "center",
               }}
             >
-              <Cross size={20} color="#fff" strokeWidth={2.5} />
+              <Image
+                source={require("../../assets/images/logo.png")}
+                style={{ width: 20, height: 20 }}
+                resizeMode="contain"
+              />
             </View>
             <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800", letterSpacing: 1 }}>
               SAFE
@@ -105,9 +109,18 @@ export default function ProfileScreen() {
                 backgroundColor: "rgba(255,255,255,0.2)",
                 alignItems: "center",
                 justifyContent: "center",
+                overflow: "hidden",
               }}
             >
-              <Ionicons name="person" size={36} color="#fff" />
+              {clerkUser?.imageUrl ? (
+                <Image
+                  source={{ uri: clerkUser.imageUrl }}
+                  style={{ width: 64, height: 64 }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Ionicons name="person" size={36} color="#fff" />
+              )}
             </View>
 
             {/* Name, email, badge */}
@@ -123,7 +136,7 @@ export default function ProfileScreen() {
             {/* Settings + Logout */}
             <View style={{ flexDirection: "row", gap: 10 }}>
               <Pressable
-                onPress={() => router.push("/settings" as any)}
+                onPress={() => router.push("/settings")}
                 style={{
                   width: 36,
                   height: 36,
@@ -162,19 +175,12 @@ export default function ProfileScreen() {
           }}
         >
           {/* Premium Card */}
-          <Pressable
-            onPress={() => {
-              if (isPremium) {
-                router.push("/invoices");
-              } else {
-                router.push("/pricing");
-              }
-            }}
-            style={({ pressed }) => ({
+          <View
+            style={{
               flex: 1,
-              backgroundColor: pressed ? "#f0e8e0" : "#fff",
+              backgroundColor: "#fff",
               borderRadius: 16,
-              padding: 16,
+              padding: 20,
               ...Platform.select({
                 ios: {
                   shadowColor: "#000",
@@ -184,27 +190,47 @@ export default function ProfileScreen() {
                 },
                 android: { elevation: 4 },
               }),
-            })}
+            }}
           >
-            <Ionicons
-              name={isPremium ? "star" : "trophy-outline"}
-              size={28}
-              color={isPremium ? "#f5a623" : "#888"}
-            />
-            <Text
-              style={{
-                fontSize: 15,
-                fontWeight: "700",
-                color: "#1a1a1a",
-                marginTop: 8,
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 12 }}>
+              <Ionicons
+                name={isPremium ? "star" : "trophy-outline"}
+                size={28}
+                color={isPremium ? "#f5a623" : "#8B1A1A"}
+              />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 16, fontWeight: "700", color: "#1a1a1a" }}>
+                  {isPremium ? "Premium Ativo" : "Tornar Premium"}
+                </Text>
+                <Text style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
+                  {isPremium ? "Gerencie sua assinatura" : "Acesse vantagens exclusivas"}
+                </Text>
+              </View>
+            </View>
+            <Pressable
+              onPress={() => {
+                if (isPremium) {
+                  router.push("/invoices");
+                } else {
+                  router.push("/pricing");
+                }
               }}
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? "#7B1616" : "#8B1A1A",
+                borderRadius: 12,
+                paddingVertical: 12,
+                alignItems: "center",
+                flexDirection: "row",
+                justifyContent: "center",
+                gap: 8,
+              })}
             >
-              {isPremium ? "Premium Ativo" : "Tornar Premium"}
-            </Text>
-            <Text style={{ fontSize: 12, color: "#888", marginTop: 4 }}>
-              {isPremium ? "Gerencie sua assinatura" : "Acesse vantagens exclusivas"}
-            </Text>
-          </Pressable>
+
+              <Text style={{ color: "#fff", fontSize: 14, fontWeight: "700" }}>
+                {isPremium ? "Ver Faturas" : "Assinar Agora"}
+              </Text>
+            </Pressable>
+          </View>
 
         </View>
 

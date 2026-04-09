@@ -512,6 +512,40 @@ export const createCardPayment = action({
   },
 });
 
+export const cancelSubscription = action({
+  args: {},
+  handler: async (ctx): Promise<{ success: boolean }> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Não autenticado");
+
+    const user = await ctx.runQuery(internal.users.getMeInternal, {
+      clerkId: identity.subject,
+    });
+
+    if (!user) throw new Error("Usuário não encontrado");
+    if (!user.isPremium) throw new Error("Você não possui assinatura ativa");
+    if (!user.asaasSubscriptionId) {
+      throw new Error("Nenhuma assinatura encontrada para cancelar");
+    }
+
+    await asaasFetch(`/subscriptions/${user.asaasSubscriptionId}`, {
+      method: "DELETE",
+    });
+
+    await ctx.runMutation(internal.orders.updateStatusBySubscription, {
+      asaasSubscriptionId: user.asaasSubscriptionId,
+      status: "cancelled",
+    });
+
+    await ctx.runMutation(internal.users.setPremiumStatus, {
+      clerkId: identity.subject,
+      isPremium: false,
+    });
+
+    return { success: true };
+  },
+});
+
 export const getSubscriptionPayments = action({
   args: {
     asaasSubscriptionId: v.string(),

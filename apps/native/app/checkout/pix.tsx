@@ -4,7 +4,7 @@ import * as Clipboard from "expo-clipboard";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAction } from "convex/react";
-import { Cross } from "lucide-react-native";
+
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -176,7 +176,11 @@ export default function PixScreen() {
               justifyContent: "center",
             }}
           >
-            <Cross size={20} color="#fff" strokeWidth={2.5} />
+            <Image
+              source={require("../../assets/images/logo.png")}
+              style={{ width: 20, height: 20 }}
+              resizeMode="contain"
+            />
           </View>
           <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800", letterSpacing: 1 }}>
             SAFE
@@ -227,7 +231,11 @@ export default function PixScreen() {
               justifyContent: "center",
             }}
           >
-            <Cross size={20} color="#fff" strokeWidth={2.5} />
+            <Image
+              source={require("../../assets/images/logo.png")}
+              style={{ width: 20, height: 20 }}
+              resizeMode="contain"
+            />
           </View>
           <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800", letterSpacing: 1 }}>
             SAFE
@@ -311,7 +319,11 @@ export default function PixScreen() {
                 justifyContent: "center",
               }}
             >
-              <Cross size={20} color="#fff" strokeWidth={2.5} />
+              <Image
+              source={require("../../assets/images/logo.png")}
+              style={{ width: 20, height: 20 }}
+              resizeMode="contain"
+            />
             </View>
             <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800", letterSpacing: 1 }}>
               SAFE

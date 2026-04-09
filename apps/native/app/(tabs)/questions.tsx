@@ -2,10 +2,11 @@ import { api } from "@app-catolico/backend/convex/_generated/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
-import { Cross } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
+  Animated,
+  Image,
   Modal,
   Platform,
   Pressable,
@@ -32,7 +33,27 @@ export default function ConfessarScreen() {
   const [category, setCategory] = useState<string>("Outro");
   const [showPicker, setShowPicker] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showInfoAlert, setShowInfoAlert] = useState(true);
+  const fadeAnim = useState(() => new Animated.Value(0))[0];
   const submitQuestion = useMutation(api.questions.submit);
+
+  useEffect(() => {
+    if (showInfoAlert) {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [showInfoAlert]);
+
+  const dismissAlert = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => setShowInfoAlert(false));
+  };
 
   const handleSubmit = async () => {
     const trimmed = text.trim();
@@ -87,7 +108,11 @@ export default function ConfessarScreen() {
                 justifyContent: "center",
               }}
             >
-              <Cross size={20} color="#fff" strokeWidth={2.5} />
+              <Image
+                source={require("../../assets/images/logo.png")}
+                style={{ width: 20, height: 20 }}
+                resizeMode="contain"
+              />
             </View>
             <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800", letterSpacing: 1 }}>
               SAFE
@@ -111,9 +136,8 @@ export default function ConfessarScreen() {
         <LinearGradient
           colors={["#8B1A1A", "#A52422", "#c4948b", "#f5f0eb"]}
           locations={[0, 0.3, 0.7, 1]}
-          style={{ paddingTop: 32, paddingBottom: 48, alignItems: "center", paddingHorizontal: 24 }}
+          style={{ paddingTop: 20, paddingBottom: 48, alignItems: "center", paddingHorizontal: 24 }}
         >
-          <Text style={{ fontSize: 48, marginBottom: 4 }}>🕊️</Text>
           <Text
             style={{
               color: "#fff",
@@ -266,40 +290,73 @@ export default function ConfessarScreen() {
           </View>
         </View>
 
-        {/* COMO FUNCIONA section */}
-        <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
-          <View
+      </ScrollView>
+
+      {/* Info alert overlay */}
+      <Modal visible={showInfoAlert} transparent animationType="none">
+        <Pressable
+          onPress={dismissAlert}
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+            paddingHorizontal: 28,
+          }}
+        >
+          <Animated.View
             style={{
+              opacity: fadeAnim,
+              transform: [
+                {
+                  scale: fadeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.9, 1],
+                  }),
+                },
+              ],
               backgroundColor: "#fff",
-              borderRadius: 16,
-              padding: 24,
-              borderWidth: 1,
-              borderColor: "rgba(139,26,26,0.12)",
+              borderRadius: 20,
+              padding: 28,
+              width: "100%",
               ...Platform.select({
                 ios: {
                   shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.06,
-                  shadowRadius: 8,
+                  shadowOffset: { width: 0, height: 8 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 20,
                 },
-                android: { elevation: 3 },
+                android: { elevation: 12 },
               }),
             }}
           >
-            <Text
-              style={{
-                fontSize: 13,
-                fontWeight: "700",
-                color: "#1a1a1a",
-                letterSpacing: 1.5,
-                textTransform: "uppercase",
-                marginBottom: 18,
-              }}
-            >
-              Como funciona
-            </Text>
+            <View style={{ alignItems: "center", marginBottom: 20 }}>
+              <View
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 28,
+                  backgroundColor: "#fef3f3",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 12,
+                }}
+              >
+                <Ionicons name="information-circle" size={32} color="#8B1A1A" />
+              </View>
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: "800",
+                  color: "#1a1a1a",
+                  textAlign: "center",
+                }}
+              >
+                Como funciona
+              </Text>
+            </View>
 
-            <View style={{ gap: 16 }}>
+            <View style={{ gap: 18 }}>
               <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12 }}>
                 <Text style={{ fontSize: 22 }}>✍️</Text>
                 <Text style={{ fontSize: 14, color: "#444", lineHeight: 21, flex: 1 }}>
@@ -319,9 +376,20 @@ export default function ConfessarScreen() {
                 </Text>
               </View>
             </View>
-          </View>
-        </View>
-      </ScrollView>
+
+            <Text
+              style={{
+                fontSize: 12,
+                color: "#999",
+                textAlign: "center",
+                marginTop: 20,
+              }}
+            >
+              Toque em qualquer lugar para fechar
+            </Text>
+          </Animated.View>
+        </Pressable>
+      </Modal>
 
       {/* Category picker modal */}
       <Modal visible={showPicker} transparent animationType="slide">

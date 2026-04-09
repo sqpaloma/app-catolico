@@ -1,28 +1,36 @@
 import { api } from "@app-catolico/backend/convex/_generated/api";
 import type { Id } from "@app-catolico/backend/convex/_generated/dataModel";
 import { useUser } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { useMutation, useQuery } from "convex/react";
 import { useLocalSearchParams } from "expo-router";
-import { Button, Chip, Separator, Spinner, Surface } from "heroui-native";
+import { Spinner } from "heroui-native";
 import React, { useState } from "react";
-import { Alert, Text, TextInput, View } from "react-native";
-
-import { AnswerCard } from "@/components/answer-card";
-import { ConsensusCard } from "@/components/consensus-card";
-import { Container } from "@/components/container";
+import {
+  Alert,
+  Image,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const statusConfig = {
-  pending: { label: "Aguardando diretores", color: "warning" as const },
-  answering: { label: "Em resposta", color: "primary" as const },
-  consensus_ready: {
-    label: "Orientação disponível",
-    color: "success" as const,
-  },
+  pending: { label: "Aguardando diretores", bg: "#FFF3E0", color: "#E65100" },
+  answering: { label: "Em resposta", bg: "#E3F2FD", color: "#1565C0" },
+  consensus_ready: { label: "Orientação disponível", bg: "#E8F5E9", color: "#2E7D32" },
 };
 
 export default function QuestionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const questionId = id as Id<"questions">;
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const question = useQuery(api.questions.getById, { questionId });
   const answers = useQuery(api.answers.getByQuestion, { questionId });
@@ -30,7 +38,7 @@ export default function QuestionDetailScreen() {
 
   if (question === undefined || answers === undefined) {
     return (
-      <View className="flex-1 items-center justify-center bg-background">
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f5f0eb" }}>
         <Spinner size="lg" />
       </View>
     );
@@ -38,10 +46,8 @@ export default function QuestionDetailScreen() {
 
   if (question === null) {
     return (
-      <View className="flex-1 items-center justify-center bg-background px-4">
-        <Text className="text-foreground text-lg">
-          Pergunta não encontrada
-        </Text>
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f5f0eb" }}>
+        <Text style={{ fontSize: 17, color: "#666" }}>Pergunta não encontrada</Text>
       </View>
     );
   }
@@ -49,80 +55,284 @@ export default function QuestionDetailScreen() {
   const config = statusConfig[question.status];
 
   return (
-    <Container className="px-4 pb-4 bg-background">
-      <View className="py-4 flex-row items-center gap-2">
-        <Chip variant="flat" color={config.color} size="sm">
-          <Chip.Label>{config.label}</Chip.Label>
-        </Chip>
-        {question.isPremium && (
-          <Chip variant="flat" color="warning" size="sm">
-            <Chip.Label>Premium</Chip.Label>
-          </Chip>
-        )}
-      </View>
-
-      <Surface variant="secondary" className="p-4 rounded-xl">
-        <Text className="text-foreground text-base leading-7">
-          {question.normalizedText}
-        </Text>
-      </Surface>
-
-      {question.consensusResponse && (
-        <View className="mt-4">
-          <ConsensusCard text={question.consensusResponse} />
+    <View style={{ flex: 1, backgroundColor: "#f5f0eb" }}>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 16 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Header */}
+        <View
+          style={{
+            backgroundColor: "#8B1A1A",
+            paddingTop: insets.top + 8,
+            paddingBottom: 12,
+            paddingHorizontal: 20,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <Pressable
+              onPress={() => router.back()}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: "rgba(255,255,255,0.15)",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Ionicons name="arrow-back" size={20} color="#fff" />
+            </Pressable>
+            <Image
+              source={require("../../assets/images/logo.png")}
+              style={{ width: 20, height: 20 }}
+              resizeMode="contain"
+            />
+            <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800", letterSpacing: 1 }}>
+              SAFE
+            </Text>
+          </View>
+          <Text
+            style={{
+              color: "rgba(255,255,255,0.75)",
+              fontSize: 12,
+              fontStyle: "italic",
+              flexShrink: 1,
+              textAlign: "right",
+              maxWidth: "55%",
+            }}
+          >
+            Um espaço seguro para sua alma
+          </Text>
         </View>
-      )}
 
-      {question.isPremium && history && history.length > 0 && (
-        <View className="mt-6">
-          <Text className="text-foreground font-semibold text-lg mb-1">
-            Histórico do Usuário
+        {/* Hero gradient */}
+        <LinearGradient
+          colors={["#8B1A1A", "#A52422", "#c4948b", "#f5f0eb"]}
+          locations={[0, 0.35, 0.75, 1]}
+          style={{ paddingTop: 20, paddingBottom: 60, alignItems: "center", paddingHorizontal: 24 }}
+        >
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: 24,
+              fontWeight: "800",
+              textAlign: "center",
+              marginBottom: 8,
+            }}
+          >
+            Pergunta
           </Text>
-          <Text className="text-muted text-xs mb-3">
-            Perguntas anteriores deste usuário (anônimo) — visível por ser Premium.
-          </Text>
-          <View className="gap-2">
-            {history.map((q) => (
-              <Surface key={q._id} variant="secondary" className="p-3 rounded-lg">
-                <Text className="text-foreground text-sm leading-6" numberOfLines={3}>
-                  {q.normalizedText}
+          <View
+            style={{
+              backgroundColor: "rgba(255,255,255,0.2)",
+              paddingHorizontal: 14,
+              paddingVertical: 6,
+              borderRadius: 16,
+            }}
+          >
+            <Text style={{ color: "#fff", fontSize: 13, fontWeight: "600" }}>
+              {config.label}
+            </Text>
+          </View>
+        </LinearGradient>
+
+        {/* Question card */}
+        <View style={{ paddingHorizontal: 20, marginTop: -36 }}>
+          <View
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 16,
+              padding: 20,
+              ...Platform.select({
+                ios: {
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 12,
+                },
+                android: { elevation: 6 },
+              }),
+            }}
+          >
+            {question.isPremium && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 6,
+                  marginBottom: 12,
+                }}
+              >
+                <Ionicons name="star" size={14} color="#f5a623" />
+                <Text style={{ fontSize: 12, fontWeight: "600", color: "#f5a623" }}>
+                  Premium
                 </Text>
-                <Chip
-                  variant="flat"
-                  color={statusConfig[q.status].color}
-                  size="sm"
-                  className="mt-2 self-start"
+              </View>
+            )}
+            <Text style={{ fontSize: 16, color: "#1a1a1a", lineHeight: 26 }}>
+              {question.normalizedText}
+            </Text>
+          </View>
+        </View>
+
+        {/* Consensus response */}
+        {question.consensusResponse && (
+          <View style={{ paddingHorizontal: 20, marginTop: 16 }}>
+            <View
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: 16,
+                padding: 20,
+                borderLeftWidth: 4,
+                borderLeftColor: "#8B1A1A",
+                ...Platform.select({
+                  ios: {
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 8,
+                  },
+                  android: { elevation: 4 },
+                }),
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <Ionicons name="sparkles" size={18} color="#8B1A1A" />
+                <Text style={{ fontSize: 15, fontWeight: "700", color: "#8B1A1A" }}>
+                  Orientação Final
+                </Text>
+              </View>
+              <Text style={{ fontSize: 15, color: "#333", lineHeight: 24 }}>
+                {question.consensusResponse}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Premium user history */}
+        {question.isPremium && history && history.length > 0 && (
+          <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
+            <Text
+              style={{
+                fontSize: 13,
+                fontWeight: "700",
+                color: "#1a1a1a",
+                letterSpacing: 1.5,
+                textTransform: "uppercase",
+                marginBottom: 10,
+              }}
+            >
+              Histórico do Usuário
+            </Text>
+            <Text style={{ fontSize: 12, color: "#888", marginBottom: 12 }}>
+              Perguntas anteriores deste usuário (anônimo) — visível por ser Premium.
+            </Text>
+            <View style={{ gap: 10 }}>
+              {history.map((q) => {
+                const hConfig = statusConfig[q.status];
+                return (
+                  <View
+                    key={q._id}
+                    style={{
+                      backgroundColor: "#fff",
+                      borderRadius: 12,
+                      padding: 14,
+                      ...Platform.select({
+                        ios: {
+                          shadowColor: "#000",
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 0.06,
+                          shadowRadius: 8,
+                        },
+                        android: { elevation: 3 },
+                      }),
+                    }}
+                  >
+                    <Text
+                      style={{ fontSize: 14, color: "#333", lineHeight: 22 }}
+                      numberOfLines={3}
+                    >
+                      {q.normalizedText}
+                    </Text>
+                    <View
+                      style={{
+                        alignSelf: "flex-start",
+                        backgroundColor: hConfig.bg,
+                        paddingHorizontal: 10,
+                        paddingVertical: 4,
+                        borderRadius: 12,
+                        marginTop: 8,
+                      }}
+                    >
+                      <Text style={{ fontSize: 11, fontWeight: "600", color: hConfig.color }}>
+                        {hConfig.label}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        )}
+
+        {/* Director answers */}
+        {answers.length > 0 && (
+          <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
+            <Text
+              style={{
+                fontSize: 13,
+                fontWeight: "700",
+                color: "#1a1a1a",
+                letterSpacing: 1.5,
+                textTransform: "uppercase",
+                marginBottom: 10,
+              }}
+            >
+              Respostas dos Diretores ({answers.length})
+            </Text>
+            <View style={{ gap: 10 }}>
+              {answers.map((answer) => (
+                <View
+                  key={answer._id}
+                  style={{
+                    backgroundColor: "#fff",
+                    borderRadius: 16,
+                    padding: 16,
+                    ...Platform.select({
+                      ios: {
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.06,
+                        shadowRadius: 8,
+                      },
+                      android: { elevation: 3 },
+                    }),
+                  }}
                 >
-                  <Chip.Label>{statusConfig[q.status].label}</Chip.Label>
-                </Chip>
-              </Surface>
-            ))}
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                    <Ionicons name="person-circle-outline" size={20} color="#8B1A1A" />
+                    <Text style={{ fontSize: 14, fontWeight: "600", color: "#555" }}>
+                      {answer.directorName}
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: 15, color: "#333", lineHeight: 24 }}>
+                    {answer.text}
+                  </Text>
+                </View>
+              ))}
+            </View>
           </View>
-        </View>
-      )}
+        )}
 
-      {answers.length > 0 && (
-        <View className="mt-6">
-          <Text className="text-foreground font-semibold text-lg mb-3">
-            Respostas dos Diretores ({answers.length})
-          </Text>
-          <View className="gap-3">
-            {answers.map((answer) => (
-              <AnswerCard
-                key={answer._id}
-                directorName={answer.directorName}
-                text={answer.text}
-              />
-            ))}
-          </View>
-        </View>
-      )}
-
-      <DirectorAnswerForm
-        questionId={questionId}
-        answers={answers}
-      />
-    </Container>
+        {/* Director answer form */}
+        <DirectorAnswerForm questionId={questionId} answers={answers} />
+      </ScrollView>
+    </View>
   );
 }
 
@@ -142,10 +352,19 @@ function DirectorAnswerForm({
 
   if (alreadyAnswered) {
     return (
-      <View className="mt-6 items-center py-4">
-        <Chip variant="flat" color="success" size="sm">
-          <Chip.Label>Você já respondeu esta pergunta</Chip.Label>
-        </Chip>
+      <View style={{ paddingHorizontal: 20, marginTop: 20, alignItems: "center", paddingVertical: 16 }}>
+        <View
+          style={{
+            backgroundColor: "#E8F5E9",
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderRadius: 16,
+          }}
+        >
+          <Text style={{ fontSize: 13, fontWeight: "600", color: "#2E7D32" }}>
+            Você já respondeu esta pergunta
+          </Text>
+        </View>
       </View>
     );
   }
@@ -170,38 +389,89 @@ function DirectorAnswerForm({
   };
 
   return (
-    <View className="mt-6">
-      <Separator className="mb-4" />
-      <Text className="text-foreground font-semibold text-lg mb-3">
+    <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
+      <View
+        style={{
+          height: 1,
+          backgroundColor: "rgba(139,26,26,0.12)",
+          marginBottom: 16,
+        }}
+      />
+      <Text
+        style={{
+          fontSize: 13,
+          fontWeight: "700",
+          color: "#1a1a1a",
+          letterSpacing: 1.5,
+          textTransform: "uppercase",
+          marginBottom: 10,
+        }}
+      >
         Sua Orientação
       </Text>
 
-      <Surface variant="secondary" className="rounded-xl p-1">
+      <View
+        style={{
+          backgroundColor: "#fff",
+          borderRadius: 16,
+          padding: 4,
+          ...Platform.select({
+            ios: {
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.06,
+              shadowRadius: 8,
+            },
+            android: { elevation: 3 },
+          }),
+        }}
+      >
         <TextInput
-          className="text-foreground text-base p-4 min-h-[120px]"
+          style={{
+            fontSize: 15,
+            color: "#333",
+            padding: 16,
+            minHeight: 120,
+            textAlignVertical: "top",
+          }}
           placeholder="Escreva sua orientação espiritual..."
-          placeholderTextColor="#888"
+          placeholderTextColor="#aaa"
           multiline
-          textAlignVertical="top"
           value={text}
           onChangeText={setText}
           editable={!isSubmitting}
         />
-      </Surface>
+      </View>
 
-      <Button
-        className="mt-3"
-        size="lg"
-        color="primary"
-        isDisabled={!text.trim() || isSubmitting}
+      <Pressable
         onPress={handleSubmit}
+        disabled={!text.trim() || isSubmitting}
+        style={({ pressed }) => ({
+          backgroundColor: !text.trim() || isSubmitting
+            ? "rgba(139,26,26,0.4)"
+            : pressed
+              ? "#7B1616"
+              : "#8B1A1A",
+          borderRadius: 16,
+          paddingVertical: 16,
+          alignItems: "center",
+          justifyContent: "center",
+          marginTop: 12,
+          flexDirection: "row",
+          gap: 8,
+        })}
       >
         {isSubmitting ? (
-          <Spinner size="sm" color="white" />
+          <Spinner size="sm" />
         ) : (
-          <Button.Label>Enviar Orientação</Button.Label>
+          <>
+            <Ionicons name="send" size={18} color="#fff" />
+            <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
+              Enviar Orientação
+            </Text>
+          </>
         )}
-      </Button>
+      </Pressable>
     </View>
   );
 }

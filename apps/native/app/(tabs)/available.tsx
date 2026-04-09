@@ -1,18 +1,20 @@
 import { api } from "@app-catolico/backend/convex/_generated/api";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { Cross } from "lucide-react-native";
+import { useRouter } from "expo-router";
 import { useQuery } from "convex/react";
 import { Spinner } from "heroui-native";
-import { Platform, ScrollView, Text, View } from "react-native";
+import { Image, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function AvailableQuestionsScreen() {
-  const questions = useQuery(api.questions.getAvailableQuestions);
+  const myQuestions = useQuery(api.questions.getMyQuestions);
+  const availableQuestions = useQuery(api.questions.getAvailableQuestions);
   const myAnswers = useQuery(api.answers.getMyAnswers);
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
-  if (questions === undefined || myAnswers === undefined) {
+  if (myQuestions === undefined || availableQuestions === undefined || myAnswers === undefined) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f5f0eb" }}>
         <Spinner size="lg" />
@@ -20,8 +22,12 @@ export default function AvailableQuestionsScreen() {
     );
   }
 
-  const pendingCount = questions.length;
-  const answeredCount = myAnswers.length;
+  const pendingCount = myQuestions.filter(
+    (q) => q.status === "pending" || q.status === "answering",
+  ).length;
+  const answeredCount = myQuestions.filter(
+    (q) => q.status === "consensus_ready",
+  ).length;
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f5f0eb" }}>
@@ -52,7 +58,11 @@ export default function AvailableQuestionsScreen() {
                 justifyContent: "center",
               }}
             >
-              <Cross size={20} color="#fff" strokeWidth={2.5} />
+              <Image
+                source={require("../../assets/images/logo.png")}
+                style={{ width: 20, height: 20 }}
+                resizeMode="contain"
+              />
             </View>
             <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800", letterSpacing: 1 }}>
               SAFE
@@ -76,9 +86,8 @@ export default function AvailableQuestionsScreen() {
         <LinearGradient
           colors={["#8B1A1A", "#A52422", "#c4948b", "#f5f0eb"]}
           locations={[0, 0.35, 0.75, 1]}
-          style={{ paddingTop: 36, paddingBottom: 80, alignItems: "center", paddingHorizontal: 24 }}
+          style={{ paddingTop: 20, paddingBottom: 80, alignItems: "center", paddingHorizontal: 24 }}
         >
-          <Ionicons name="shield-outline" size={48} color="#fff" style={{ marginBottom: 12 }} />
           <Text
             style={{
               color: "#fff",
@@ -101,7 +110,7 @@ export default function AvailableQuestionsScreen() {
           </Text>
         </LinearGradient>
 
-        {/* Stats cards */}
+        {/* Personal stats cards */}
         <View
           style={{
             flexDirection: "row",
@@ -163,36 +172,114 @@ export default function AvailableQuestionsScreen() {
           </View>
         </View>
 
-        {/* Messages section */}
+        {/* Received questions section (from other users) */}
         <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
-          <View
+          <Text
             style={{
-              backgroundColor: "#fff",
-              borderRadius: 16,
-              paddingVertical: 40,
-              paddingHorizontal: 24,
-              alignItems: "center",
-              ...Platform.select({
-                ios: {
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.06,
-                  shadowRadius: 8,
-                },
-                android: { elevation: 3 },
-              }),
+              fontSize: 13,
+              fontWeight: "700",
+              color: "#1a1a1a",
+              letterSpacing: 1.5,
+              textTransform: "uppercase",
+              marginBottom: 10,
             }}
           >
-            <Ionicons
-              name="chatbubbles-outline"
-              size={44}
-              color="#bbb"
-              style={{ marginBottom: 12 }}
-            />
-            <Text style={{ fontSize: 15, color: "#888", textAlign: "center" }}>
-              Nenhuma mensagem recebida ainda.
-            </Text>
-          </View>
+            Perguntas Recebidas ({availableQuestions.length})
+          </Text>
+
+          {availableQuestions.length === 0 ? (
+            <View
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: 16,
+                paddingVertical: 40,
+                paddingHorizontal: 24,
+                alignItems: "center",
+                ...Platform.select({
+                  ios: {
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.06,
+                    shadowRadius: 8,
+                  },
+                  android: { elevation: 3 },
+                }),
+              }}
+            >
+              <Ionicons
+                name="chatbubbles-outline"
+                size={44}
+                color="#bbb"
+                style={{ marginBottom: 12 }}
+              />
+              <Text style={{ fontSize: 15, color: "#888", textAlign: "center" }}>
+                Nenhuma mensagem recebida ainda.
+              </Text>
+            </View>
+          ) : (
+            <View style={{ gap: 10 }}>
+              {availableQuestions.map((question) => (
+                <Pressable
+                  key={question._id}
+                  onPress={() => router.push(`/question/${question._id}`)}
+                  style={({ pressed }) => ({
+                    backgroundColor: pressed ? "#f0e8e0" : "#fff",
+                    borderRadius: 16,
+                    padding: 16,
+                    ...Platform.select({
+                      ios: {
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.06,
+                        shadowRadius: 8,
+                      },
+                      android: { elevation: 3 },
+                    }),
+                  })}
+                >
+                  <Text
+                    style={{ fontSize: 15, color: "#333", lineHeight: 22 }}
+                    numberOfLines={3}
+                  >
+                    {question.normalizedText}
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      marginTop: 10,
+                    }}
+                  >
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                      <Ionicons name="chatbubbles-outline" size={14} color="#888" />
+                      <Text style={{ fontSize: 12, color: "#888" }}>
+                        {question.answerCount} {question.answerCount === 1 ? "resposta" : "respostas"}
+                      </Text>
+                    </View>
+                    <View
+                      style={{
+                        backgroundColor: question.status === "pending" ? "#FFF3E0" : "#E3F2FD",
+                        paddingHorizontal: 10,
+                        paddingVertical: 4,
+                        borderRadius: 12,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 11,
+                          fontWeight: "600",
+                          color: question.status === "pending" ? "#E65100" : "#1565C0",
+                        }}
+                      >
+                        {question.status === "pending" ? "Aguardando" : "Em resposta"}
+                      </Text>
+                    </View>
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+          )}
         </View>
       </ScrollView>
     </View>

@@ -1,21 +1,73 @@
-import { useSignIn } from "@clerk/clerk-expo";
+import { useSignIn, useSSO } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import * as Linking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
 import { Link, useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Alert, Text, TextInput, View } from "react-native";
-import { Button, Surface } from "heroui-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Container } from "@/components/container";
+WebBrowser.maybeCompleteAuthSession();
 
 export default function SignInScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
+  const { startSSOFlow } = useSSO();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    void WebBrowser.warmUpAsync();
+    return () => {
+      void WebBrowser.coolDownAsync();
+    };
+  }, []);
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [pendingVerification, setPendingVerification] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<"google" | "apple" | null>(null);
+
+  const onSSOPress = useCallback(
+    async (strategy: "oauth_google" | "oauth_apple") => {
+      if (!isLoaded) return;
+      setOauthLoading(strategy === "oauth_google" ? "google" : "apple");
+
+      try {
+        const { createdSessionId, setActive: ssoSetActive } =
+          await startSSOFlow({
+            strategy,
+            redirectUrl: Linking.createURL("/(auth)/sign-in"),
+          });
+
+        if (createdSessionId && ssoSetActive) {
+          await ssoSetActive({ session: createdSessionId });
+          router.replace("/");
+        }
+      } catch (err: any) {
+        const msg =
+          err?.errors?.[0]?.longMessage ??
+          err?.message ??
+          "Não foi possível continuar. Tente novamente.";
+        Alert.alert("Erro", msg);
+      } finally {
+        setOauthLoading(null);
+      }
+    },
+    [isLoaded, startSSOFlow, router],
+  );
 
   const onSignInPress = async () => {
     if (!isLoaded) return;
@@ -76,99 +128,394 @@ export default function SignInScreen() {
     }
   };
 
+  const cardShadow = Platform.select({
+    ios: {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+    },
+    android: { elevation: 6 },
+  });
+
   if (pendingVerification) {
     return (
-      <Container className="px-6 justify-center">
-        <View className="items-center mb-8">
-          <View className="w-16 h-16 rounded-full bg-primary/20 items-center justify-center mb-4">
-            <Ionicons name="mail" size={28} color="#888" />
-          </View>
-          <Text className="text-foreground text-2xl font-bold">
-            Verificar Dispositivo
-          </Text>
-          <Text className="text-muted text-sm mt-1 text-center">
-            Enviamos um código para {emailAddress}
-          </Text>
-        </View>
-
-        <Surface variant="secondary" className="rounded-xl p-1 mb-4">
-          <TextInput
-            className="text-foreground text-base p-4 text-center tracking-widest"
-            value={code}
-            placeholder="000000"
-            placeholderTextColor="#888"
-            keyboardType="number-pad"
-            onChangeText={setCode}
-            editable={!isLoading}
-          />
-        </Surface>
-
-        <Button
-          size="lg"
-          color="primary"
-          isDisabled={!code || isLoading}
-          onPress={onVerifyPress}
+      <View style={{ flex: 1, backgroundColor: "#f5f0eb" }}>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 16 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Button.Label>{isLoading ? "Verificando..." : "Verificar"}</Button.Label>
-        </Button>
-      </Container>
+          <View
+            style={{
+              backgroundColor: "#8B1A1A",
+              paddingTop: insets.top + 8,
+              paddingBottom: 12,
+              paddingHorizontal: 20,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <View
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Image
+                  source={require("../../assets/images/logo.png")}
+                  style={{ width: 20, height: 20 }}
+                  resizeMode="contain"
+                />
+              </View>
+              <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800", letterSpacing: 1 }}>
+                SAFE
+              </Text>
+            </View>
+          </View>
+
+          <LinearGradient
+            colors={["#8B1A1A", "#A52422", "#c4948b", "#f5f0eb"]}
+            locations={[0, 0.3, 0.7, 1]}
+            style={{ paddingTop: 32, paddingBottom: 56, alignItems: "center", paddingHorizontal: 24 }}
+          >
+            <View
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: "rgba(255,255,255,0.2)",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 16,
+              }}
+            >
+              <Ionicons name="mail" size={28} color="#fff" />
+            </View>
+            <Text
+              style={{
+                color: "#fff",
+                fontSize: 28,
+                fontWeight: "800",
+                textAlign: "center",
+                marginBottom: 8,
+              }}
+            >
+              Verificar Dispositivo
+            </Text>
+            <Text
+              style={{
+                color: "rgba(255,255,255,0.85)",
+                fontSize: 14,
+                textAlign: "center",
+                lineHeight: 20,
+              }}
+            >
+              Enviamos um código para {emailAddress}
+            </Text>
+          </LinearGradient>
+
+          <View style={{ paddingHorizontal: 20, marginTop: -32 }}>
+            <View
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: 16,
+                padding: 24,
+                ...cardShadow,
+              }}
+            >
+              <TextInput
+                style={{
+                  backgroundColor: "#f5f0eb",
+                  borderRadius: 12,
+                  padding: 16,
+                  fontSize: 18,
+                  color: "#1a1a1a",
+                  textAlign: "center",
+                  letterSpacing: 8,
+                  marginBottom: 16,
+                }}
+                value={code}
+                placeholder="000000"
+                placeholderTextColor="#aaa"
+                keyboardType="number-pad"
+                onChangeText={setCode}
+                editable={!isLoading}
+              />
+
+              <Pressable
+                onPress={onVerifyPress}
+                disabled={!code || isLoading}
+                style={({ pressed }) => ({
+                  backgroundColor: !code || isLoading
+                    ? "#c4948b"
+                    : pressed
+                      ? "#7B1616"
+                      : "#8B1A1A",
+                  borderRadius: 12,
+                  paddingVertical: 16,
+                  alignItems: "center",
+                })}
+              >
+                <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
+                  {isLoading ? "Verificando..." : "Verificar"}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </ScrollView>
+      </View>
     );
   }
 
   return (
-    <Container className="px-6 justify-center">
-      <View className="items-center mb-8">
-        <View className="w-16 h-16 rounded-full bg-primary/20 items-center justify-center mb-4">
-          <Ionicons name="heart" size={28} color="#888" />
-        </View>
-        <Text className="text-foreground text-2xl font-bold">
-          Direção Espiritual
-        </Text>
-        <Text className="text-muted text-sm mt-1">
-          Entre na sua conta para continuar
-        </Text>
-      </View>
-
-      <Surface variant="secondary" className="rounded-xl p-1 mb-3">
-        <TextInput
-          className="text-foreground text-base p-4"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          value={emailAddress}
-          placeholder="Email"
-          placeholderTextColor="#888"
-          onChangeText={setEmailAddress}
-          editable={!isLoading}
-        />
-      </Surface>
-
-      <Surface variant="secondary" className="rounded-xl p-1 mb-4">
-        <TextInput
-          className="text-foreground text-base p-4"
-          value={password}
-          placeholder="Senha"
-          placeholderTextColor="#888"
-          secureTextEntry
-          onChangeText={setPassword}
-          editable={!isLoading}
-        />
-      </Surface>
-
-      <Button
-        size="lg"
-        color="primary"
-        isDisabled={!emailAddress || !password || isLoading}
-        onPress={onSignInPress}
+    <View style={{ flex: 1, backgroundColor: "#f5f0eb" }}>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 16 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <Button.Label>{isLoading ? "Entrando..." : "Entrar"}</Button.Label>
-      </Button>
+        <View
+          style={{
+            backgroundColor: "#8B1A1A",
+            paddingTop: insets.top + 8,
+            paddingBottom: 12,
+            paddingHorizontal: 20,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: "rgba(255,255,255,0.15)",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Image
+                source={require("../../assets/images/logo.png")}
+                style={{ width: 20, height: 20 }}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800", letterSpacing: 1 }}>
+              SAFE
+            </Text>
+          </View>
+        </View>
 
-      <View className="flex-row items-center justify-center mt-6 gap-1">
-        <Text className="text-muted text-sm">Não tem conta?</Text>
-        <Link href="/(auth)/sign-up">
-          <Text className="text-primary text-sm font-semibold">Criar conta</Text>
-        </Link>
-      </View>
-    </Container>
+        <LinearGradient
+          colors={["#8B1A1A", "#A52422", "#c4948b", "#f5f0eb"]}
+          locations={[0, 0.3, 0.7, 1]}
+          style={{ paddingTop: 40, paddingBottom: 56, alignItems: "center", paddingHorizontal: 24 }}
+        >
+          <Image
+            source={require("../../assets/images/logo.png")}
+            style={{ width: 44, height: 44, marginBottom: 8 }}
+            resizeMode="contain"
+          />
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: 28,
+              fontWeight: "800",
+              textAlign: "center",
+              marginBottom: 8,
+            }}
+          >
+            Bem-vindo de volta
+          </Text>
+          <Text
+            style={{
+              color: "rgba(255,255,255,0.85)",
+              fontSize: 14,
+              textAlign: "center",
+              lineHeight: 20,
+              maxWidth: 280,
+            }}
+          >
+            Entre na sua conta para continuar sua jornada espiritual
+          </Text>
+        </LinearGradient>
+
+        <View style={{ paddingHorizontal: 20, marginTop: -32 }}>
+          <View
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 16,
+              padding: 24,
+              ...cardShadow,
+            }}
+          >
+            <View style={{ marginBottom: 12 }}>
+              <Text style={{ fontSize: 13, fontWeight: "600", color: "#666", marginBottom: 8, marginLeft: 4 }}>
+                Email
+              </Text>
+              <TextInput
+                style={{
+                  backgroundColor: "#f5f0eb",
+                  borderRadius: 12,
+                  padding: 16,
+                  fontSize: 16,
+                  color: "#1a1a1a",
+                }}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                value={emailAddress}
+                placeholder="seu@email.com"
+                placeholderTextColor="#aaa"
+                onChangeText={setEmailAddress}
+                editable={!isLoading}
+              />
+            </View>
+
+            <View style={{ marginBottom: 20 }}>
+              <Text style={{ fontSize: 13, fontWeight: "600", color: "#666", marginBottom: 8, marginLeft: 4 }}>
+                Senha
+              </Text>
+              <TextInput
+                style={{
+                  backgroundColor: "#f5f0eb",
+                  borderRadius: 12,
+                  padding: 16,
+                  fontSize: 16,
+                  color: "#1a1a1a",
+                }}
+                value={password}
+                placeholder="Sua senha"
+                placeholderTextColor="#aaa"
+                secureTextEntry
+                onChangeText={setPassword}
+                editable={!isLoading}
+              />
+            </View>
+
+            <Pressable
+              onPress={onSignInPress}
+              disabled={!emailAddress || !password || isLoading || !!oauthLoading}
+              style={({ pressed }) => ({
+                backgroundColor: !emailAddress || !password || isLoading
+                  ? "#c4948b"
+                  : pressed
+                    ? "#7B1616"
+                    : "#8B1A1A",
+                borderRadius: 12,
+                paddingVertical: 16,
+                alignItems: "center",
+                flexDirection: "row",
+                justifyContent: "center",
+                gap: 8,
+              })}
+            >
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
+                {isLoading ? "Entrando..." : "Entrar"}
+              </Text>
+              {!isLoading && (
+                <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.8)" />
+              )}
+            </Pressable>
+
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 20,
+                marginBottom: 4,
+              }}
+            >
+              <View style={{ flex: 1, height: 1, backgroundColor: "#e0d8d0" }} />
+              <Text style={{ marginHorizontal: 12, fontSize: 13, color: "#999" }}>
+                ou continue com
+              </Text>
+              <View style={{ flex: 1, height: 1, backgroundColor: "#e0d8d0" }} />
+            </View>
+
+            <View style={{ flexDirection: "row", gap: 12, marginTop: 12 }}>
+              <Pressable
+                onPress={() => onSSOPress("oauth_google")}
+                disabled={isLoading || !!oauthLoading}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  backgroundColor: pressed ? "#f0ebe5" : "#f5f0eb",
+                  borderRadius: 12,
+                  paddingVertical: 14,
+                  borderWidth: 1,
+                  borderColor: "#e0d8d0",
+                  opacity: oauthLoading === "apple" ? 0.5 : 1,
+                })}
+              >
+                {oauthLoading === "google" ? (
+                  <ActivityIndicator size="small" color="#8B1A1A" />
+                ) : (
+                  <>
+                    <Ionicons name="logo-google" size={20} color="#4285F4" />
+                    <Text style={{ fontSize: 14, fontWeight: "600", color: "#333" }}>
+                      Google
+                    </Text>
+                  </>
+                )}
+              </Pressable>
+
+              <Pressable
+                onPress={() => onSSOPress("oauth_apple")}
+                disabled={isLoading || !!oauthLoading}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  backgroundColor: pressed ? "#2a2a2a" : "#1a1a1a",
+                  borderRadius: 12,
+                  paddingVertical: 14,
+                  opacity: oauthLoading === "google" ? 0.5 : 1,
+                })}
+              >
+                {oauthLoading === "apple" ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons name="logo-apple" size={20} color="#fff" />
+                    <Text style={{ fontSize: 14, fontWeight: "600", color: "#fff" }}>
+                      Apple
+                    </Text>
+                  </>
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: 24,
+            gap: 4,
+          }}
+        >
+          <Text style={{ fontSize: 14, color: "#888" }}>Não tem conta?</Text>
+          <Link href="/(auth)/sign-up">
+            <Text style={{ fontSize: 14, color: "#8B1A1A", fontWeight: "700" }}>Criar conta</Text>
+          </Link>
+        </View>
+      </ScrollView>
+    </View>
   );
 }

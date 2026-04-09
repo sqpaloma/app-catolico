@@ -49,9 +49,7 @@ function StackLayout() {
         <Stack.Screen
           name="question/[id]"
           options={{
-            headerShown: true,
-            headerTitle: "Pergunta",
-            headerBackTitle: "Voltar",
+            headerShown: false,
             presentation: "card",
           }}
         />
@@ -72,6 +70,13 @@ function StackLayout() {
           }}
         />
         <Stack.Screen
+          name="settings"
+          options={{
+            headerShown: false,
+            presentation: "card",
+          }}
+        />
+        <Stack.Screen
           name="directees"
           options={{
             headerShown: true,
@@ -85,15 +90,6 @@ function StackLayout() {
           options={{
             headerShown: true,
             headerTitle: "Diário do Dirigido",
-            headerBackTitle: "Voltar",
-            presentation: "card",
-          }}
-        />
-        <Stack.Screen
-          name="write"
-          options={{
-            headerShown: true,
-            headerTitle: "Escrever",
             headerBackTitle: "Voltar",
             presentation: "card",
           }}
