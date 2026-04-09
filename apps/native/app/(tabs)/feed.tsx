@@ -465,7 +465,7 @@ export default function DiarioScreen() {
           />
         )}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-        ListHeaderComponent={renderHeader}
+        ListHeaderComponent={renderHeader()}
         ListEmptyComponent={renderEmpty}
         contentContainerStyle={{
           flexGrow: 1,

@@ -25,6 +25,8 @@ export const ensureUser = mutation({
     const userId = await ctx.db.insert("users", {
       clerkId: identity.subject,
       anonymousId: generateAnonymousId(),
+      firstName: identity.givenName ?? undefined,
+      lastName: identity.familyName ?? undefined,
       isDirector: true,
       isPremium: false,
     });
@@ -42,6 +44,26 @@ export const getMe = query({
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
       .unique();
+  },
+});
+
+export const updateName = mutation({
+  args: {
+    firstName: v.string(),
+    lastName: v.string(),
+  },
+  handler: async (ctx, { firstName, lastName }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Não autenticado");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) throw new Error("Usuário não encontrado");
+
+    await ctx.db.patch(user._id, { firstName, lastName });
   },
 });
 
