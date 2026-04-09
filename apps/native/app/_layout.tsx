@@ -84,15 +84,6 @@ function StackLayout() {
           }}
         />
         <Stack.Screen
-          name="directees"
-          options={{
-            headerShown: true,
-            headerTitle: "Meus Dirigidos",
-            headerBackTitle: "Voltar",
-            presentation: "card",
-          }}
-        />
-        <Stack.Screen
           name="directee-feed/[userId]"
           options={{
             headerShown: true,
