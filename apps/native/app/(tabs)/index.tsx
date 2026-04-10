@@ -94,7 +94,7 @@ export default function HomeScreen() {
               marginBottom: 12,
             }}
           >
-            Bem-vindo ao SAFE
+            Bem-vindo ao Safe
           </Text>
           <Text
             style={{

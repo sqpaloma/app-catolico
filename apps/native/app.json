@@ -11,6 +11,7 @@
     "slug": "app-catolico",
     "plugins": [
       "expo-font",
+      "expo-splash-screen",
       "expo-secure-store",
       "expo-image"
     ],

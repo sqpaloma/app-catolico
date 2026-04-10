@@ -212,8 +212,6 @@ export default function ConfessarScreen() {
               }),
             }}
           >
-            ß
-
             {/* Category selector */}
             <Text style={{ fontSize: 16, fontWeight: "700", color: "#1a1a1a", marginBottom: 10 }}>
               O que você está sentindo?
