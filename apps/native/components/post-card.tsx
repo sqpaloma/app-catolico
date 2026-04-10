@@ -4,7 +4,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "convex/react";
 import { Chip, Surface } from "heroui-native";
 import React from "react";
-import { Alert, Image, Pressable, Text, View } from "react-native";
+import { Alert, Image, Pressable, View } from "react-native";
+import { Text } from "@/components/ui/themed-text";
 
 interface PostCardProps {
   id: Id<"posts">;

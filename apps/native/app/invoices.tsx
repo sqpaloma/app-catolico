@@ -3,7 +3,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import { Spinner, Surface } from "heroui-native";
 import React from "react";
-import { Linking, Pressable, Text, View } from "react-native";
+import { Linking, Pressable, View } from "react-native";
+import { Text } from "@/components/ui/themed-text";
 
 import { Container } from "@/components/container";
 

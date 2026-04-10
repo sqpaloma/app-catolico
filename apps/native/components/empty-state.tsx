@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useThemeColor } from "heroui-native";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "@/components/ui/themed-text";
 
 interface EmptyStateProps {
   icon?: keyof typeof Ionicons.glyphMap;

@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Chip, Surface } from "heroui-native";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "@/components/ui/themed-text";
 import type { Id } from "@app-catolico/backend/convex/_generated/dataModel";
 
 interface QuestionCardProps {

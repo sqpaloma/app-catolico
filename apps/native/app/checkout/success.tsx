@@ -2,7 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Image, Platform, Pressable, Text, View } from "react-native";
+import { Image, Platform, Pressable, View } from "react-native";
+import { Text } from "@/components/ui/themed-text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function SuccessScreen() {
@@ -51,8 +52,8 @@ export default function SuccessScreen() {
 
       {/* Hero gradient */}
       <LinearGradient
-        colors={["#8B1A1A", "#A52422", "#c4948b", "#f5f0eb"]}
-        locations={[0, 0.3, 0.7, 1]}
+        colors={["#8B1A1A", "#A52422", "#b5726a", "#f5f0eb"]}
+        locations={[0, 0.45, 0.85, 1]}
         style={{ paddingTop: 48, paddingBottom: 64, alignItems: "center", paddingHorizontal: 24 }}
       >
         <View

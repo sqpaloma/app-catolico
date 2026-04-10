@@ -9,10 +9,9 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Text,
-  TextInput,
   View,
 } from "react-native";
+import { Text, TextInput } from "@/components/ui/themed-text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type BillingType = "PIX" | "CREDIT_CARD";
@@ -238,8 +237,8 @@ export default function CheckoutScreen() {
 
         {/* Hero gradient */}
         <LinearGradient
-          colors={["#8B1A1A", "#A52422", "#c4948b", "#f5f0eb"]}
-          locations={[0, 0.3, 0.7, 1]}
+          colors={["#8B1A1A", "#A52422", "#b5726a", "#f5f0eb"]}
+          locations={[0, 0.45, 0.85, 1]}
           style={{ paddingTop: 32, paddingBottom: 48, alignItems: "center", paddingHorizontal: 24 }}
         >
           <Ionicons name="star" size={44} color="#fff" style={{ marginBottom: 8 }} />

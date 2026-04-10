@@ -3,7 +3,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAction } from "convex/react";
 import React, { useEffect, useRef } from "react";
-import { ActivityIndicator, Image, Text, View } from "react-native";
+import { ActivityIndicator, Image, View } from "react-native";
+import { Text } from "@/components/ui/themed-text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type CustomerData = {

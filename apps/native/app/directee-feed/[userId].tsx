@@ -2,8 +2,9 @@ import { api } from "@app-catolico/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useLocalSearchParams } from "expo-router";
 import { Spinner } from "heroui-native";
-import { FlatList, Text, View } from "react-native";
+import { FlatList, View } from "react-native";
 
+import { Text } from "@/components/ui/themed-text";
 import { Container } from "@/components/container";
 import { EmptyState } from "@/components/empty-state";
 import { PostCard } from "@/components/post-card";

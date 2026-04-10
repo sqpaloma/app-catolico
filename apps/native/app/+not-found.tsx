@@ -1,6 +1,7 @@
 import { Link, Stack } from "expo-router";
 import { Button, Surface } from "heroui-native";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "@/components/ui/themed-text";
 
 import { Container } from "@/components/container";
 

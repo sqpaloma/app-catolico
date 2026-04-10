@@ -7,9 +7,9 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Text,
   View,
 } from "react-native";
+import { Text } from "@/components/ui/themed-text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const VERSE = {
@@ -76,8 +76,8 @@ export default function HomeScreen() {
 
         {/* Hero section with gradient */}
         <LinearGradient
-          colors={["#8B1A1A", "#A52422", "#c4948b", "#f5f0eb"]}
-          locations={[0, 0.3, 0.7, 1]}
+          colors={["#8B1A1A", "#A52422", "#b5726a", "#f5f0eb"]}
+          locations={[0, 0.45, 0.85, 1]}
           style={{ paddingTop: 20, paddingBottom: 48, alignItems: "center", paddingHorizontal: 24 }}
         >
           <Image

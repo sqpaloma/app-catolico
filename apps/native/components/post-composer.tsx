@@ -9,10 +9,9 @@ import {
   Image,
   Pressable,
   Switch,
-  Text,
-  TextInput,
   View,
 } from "react-native";
+import { Text, TextInput } from "@/components/ui/themed-text";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 

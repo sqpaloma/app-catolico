@@ -13,23 +13,12 @@ import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { HeroUINativeProvider } from "heroui-native";
 import React, { useEffect, useRef } from "react";
-import { Text, TextInput } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
 import { AppThemeProvider } from "@/contexts/app-theme-context";
 
 SplashScreen.preventAutoHideAsync();
-
-const patchFont = (Component: any) => {
-  const original = Component.render;
-  if (typeof original === "function") {
-    Component.render = (props: any, ref: any) =>
-      original({ ...props, style: [{ fontFamily: "XanhMono" }, props.style] }, ref);
-  }
-};
-patchFont(Text);
-patchFont(TextInput);
 
 export const unstable_settings = {
   initialRouteName: "(tabs)",
