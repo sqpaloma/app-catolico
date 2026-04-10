@@ -212,23 +212,7 @@ export default function ConfessarScreen() {
               }),
             }}
           >
-            {/* Security badge */}
-            <View
-              style={{
-                backgroundColor: "#e8f5e9",
-                borderRadius: 12,
-                padding: 14,
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 10,
-                marginBottom: 24,
-              }}
-            >
-              <Ionicons name="lock-closed-outline" size={20} color="#2e7d32" />
-              <Text style={{ color: "#2e7d32", fontSize: 13, fontWeight: "600", flex: 1, lineHeight: 19 }}>
-                Sua identidade é completamente protegida. Nenhum dado pessoal é coletado.
-              </Text>
-            </View>
+            ß
 
             {/* Category selector */}
             <Text style={{ fontSize: 16, fontWeight: "700", color: "#1a1a1a", marginBottom: 10 }}>
@@ -519,7 +503,7 @@ export default function ConfessarScreen() {
           style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "flex-end" }}
         >
           <Pressable
-            onPress={() => {}}
+            onPress={() => { }}
             style={{
               backgroundColor: "#fff",
               borderTopLeftRadius: 20,

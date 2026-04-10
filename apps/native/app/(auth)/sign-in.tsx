@@ -39,6 +39,8 @@ export default function SignInScreen() {
   const [pendingVerification, setPendingVerification] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<"google" | "apple" | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const onSSOPress = useCallback(
     async (strategy: "oauth_google" | "oauth_apple") => {
@@ -61,7 +63,7 @@ export default function SignInScreen() {
           err?.errors?.[0]?.longMessage ??
           err?.message ??
           "Não foi possível continuar. Tente novamente.";
-        Alert.alert("Erro", msg);
+        setErrorMessage(msg);
       } finally {
         setOauthLoading(null);
       }
@@ -71,6 +73,7 @@ export default function SignInScreen() {
 
   const onSignInPress = async () => {
     if (!isLoaded) return;
+    setErrorMessage("");
     setIsLoading(true);
 
     try {
@@ -95,11 +98,11 @@ export default function SignInScreen() {
         await signIn.prepareSecondFactor({ strategy: "email_code" });
         setPendingVerification(true);
       } else {
-        Alert.alert("Erro", `Login incompleto (status: ${status}).`);
+        setErrorMessage(`Login incompleto (status: ${status}).`);
       }
     } catch (err: any) {
       const msg = err?.errors?.[0]?.longMessage ?? err?.message ?? "Email ou senha incorretos.";
-      Alert.alert("Erro", msg);
+      setErrorMessage(msg);
     } finally {
       setIsLoading(false);
     }
@@ -375,31 +378,75 @@ export default function SignInScreen() {
                 value={emailAddress}
                 placeholder="seu@email.com"
                 placeholderTextColor="#aaa"
-                onChangeText={setEmailAddress}
+                onChangeText={(text) => {
+                  setEmailAddress(text);
+                  if (errorMessage) setErrorMessage("");
+                }}
                 editable={!isLoading}
               />
             </View>
 
-            <View style={{ marginBottom: 20 }}>
+            <View style={{ marginBottom: 12 }}>
               <Text style={{ fontSize: 13, fontWeight: "600", color: "#666", marginBottom: 8, marginLeft: 4 }}>
                 Senha
               </Text>
-              <TextInput
+              <View
                 style={{
                   backgroundColor: "#f5f0eb",
                   borderRadius: 12,
-                  padding: 16,
-                  fontSize: 16,
-                  color: "#1a1a1a",
+                  flexDirection: "row",
+                  alignItems: "center",
                 }}
-                value={password}
-                placeholder="Sua senha"
-                placeholderTextColor="#aaa"
-                secureTextEntry
-                onChangeText={setPassword}
-                editable={!isLoading}
-              />
+              >
+                <TextInput
+                  style={{
+                    flex: 1,
+                    padding: 16,
+                    fontSize: 16,
+                    color: "#1a1a1a",
+                  }}
+                  value={password}
+                  placeholder="Sua senha"
+                  placeholderTextColor="#aaa"
+                  secureTextEntry={!showPassword}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    if (errorMessage) setErrorMessage("");
+                  }}
+                  editable={!isLoading}
+                />
+                <Pressable
+                  onPress={() => setShowPassword((prev) => !prev)}
+                  hitSlop={8}
+                  style={{ paddingRight: 14, paddingLeft: 4 }}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    size={22}
+                    color="#999"
+                  />
+                </Pressable>
+              </View>
             </View>
+
+            {errorMessage ? (
+              <View
+                style={{
+                  backgroundColor: "#FEF2F2",
+                  borderRadius: 10,
+                  padding: 12,
+                  marginBottom: 12,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <Ionicons name="alert-circle" size={18} color="#B91C1C" />
+                <Text style={{ flex: 1, fontSize: 13, color: "#B91C1C", lineHeight: 18 }}>
+                  {errorMessage}
+                </Text>
+              </View>
+            ) : null}
 
             <Pressable
               onPress={onSignInPress}

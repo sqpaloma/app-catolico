@@ -9,7 +9,12 @@
     "dev:setup": "convex dev --configure --until-success"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.52",
+    "@convex-dev/rag": "^0.7.2",
+    "@convex-dev/workpool": "^0.4.6",
+    "ai": "^6.0.156",
     "convex": "catalog:",
+    "convex-helpers": "^0.1.114",
     "dotenv": "catalog:",
     "openai": "^4.78.1",
     "zod": "catalog:"

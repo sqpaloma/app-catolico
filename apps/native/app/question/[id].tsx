@@ -55,6 +55,39 @@ export default function QuestionDetailScreen() {
 
   const config = statusConfig[question.status];
 
+  const parsedConsensus = (() => {
+    if (!question.consensusResponse) return null;
+    const raw = question.consensusResponse;
+    const refPattern = /^((?:[A-ZÀ-ÚÇ][\wÀ-úÇç .]+\d*[\s:]*[\d,\-–]*|CIC\s*\d+))\s*[—–-]\s*(.+)$/;
+    const lines = raw.split("\n");
+    const bodyLines: string[] = [];
+    const refs: { label: string; text: string; icon: string }[] = [];
+    let foundRefs = false;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        if (!foundRefs) bodyLines.push("");
+        continue;
+      }
+      const match = trimmed.match(refPattern);
+      if (match) {
+        foundRefs = true;
+        const label = match[1].trim();
+        const refText = match[2].trim();
+        let icon = "book-outline";
+        if (/^CIC/i.test(label)) icon = "document-text-outline";
+        else if (/^(Santo|Santa|São|S\.)/i.test(label)) icon = "person-outline";
+        refs.push({ label, text: refText, icon });
+      } else if (!foundRefs) {
+        bodyLines.push(trimmed);
+      }
+    }
+
+    const body = bodyLines.join("\n").trim();
+    return { body, refs };
+  })();
+
   return (
     <View style={{ flex: 1, backgroundColor: "#f5f0eb" }}>
       <ScrollView
@@ -202,15 +235,129 @@ export default function QuestionDetailScreen() {
                 }),
               }}
             >
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                <Ionicons name="sparkles" size={18} color="#8B1A1A" />
-                <Text style={{ fontSize: 15, fontWeight: "700", color: "#8B1A1A" }}>
-                  Orientação Final
-                </Text>
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <Ionicons name="sparkles" size={18} color="#8B1A1A" />
+                  <Text style={{ fontSize: 15, fontWeight: "700", color: "#8B1A1A" }}>
+                    Orientação Final
+                  </Text>
+                </View>
+                {question.confidenceScore != null && (
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 4,
+                      backgroundColor:
+                        question.confidenceScore >= 80
+                          ? "#E8F5E9"
+                          : question.confidenceScore >= 60
+                            ? "#FFF8E1"
+                            : "#FBE9E7",
+                      paddingHorizontal: 8,
+                      paddingVertical: 4,
+                      borderRadius: 10,
+                    }}
+                  >
+                    <Ionicons
+                      name="shield-checkmark"
+                      size={13}
+                      color={
+                        question.confidenceScore >= 80
+                          ? "#2E7D32"
+                          : question.confidenceScore >= 60
+                            ? "#F9A825"
+                            : "#E65100"
+                      }
+                    />
+                    <Text
+                      style={{
+                        fontSize: 11,
+                        fontWeight: "700",
+                        color:
+                          question.confidenceScore >= 80
+                            ? "#2E7D32"
+                            : question.confidenceScore >= 60
+                              ? "#F9A825"
+                              : "#E65100",
+                      }}
+                    >
+                      {question.confidenceScore}% Confiável
+                    </Text>
+                  </View>
+                )}
               </View>
               <Text style={{ fontSize: 15, color: "#333", lineHeight: 24 }}>
-                {question.consensusResponse}
+                {parsedConsensus?.body ?? question.consensusResponse}
               </Text>
+
+              {/* Director count */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 8,
+                  marginTop: 16,
+                  paddingTop: 14,
+                  borderTopWidth: 1,
+                  borderTopColor: "rgba(139,26,26,0.1)",
+                }}
+              >
+                <Ionicons name="people-outline" size={16} color="#8B1A1A" />
+                <Text style={{ fontSize: 13, color: "#888", fontStyle: "italic", flex: 1 }}>
+                  Para formular esta orientação, foram consultados{" "}
+                  <Text style={{ fontWeight: "700", color: "#555" }}>
+                    {question.answerCount} {question.answerCount === 1 ? "diretor espiritual" : "diretores espirituais"}
+                  </Text>
+                </Text>
+              </View>
+
+              {/* Doctrinal references */}
+              {parsedConsensus && parsedConsensus.refs.length > 0 && (
+                <View style={{ marginTop: 16 }}>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: "700",
+                      color: "#8B1A1A",
+                      letterSpacing: 1,
+                      textTransform: "uppercase",
+                      marginBottom: 10,
+                    }}
+                  >
+                    Fontes Consultadas
+                  </Text>
+                  <View style={{ gap: 10 }}>
+                    {parsedConsensus.refs.map((ref, idx) => (
+                      <View
+                        key={idx}
+                        style={{
+                          backgroundColor: "#faf6f3",
+                          borderRadius: 10,
+                          padding: 12,
+                          flexDirection: "row",
+                          gap: 10,
+                        }}
+                      >
+                        <Ionicons
+                          name={ref.icon as keyof typeof Ionicons.glyphMap}
+                          size={16}
+                          color="#8B1A1A"
+                          style={{ marginTop: 2 }}
+                        />
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ fontSize: 13, fontWeight: "700", color: "#555", marginBottom: 3 }}>
+                            {ref.label}
+                          </Text>
+                          <Text style={{ fontSize: 13, color: "#666", lineHeight: 20 }}>
+                            {ref.text}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )}
             </View>
           </View>
         )}
@@ -281,8 +428,8 @@ export default function QuestionDetailScreen() {
           </View>
         )}
 
-        {/* Director answers */}
-        {answers.length > 0 && (
+        {/* Director answers — only visible to other directors, not the question author */}
+        {userId !== question.userId && answers.length > 0 && (
           <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
             <Text
               style={{

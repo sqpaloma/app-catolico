@@ -6,8 +6,11 @@ export const submit = mutation({
   args: {
     questionId: v.id("questions"),
     text: v.string(),
+    role: v.optional(
+      v.union(v.literal("leigo"), v.literal("diretor"), v.literal("padre")),
+    ),
   },
-  handler: async (ctx, { questionId, text }) => {
+  handler: async (ctx, { questionId, text, role }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Não autenticado");
 
@@ -27,6 +30,7 @@ export const submit = mutation({
       directorId: identity.subject,
       directorName: identity.name ?? "Diretor Espiritual",
       text,
+      role,
     });
 
     const newCount = question.answerCount + 1;

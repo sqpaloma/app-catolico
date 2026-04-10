@@ -1,4 +1,4 @@
-import { mutation, query, internalMutation } from "./_generated/server";
+import { mutation, query, internalMutation, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 
@@ -52,12 +52,21 @@ export const saveConsensus = internalMutation({
   args: {
     questionId: v.id("questions"),
     consensusResponse: v.string(),
+    confidenceScore: v.optional(v.number()),
   },
-  handler: async (ctx, { questionId, consensusResponse }) => {
+  handler: async (ctx, { questionId, consensusResponse, confidenceScore }) => {
     await ctx.db.patch(questionId, {
       consensusResponse,
+      confidenceScore,
       status: "consensus_ready",
     });
+  },
+});
+
+export const getByIdInternal = internalQuery({
+  args: { questionId: v.id("questions") },
+  handler: async (ctx, { questionId }) => {
+    return await ctx.db.get(questionId);
   },
 });
 

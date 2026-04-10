@@ -29,6 +29,7 @@ export default defineSchema({
       v.literal("consensus_ready"),
     ),
     consensusResponse: v.optional(v.string()),
+    confidenceScore: v.optional(v.number()),
     answerCount: v.number(),
   })
     .index("by_userId", ["userId"])
@@ -40,6 +41,9 @@ export default defineSchema({
     directorId: v.string(),
     directorName: v.string(),
     text: v.string(),
+    role: v.optional(
+      v.union(v.literal("leigo"), v.literal("diretor"), v.literal("padre")),
+    ),
   })
     .index("by_questionId", ["questionId"])
     .index("by_directorId", ["directorId"]),

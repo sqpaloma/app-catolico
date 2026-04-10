@@ -39,6 +39,16 @@ export default function SignUpScreen() {
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<"google" | "apple" | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const passwordChecks = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+  };
+  const allChecksPassed = Object.values(passwordChecks).every(Boolean);
 
   const onSSOPress = useCallback(
     async (strategy: "oauth_google" | "oauth_apple") => {
@@ -61,7 +71,7 @@ export default function SignUpScreen() {
           err?.errors?.[0]?.longMessage ??
           err?.message ??
           "Não foi possível continuar. Tente novamente.";
-        Alert.alert("Erro", msg);
+        setErrorMessage(msg);
       } finally {
         setOauthLoading(null);
       }
@@ -71,6 +81,13 @@ export default function SignUpScreen() {
 
   const onSignUpPress = async () => {
     if (!isLoaded) return;
+    setErrorMessage("");
+
+    if (!allChecksPassed) {
+      setErrorMessage("A senha não atende todos os requisitos abaixo.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -90,7 +107,7 @@ export default function SignUpScreen() {
         clerkErr?.message ??
         "Não foi possível criar a conta. Verifique os dados.";
       console.error("Clerk sign-up error:", err);
-      Alert.alert("Erro", String(message));
+      setErrorMessage(String(message));
     } finally {
       setIsLoading(false);
     }
@@ -363,31 +380,104 @@ export default function SignUpScreen() {
                 value={emailAddress}
                 placeholder="seu@email.com"
                 placeholderTextColor="#aaa"
-                onChangeText={setEmailAddress}
+                onChangeText={(text) => {
+                  setEmailAddress(text);
+                  if (errorMessage) setErrorMessage("");
+                }}
                 editable={!isLoading}
               />
             </View>
 
-            <View style={{ marginBottom: 20 }}>
+            <View style={{ marginBottom: 8 }}>
               <Text style={{ fontSize: 13, fontWeight: "600", color: "#666", marginBottom: 8, marginLeft: 4 }}>
                 Senha
               </Text>
-              <TextInput
+              <View
                 style={{
                   backgroundColor: "#f5f0eb",
                   borderRadius: 12,
-                  padding: 16,
-                  fontSize: 16,
-                  color: "#1a1a1a",
+                  flexDirection: "row",
+                  alignItems: "center",
                 }}
-                value={password}
-                placeholder="Crie uma senha"
-                placeholderTextColor="#aaa"
-                secureTextEntry
-                onChangeText={setPassword}
-                editable={!isLoading}
-              />
+              >
+                <TextInput
+                  style={{
+                    flex: 1,
+                    padding: 16,
+                    fontSize: 16,
+                    color: "#1a1a1a",
+                  }}
+                  value={password}
+                  placeholder="Crie uma senha"
+                  placeholderTextColor="#aaa"
+                  secureTextEntry={!showPassword}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    if (errorMessage) setErrorMessage("");
+                  }}
+                  editable={!isLoading}
+                />
+                <Pressable
+                  onPress={() => setShowPassword((prev) => !prev)}
+                  hitSlop={8}
+                  style={{ paddingRight: 14, paddingLeft: 4 }}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    size={22}
+                    color="#999"
+                  />
+                </Pressable>
+              </View>
             </View>
+
+            {password.length > 0 ? (
+              <View style={{ marginBottom: 12, gap: 4 }}>
+                {([
+                  { key: "length" as const, label: "Mínimo de 8 caracteres" },
+                  { key: "uppercase" as const, label: "Uma letra maiúscula" },
+                  { key: "lowercase" as const, label: "Uma letra minúscula" },
+                  { key: "number" as const, label: "Um número" },
+                ]).map((item) => (
+                  <View key={item.key} style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <Ionicons
+                      name={passwordChecks[item.key] ? "checkmark-circle" : "close-circle"}
+                      size={16}
+                      color={passwordChecks[item.key] ? "#16A34A" : "#DC2626"}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        color: passwordChecks[item.key] ? "#16A34A" : "#DC2626",
+                      }}
+                    >
+                      {item.label}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View style={{ height: 12 }} />
+            )}
+
+            {errorMessage ? (
+              <View
+                style={{
+                  backgroundColor: "#FEF2F2",
+                  borderRadius: 10,
+                  padding: 12,
+                  marginBottom: 12,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <Ionicons name="alert-circle" size={18} color="#B91C1C" />
+                <Text style={{ flex: 1, fontSize: 13, color: "#B91C1C", lineHeight: 18 }}>
+                  {errorMessage}
+                </Text>
+              </View>
+            ) : null}
 
             <Pressable
               onPress={onSignUpPress}
