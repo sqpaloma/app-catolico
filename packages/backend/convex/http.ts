@@ -1,23 +1,8 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { PRIVACY_POLICY_HTML } from "./privacyPolicyHtml";
 
 const http = httpRouter();
-
-http.route({
-  path: "/privacy",
-  method: "GET",
-  handler: httpAction(async () => {
-    return new Response(PRIVACY_POLICY_HTML, {
-      status: 200,
-      headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=300",
-      },
-    });
-  }),
-});
 
 function mapAsaasEventToInvoiceStatus(
   event: string,

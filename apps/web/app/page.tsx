@@ -431,7 +431,13 @@ export default function LandingPage() {
               "linear-gradient(135deg, #8B1A1A 0%, #A52422 50%, #b5726a 100%)",
           }}
         />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9zdmc+')] opacity-50" />
+        <div
+          className="absolute inset-0 opacity-50"
+          style={{
+            backgroundImage:
+              "url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9zdmc+')",
+          }}
+        />
         <div className="relative mx-auto max-w-3xl px-6 text-center">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
             <Image
@@ -506,9 +512,15 @@ export default function LandingPage() {
             <p className="text-center text-sm text-gray-400">
               Um espaço seguro para sua alma &bull; Feito com fé e caridade
             </p>
-            <p className="text-xs text-gray-400">
-              &copy; {new Date().getFullYear()} Safe
-            </p>
+            <div className="flex items-center gap-4 text-xs text-gray-400">
+              <a
+                href="/privacidade"
+                className="transition-colors hover:text-burgundy-600"
+              >
+                Política de Privacidade
+              </a>
+              <span>&copy; {new Date().getFullYear()} Safe</span>
+            </div>
           </div>
         </div>
       </footer>
