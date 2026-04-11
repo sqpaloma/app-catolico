@@ -1,14 +1,27 @@
 {
   "expo": {
-    "scheme": "app-catolico",
+    "scheme": "safe",
     "userInterfaceStyle": "automatic",
     "orientation": "default",
-    "owner": "upcraftcrew",
+    "icon": "./assets/images/logo.png",
+    "owner": "sqpaloma",
+    "ios": {
+      "bundleIdentifier": "com.safe-espiritual.safe",
+      "supportsTablet": true,
+      "icon": "./assets/images/logo.png",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.safe_espiritual.safe",
+      "icon": "./assets/images/logo.png"
+    },
     "web": {
       "bundler": "metro"
     },
-    "name": "app-catolico",
-    "slug": "app-catolico",
+    "name": "Safe",
+    "slug": "safe",
     "plugins": [
       "expo-font",
       "expo-splash-screen",
@@ -18,6 +31,11 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1d4390f6-dbd9-43be-a343-3678212f92ae"
+      }
     }
   }
 }

@@ -19,6 +19,7 @@ import type * as http from "../http.js";
 import type * as invoices from "../invoices.js";
 import type * as orders from "../orders.js";
 import type * as posts from "../posts.js";
+import type * as privacyPolicyHtml from "../privacyPolicyHtml.js";
 import type * as privateData from "../privateData.js";
 import type * as questions from "../questions.js";
 import type * as rag from "../rag.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   invoices: typeof invoices;
   orders: typeof orders;
   posts: typeof posts;
+  privacyPolicyHtml: typeof privacyPolicyHtml;
   privateData: typeof privateData;
   questions: typeof questions;
   rag: typeof rag;

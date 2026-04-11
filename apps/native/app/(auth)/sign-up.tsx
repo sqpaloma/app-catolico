@@ -1,3 +1,4 @@
+import { env } from "@app-catolico/env/native";
 import { useSignUp, useSSO } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -9,11 +10,13 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
   View,
 } from "react-native";
+import { TERMS_OF_USE_PT } from "@/constants/legal/terms-pt";
 import { Text, TextInput } from "@/components/ui/themed-text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -40,6 +43,8 @@ export default function SignUpScreen() {
   const [oauthLoading, setOauthLoading] = useState<"google" | "apple" | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const passwordChecks = {
     length: password.length >= 8,
@@ -49,9 +54,19 @@ export default function SignUpScreen() {
   };
   const allChecksPassed = Object.values(passwordChecks).every(Boolean);
 
+  const openPrivacyPolicy = useCallback(() => {
+    void WebBrowser.openBrowserAsync(env.EXPO_PUBLIC_PRIVACY_POLICY_URL);
+  }, []);
+
   const onSSOPress = useCallback(
     async (strategy: "oauth_google" | "oauth_apple") => {
       if (!isLoaded) return;
+      if (!acceptedLegal) {
+        setErrorMessage(
+          "Aceite os Termos de Uso e a Política de Privacidade para continuar.",
+        );
+        return;
+      }
       setOauthLoading(strategy === "oauth_google" ? "google" : "apple");
 
       try {
@@ -75,12 +90,19 @@ export default function SignUpScreen() {
         setOauthLoading(null);
       }
     },
-    [isLoaded, startSSOFlow, router],
+    [isLoaded, startSSOFlow, router, acceptedLegal],
   );
 
   const onSignUpPress = async () => {
     if (!isLoaded) return;
     setErrorMessage("");
+
+    if (!acceptedLegal) {
+      setErrorMessage(
+        "Aceite os Termos de Uso e a Política de Privacidade para continuar.",
+      );
+      return;
+    }
 
     if (!allChecksPassed) {
       setErrorMessage("A senha não atende todos os requisitos abaixo.");
@@ -459,6 +481,47 @@ export default function SignUpScreen() {
               <View style={{ height: 12 }} />
             )}
 
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "flex-start",
+                gap: 10,
+                marginBottom: 12,
+              }}
+            >
+              <Pressable
+                onPress={() => {
+                  setAcceptedLegal((v) => !v);
+                  if (errorMessage) setErrorMessage("");
+                }}
+                hitSlop={8}
+                style={{ paddingTop: 2 }}
+              >
+                <Ionicons
+                  name={acceptedLegal ? "checkbox" : "square-outline"}
+                  size={22}
+                  color={acceptedLegal ? "#8B1A1A" : "#999"}
+                />
+              </Pressable>
+              <Text style={{ flex: 1, fontSize: 13, color: "#444", lineHeight: 20 }}>
+                Li e aceito os{" "}
+                <Text
+                  onPress={() => setShowTermsModal(true)}
+                  style={{ color: "#8B1A1A", fontWeight: "700" }}
+                >
+                  Termos de Uso
+                </Text>{" "}
+                e a{" "}
+                <Text
+                  onPress={openPrivacyPolicy}
+                  style={{ color: "#8B1A1A", fontWeight: "700" }}
+                >
+                  Política de Privacidade
+                </Text>
+                .
+              </Text>
+            </View>
+
             {errorMessage ? (
               <View
                 style={{
@@ -480,9 +543,16 @@ export default function SignUpScreen() {
 
             <Pressable
               onPress={onSignUpPress}
-              disabled={!emailAddress || !password || isLoading || !!oauthLoading}
+              disabled={
+                !emailAddress ||
+                !password ||
+                !acceptedLegal ||
+                isLoading ||
+                !!oauthLoading
+              }
               style={({ pressed }) => ({
-                backgroundColor: !emailAddress || !password || isLoading
+                backgroundColor:
+                  !emailAddress || !password || !acceptedLegal || isLoading
                   ? "#c4948b"
                   : pressed
                     ? "#7B1616"
@@ -521,7 +591,7 @@ export default function SignUpScreen() {
             <View style={{ flexDirection: "row", gap: 12, marginTop: 12 }}>
               <Pressable
                 onPress={() => onSSOPress("oauth_google")}
-                disabled={isLoading || !!oauthLoading}
+                disabled={isLoading || !!oauthLoading || !acceptedLegal}
                 style={({ pressed }) => ({
                   flex: 1,
                   flexDirection: "row",
@@ -533,7 +603,7 @@ export default function SignUpScreen() {
                   paddingVertical: 14,
                   borderWidth: 1,
                   borderColor: "#e0d8d0",
-                  opacity: oauthLoading === "apple" ? 0.5 : 1,
+                  opacity: oauthLoading === "apple" || !acceptedLegal ? 0.5 : 1,
                 })}
               >
                 {oauthLoading === "google" ? (
@@ -550,7 +620,7 @@ export default function SignUpScreen() {
 
               <Pressable
                 onPress={() => onSSOPress("oauth_apple")}
-                disabled={isLoading || !!oauthLoading}
+                disabled={isLoading || !!oauthLoading || !acceptedLegal}
                 style={({ pressed }) => ({
                   flex: 1,
                   flexDirection: "row",
@@ -560,7 +630,7 @@ export default function SignUpScreen() {
                   backgroundColor: pressed ? "#2a2a2a" : "#1a1a1a",
                   borderRadius: 12,
                   paddingVertical: 14,
-                  opacity: oauthLoading === "google" ? 0.5 : 1,
+                  opacity: oauthLoading === "google" || !acceptedLegal ? 0.5 : 1,
                 })}
               >
                 {oauthLoading === "apple" ? (
@@ -593,6 +663,62 @@ export default function SignUpScreen() {
           </Link>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showTermsModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowTermsModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.45)",
+            justifyContent: "flex-end",
+          }}
+        >
+          <Pressable
+            style={{ flex: 1 }}
+            onPress={() => setShowTermsModal(false)}
+          />
+          <View
+            style={{
+              maxHeight: "88%",
+              backgroundColor: "#fff",
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+              paddingHorizontal: 20,
+              paddingTop: 20,
+              paddingBottom: insets.bottom + 16,
+            }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: "800", color: "#1a1a1a" }}>
+              Termos de Uso
+            </Text>
+            <ScrollView
+              style={{ marginTop: 12, marginBottom: 16 }}
+              showsVerticalScrollIndicator
+            >
+              <Text style={{ fontSize: 14, lineHeight: 22, color: "#333" }}>
+                {TERMS_OF_USE_PT}
+              </Text>
+            </ScrollView>
+            <Pressable
+              onPress={() => setShowTermsModal(false)}
+              style={{
+                backgroundColor: "#8B1A1A",
+                borderRadius: 12,
+                paddingVertical: 14,
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
+                Fechar
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

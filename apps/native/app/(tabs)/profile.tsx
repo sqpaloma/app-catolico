@@ -1,11 +1,13 @@
 import { api } from "@app-catolico/backend/convex/_generated/api";
+import { env } from "@app-catolico/env/native";
 import { useClerk, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
+import * as WebBrowser from "expo-web-browser";
 import { Spinner } from "heroui-native";
-import React from "react";
+import React, { useCallback } from "react";
 import {
   Image,
   Platform,
@@ -39,6 +41,10 @@ export default function ProfileScreen() {
   const displayName =
     clerkUser?.fullName ?? clerkUser?.firstName ?? "Usuário";
   const displayEmail = clerkUser?.primaryEmailAddress?.emailAddress ?? "";
+
+  const openPrivacyPolicy = useCallback(() => {
+    void WebBrowser.openBrowserAsync(env.EXPO_PUBLIC_PRIVACY_POLICY_URL);
+  }, []);
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f5f0eb" }}>
@@ -232,6 +238,40 @@ export default function ProfileScreen() {
             </Pressable>
           </View>
 
+        </View>
+
+        {/* Legal */}
+        <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
+          <Pressable
+            onPress={openPrivacyPolicy}
+            style={({ pressed }) => ({
+              backgroundColor: "#fff",
+              borderRadius: 12,
+              paddingVertical: 14,
+              paddingHorizontal: 16,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              opacity: pressed ? 0.85 : 1,
+              ...Platform.select({
+                ios: {
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.06,
+                  shadowRadius: 8,
+                },
+                android: { elevation: 3 },
+              }),
+            })}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+              <Ionicons name="document-text-outline" size={22} color="#8B1A1A" />
+              <Text style={{ fontSize: 15, fontWeight: "600", color: "#1a1a1a" }}>
+                Política de Privacidade
+              </Text>
+            </View>
+            <Ionicons name="open-outline" size={20} color="#888" />
+          </Pressable>
         </View>
 
         {/* MINHAS PARTILHAS */}
