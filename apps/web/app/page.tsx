@@ -414,10 +414,7 @@ export default function LandingPage() {
               <p className="mt-1 text-sm text-gray-400">Disponível</p>
             </div>
             <div className="h-8 w-px bg-warm-300" />
-            <div className="text-center">
-              <p className="text-3xl font-bold text-burgundy-600">Grátis</p>
-              <p className="mt-1 text-sm text-gray-400">Para sempre</p>
-            </div>
+
           </div>
         </div>
       </section>
