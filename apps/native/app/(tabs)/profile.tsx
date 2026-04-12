@@ -1,11 +1,10 @@
 import { api } from "@app-catolico/backend/convex/_generated/api";
-import { env } from "@app-catolico/env/native";
 import { useClerk, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
+import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import { useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
-import * as WebBrowser from "expo-web-browser";
 import { Spinner } from "heroui-native";
 import React, { useCallback } from "react";
 import {
@@ -43,7 +42,7 @@ export default function ProfileScreen() {
   const displayEmail = clerkUser?.primaryEmailAddress?.emailAddress ?? "";
 
   const openPrivacyPolicy = useCallback(() => {
-    void WebBrowser.openBrowserAsync(env.EXPO_PUBLIC_PRIVACY_POLICY_URL);
+    void Linking.openURL("https://safe-espiritual.com/privacidade");
   }, []);
 
   return (

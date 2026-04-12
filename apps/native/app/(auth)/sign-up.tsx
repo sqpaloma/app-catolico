@@ -1,4 +1,3 @@
-import { env } from "@app-catolico/env/native";
 import { useSignUp, useSSO } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -55,7 +54,7 @@ export default function SignUpScreen() {
   const allChecksPassed = Object.values(passwordChecks).every(Boolean);
 
   const openPrivacyPolicy = useCallback(() => {
-    void WebBrowser.openBrowserAsync(env.EXPO_PUBLIC_PRIVACY_POLICY_URL);
+    void Linking.openURL("https://safe-espiritual.com/privacidade");
   }, []);
 
   const onSSOPress = useCallback(

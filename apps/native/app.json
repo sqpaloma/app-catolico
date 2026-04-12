@@ -25,8 +25,7 @@
     "plugins": [
       "expo-font",
       "expo-splash-screen",
-      "expo-secure-store",
-      "expo-image"
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
