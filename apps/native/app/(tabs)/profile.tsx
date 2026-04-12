@@ -41,7 +41,7 @@ export default function ProfileScreen() {
     clerkUser?.fullName ?? clerkUser?.firstName ?? "Usuário";
   const displayEmail = clerkUser?.primaryEmailAddress?.emailAddress ?? "";
 
-i  const openPrivacyPolicy = useCallback(() => {
+  const openPrivacyPolicy = useCallback(() => {
     void Linking.openURL("https://safe-espiritual.com/privacidade");
   }, []);
 
