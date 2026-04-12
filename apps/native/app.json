@@ -3,6 +3,11 @@
     "scheme": "safe",
     "userInterfaceStyle": "automatic",
     "orientation": "default",
+    "backgroundColor": "#8B1A1A",
+    "androidStatusBar": {
+      "barStyle": "light-content",
+      "translucent": true
+    },
     "icon": "./assets/images/logo.png",
     "owner": "sqpaloma",
     "ios": {

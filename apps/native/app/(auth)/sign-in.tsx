@@ -147,6 +147,8 @@ export default function SignInScreen() {
           contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 16 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          automaticallyAdjustContentInsets={false}
+          contentInsetAdjustmentBehavior="never"
         >
           <View
             style={{
@@ -282,6 +284,8 @@ export default function SignInScreen() {
         contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 16 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        automaticallyAdjustContentInsets={false}
+        contentInsetAdjustmentBehavior="never"
       >
         <View
           style={{

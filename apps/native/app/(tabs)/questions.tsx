@@ -116,6 +116,8 @@ export default function ConfessarScreen() {
         contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 24 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustContentInsets={false}
+        contentInsetAdjustmentBehavior="never"
       >
         {/* Header bar */}
         <View

@@ -1,19 +1,15 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
-import { Spinner, useThemeColor } from "heroui-native";
-import { View } from "react-native";
-
-import { ThemeToggle } from "@/components/theme-toggle";
+import { Spinner } from "heroui-native";
+import { Platform, View } from "react-native";
 
 export default function TabLayout() {
   const { isSignedIn, isLoaded } = useAuth();
-  const foreground = useThemeColor("foreground");
-  const background = useThemeColor("background");
 
   if (!isLoaded) {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: background }}>
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f5f0eb" }}>
         <Spinner size="lg" />
       </View>
     );
@@ -26,20 +22,30 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: background },
-        headerTintColor: foreground,
-        headerTitleStyle: { fontWeight: "600", color: foreground },
-        tabBarStyle: { backgroundColor: background, borderTopColor: background },
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: "#f5f0eb",
+          borderTopColor: "rgba(139,26,26,0.08)",
+          borderTopWidth: 1,
+          ...Platform.select({
+            ios: {
+              height: undefined,
+            },
+          }),
+        },
         tabBarActiveTintColor: "#8B1A1A",
         tabBarInactiveTintColor: "rgba(139, 26, 26, 0.4)",
-        headerRight: () => <ThemeToggle />,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "600",
+        },
+        sceneStyle: { backgroundColor: "#8B1A1A" },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Início",
-          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={size} color={color} />
           ),
@@ -49,7 +55,6 @@ export default function TabLayout() {
         name="feed"
         options={{
           title: "Diário",
-          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="book-outline" size={size} color={color} />
           ),
@@ -59,7 +64,6 @@ export default function TabLayout() {
         name="questions"
         options={{
           title: "Confessar",
-          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="heart" size={size} color={color} />
           ),
@@ -69,8 +73,6 @@ export default function TabLayout() {
         name="available"
         options={{
           title: "Diretor",
-          headerShown: false,
-          href: "/available",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="shield-outline" size={size} color={color} />
           ),
@@ -80,7 +82,6 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Perfil",
-          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
           ),

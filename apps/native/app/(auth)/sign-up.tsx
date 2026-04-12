@@ -170,6 +170,8 @@ export default function SignUpScreen() {
           contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 16 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          automaticallyAdjustContentInsets={false}
+          contentInsetAdjustmentBehavior="never"
         >
           <View
             style={{
@@ -305,6 +307,8 @@ export default function SignUpScreen() {
         contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 16 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        automaticallyAdjustContentInsets={false}
+        contentInsetAdjustmentBehavior="never"
       >
         <View
           style={{

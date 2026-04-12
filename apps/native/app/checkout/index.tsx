@@ -186,6 +186,8 @@ export default function CheckoutScreen() {
         contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 24 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustContentInsets={false}
+        contentInsetAdjustmentBehavior="never"
       >
         {/* Header */}
         <View

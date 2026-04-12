@@ -472,6 +472,8 @@ export default function DiarioScreen() {
         }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustContentInsets={false}
+        contentInsetAdjustmentBehavior="never"
       />
     </View>
   );

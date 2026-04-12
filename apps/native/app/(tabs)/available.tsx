@@ -27,6 +27,8 @@ export default function AvailableQuestionsScreen() {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 16 }}
         showsVerticalScrollIndicator={false}
+        automaticallyAdjustContentInsets={false}
+        contentInsetAdjustmentBehavior="never"
       >
         {/* Header */}
         <View

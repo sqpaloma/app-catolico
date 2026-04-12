@@ -93,6 +93,8 @@ export default function QuestionDetailScreen() {
         contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 16 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustContentInsets={false}
+        contentInsetAdjustmentBehavior="never"
       >
         {/* Header */}
         <View

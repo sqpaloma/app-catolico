@@ -155,6 +155,8 @@ export default function SettingsScreen() {
         contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 32 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        automaticallyAdjustContentInsets={false}
+        contentInsetAdjustmentBehavior="never"
       >
         {/* Header */}
         <View
