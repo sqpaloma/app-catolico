@@ -1,7 +1,9 @@
 import { api } from "@app-catolico/backend/convex/_generated/api";
+import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Animated,
@@ -43,6 +45,8 @@ const MODAL_HIDDEN: FeedbackModal = {
 
 export default function ConfessarScreen() {
   const insets = useSafeAreaInsets();
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
   const [text, setText] = useState("");
   const [category, setCategory] = useState<string>("Outro");
   const [showPicker, setShowPicker] = useState(false);
@@ -76,6 +80,11 @@ export default function ConfessarScreen() {
   const closeFeedback = () => setFeedback(MODAL_HIDDEN);
 
   const handleSubmit = async () => {
+    if (!isSignedIn) {
+      router.push("/(auth)/sign-in");
+      return;
+    }
+
     const trimmed = text.trim();
     if (!trimmed) {
       showFeedback({

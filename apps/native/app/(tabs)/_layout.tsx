@@ -1,25 +1,10 @@
-import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { Redirect, Tabs } from "expo-router";
-import { Spinner } from "heroui-native";
-import { Platform, View } from "react-native";
+import { Tabs } from "expo-router";
+import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
-  const { isSignedIn, isLoaded } = useAuth();
   const insets = useSafeAreaInsets();
-
-  if (!isLoaded) {
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f5f0eb" }}>
-        <Spinner size="lg" />
-      </View>
-    );
-  }
-
-  if (!isSignedIn) {
-    return <Redirect href="/(auth)/sign-in" />;
-  }
 
   return (
     <Tabs

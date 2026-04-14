@@ -1,4 +1,5 @@
 import { api } from "@app-catolico/backend/convex/_generated/api";
+import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -7,6 +8,7 @@ import { Spinner } from "heroui-native";
 import React from "react";
 import { Image, Platform, Pressable, ScrollView, View } from "react-native";
 import { Text } from "@/components/ui/themed-text";
+import { LoginRequiredScreen } from "@/components/login-required-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const STATUS_CONFIG = {
@@ -15,7 +17,7 @@ const STATUS_CONFIG = {
   consensus_ready: { label: "Respondida", bg: "#E8F5E9", color: "#2E7D32", icon: "checkmark-circle-outline" as const },
 };
 
-export default function MyQuestionsScreen() {
+function MyQuestionsContent() {
   const questions = useQuery(api.questions.getMyQuestions);
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -310,4 +312,22 @@ export default function MyQuestionsScreen() {
       </ScrollView>
     </View>
   );
+}
+
+export default function MyQuestionsScreen() {
+  const { isSignedIn, isLoaded } = useAuth();
+
+  if (!isLoaded) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f5f0eb" }}>
+        <Spinner size="lg" />
+      </View>
+    );
+  }
+
+  if (!isSignedIn) {
+    return <LoginRequiredScreen />;
+  }
+
+  return <MyQuestionsContent />;
 }

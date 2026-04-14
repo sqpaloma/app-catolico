@@ -1,10 +1,12 @@
 import { api } from "@app-catolico/backend/convex/_generated/api";
 import type { Id } from "@app-catolico/backend/convex/_generated/dataModel";
+import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { useMutation, useQuery } from "convex/react";
+import { Spinner } from "heroui-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -16,6 +18,7 @@ import {
   View,
 } from "react-native";
 import { Text, TextInput } from "@/components/ui/themed-text";
+import { LoginRequiredScreen } from "@/components/login-required-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const MAX_CHARS = 250;
@@ -122,7 +125,7 @@ function PostItem({
   );
 }
 
-export default function DiarioScreen() {
+function DiarioContent() {
   const insets = useSafeAreaInsets();
   const posts = useQuery(api.posts.listMine);
 
@@ -477,4 +480,22 @@ export default function DiarioScreen() {
       />
     </View>
   );
+}
+
+export default function DiarioScreen() {
+  const { isSignedIn, isLoaded } = useAuth();
+
+  if (!isLoaded) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f5f0eb" }}>
+        <Spinner size="lg" />
+      </View>
+    );
+  }
+
+  if (!isSignedIn) {
+    return <LoginRequiredScreen />;
+  }
+
+  return <DiarioContent />;
 }

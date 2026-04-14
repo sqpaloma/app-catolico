@@ -1,5 +1,5 @@
 import { api } from "@app-catolico/backend/convex/_generated/api";
-import { useClerk, useUser } from "@clerk/clerk-expo";
+import { useAuth, useClerk, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
@@ -15,11 +15,12 @@ import {
   View,
 } from "react-native";
 import { Text } from "@/components/ui/themed-text";
+import { LoginRequiredScreen } from "@/components/login-required-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 
-export default function ProfileScreen() {
+function ProfileContent() {
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
@@ -370,4 +371,22 @@ export default function ProfileScreen() {
       </ScrollView>
     </View>
   );
+}
+
+export default function ProfileScreen() {
+  const { isSignedIn, isLoaded } = useAuth();
+
+  if (!isLoaded) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f5f0eb" }}>
+        <Spinner size="lg" />
+      </View>
+    );
+  }
+
+  if (!isSignedIn) {
+    return <LoginRequiredScreen />;
+  }
+
+  return <ProfileContent />;
 }

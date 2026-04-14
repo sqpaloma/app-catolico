@@ -1,4 +1,5 @@
 import { api } from "@app-catolico/backend/convex/_generated/api";
+import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -6,9 +7,10 @@ import { useQuery } from "convex/react";
 import { Spinner } from "heroui-native";
 import { Image, Platform, Pressable, ScrollView, View } from "react-native";
 import { Text } from "@/components/ui/themed-text";
+import { LoginRequiredScreen } from "@/components/login-required-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function AvailableQuestionsScreen() {
+function AvailableQuestionsContent() {
   const availableQuestions = useQuery(api.questions.getAvailableQuestions);
   const myAnswers = useQuery(api.answers.getMyAnswers);
   const insets = useSafeAreaInsets();
@@ -281,4 +283,22 @@ export default function AvailableQuestionsScreen() {
       </ScrollView>
     </View>
   );
+}
+
+export default function AvailableQuestionsScreen() {
+  const { isSignedIn, isLoaded } = useAuth();
+
+  if (!isLoaded) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f5f0eb" }}>
+        <Spinner size="lg" />
+      </View>
+    );
+  }
+
+  if (!isSignedIn) {
+    return <LoginRequiredScreen />;
+  }
+
+  return <AvailableQuestionsContent />;
 }
