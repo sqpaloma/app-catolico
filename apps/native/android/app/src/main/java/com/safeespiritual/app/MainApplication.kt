@@ -1,4 +1,4 @@
-package com.safe_espiritual.safe
+package com.safeespiritual.app
 
 import android.app.Application
 import android.content.res.Configuration

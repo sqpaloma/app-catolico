@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.safe_espiritual.safe'
+    namespace 'com.safeespiritual.app'
     defaultConfig {
-        applicationId 'com.safe_espiritual.safe'
+        applicationId 'com.safeespiritual.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

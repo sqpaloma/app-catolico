@@ -47,7 +47,7 @@ export default function SignInScreen() {
       setOauthLoading(strategy === "oauth_google" ? "google" : "apple");
 
       try {
-        const { createdSessionId, setActive: ssoSetActive } =
+        const { createdSessionId, setActive: ssoSetActive, signIn: ssoSignIn, signUp: ssoSignUp } =
           await startSSOFlow({
             strategy,
             redirectUrl: Linking.createURL("/(auth)/sign-in"),
@@ -56,6 +56,34 @@ export default function SignInScreen() {
         if (createdSessionId && ssoSetActive) {
           await ssoSetActive({ session: createdSessionId });
           router.replace("/");
+          return;
+        }
+
+        if (ssoSignUp?.verifications?.externalAccount?.status === "transferable" && ssoSignIn) {
+          const response = await ssoSignIn.create({ transfer: true });
+          if (response.status === "complete" && ssoSetActive) {
+            await ssoSetActive({ session: response.createdSessionId });
+            router.replace("/");
+            return;
+          }
+        }
+
+        if (ssoSignIn?.firstFactorVerification?.status === "transferable" && ssoSignUp) {
+          const response = await ssoSignUp.create({ transfer: true });
+          if (response.status === "complete" && ssoSetActive) {
+            await ssoSetActive({ session: response.createdSessionId });
+            router.replace("/");
+            return;
+          }
+        }
+
+        if (
+          ssoSignUp?.verifications?.externalAccount?.status === "unverified" &&
+          ssoSignUp?.status === "missing_requirements"
+        ) {
+          setErrorMessage(
+            "Não foi possível verificar sua conta externa. Tente novamente ou use email/senha.",
+          );
         }
       } catch (err: any) {
         const msg =

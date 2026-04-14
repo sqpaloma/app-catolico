@@ -1,4 +1,4 @@
-package com.safe_espiritual.safe
+package com.safeespiritual.app
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

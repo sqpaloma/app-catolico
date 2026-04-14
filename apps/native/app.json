@@ -19,7 +19,7 @@
       }
     },
     "android": {
-      "package": "com.safe_espiritual.safe",
+      "package": "com.safeespiritual.app",
       "icon": "./assets/images/logo.png"
     },
     "web": {

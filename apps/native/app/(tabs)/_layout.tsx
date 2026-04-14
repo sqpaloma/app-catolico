@@ -76,7 +76,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="questions"
         options={{
-          title: "Confessar",
+          title: "Compartilhar",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "heart" : "heart-outline"} size={24} color={color} />
           ),
