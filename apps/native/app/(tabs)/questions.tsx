@@ -1,7 +1,7 @@
 import { api } from "@app-catolico/backend/convex/_generated/api";
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -27,6 +27,8 @@ const CATEGORIES = [
   "Outro",
 ] as const;
 
+const QUESTION_LIMIT_REACHED = "QUESTION_LIMIT_REACHED";
+
 type FeedbackModal = {
   visible: boolean;
   icon: keyof typeof Ionicons.glyphMap;
@@ -43,6 +45,11 @@ const MODAL_HIDDEN: FeedbackModal = {
   message: "",
 };
 
+function isQuestionLimitError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes(QUESTION_LIMIT_REACHED);
+}
+
 export default function ConfessarScreen() {
   const insets = useSafeAreaInsets();
   const { isSignedIn } = useAuth();
@@ -55,6 +62,7 @@ export default function ConfessarScreen() {
   const [feedback, setFeedback] = useState<FeedbackModal>(MODAL_HIDDEN);
   const fadeAnim = useState(() => new Animated.Value(0))[0];
   const submitQuestion = useMutation(api.questions.submit);
+  const questionAccess = useQuery(api.questions.getQuestionAccess);
 
   useEffect(() => {
     if (showInfoAlert) {
@@ -96,6 +104,11 @@ export default function ConfessarScreen() {
       return;
     }
 
+    if (questionAccess?.canAskQuestion === false) {
+      router.push("/pricing");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await submitQuestion({ text: trimmed, category });
@@ -107,7 +120,12 @@ export default function ConfessarScreen() {
         title: "Enviado!",
         message: "Sua mensagem foi enviada. Um diretor espiritual responderá em breve com orientação e oração.",
       });
-    } catch {
+    } catch (error) {
+      if (isQuestionLimitError(error)) {
+        router.push("/pricing");
+        return;
+      }
+
       showFeedback({
         icon: "close-circle",
         iconColor: "#B71C1C",

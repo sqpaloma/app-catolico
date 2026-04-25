@@ -2,6 +2,8 @@ import { mutation, query, internalMutation, internalQuery } from "./_generated/s
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 
+const QUESTION_LIMIT_REACHED = "QUESTION_LIMIT_REACHED";
+
 export const submit = mutation({
   args: {
     text: v.string(),
@@ -17,6 +19,15 @@ export const submit = mutation({
       .unique();
 
     if (!user) throw new Error("Usuário não encontrado. Faça login novamente.");
+
+    if (!user.isPremium) {
+      const existingQuestion = await ctx.db
+        .query("questions")
+        .withIndex("by_userId", (q) => q.eq("userId", identity.subject))
+        .first();
+
+      if (existingQuestion) throw new Error(QUESTION_LIMIT_REACHED);
+    }
 
     const questionId = await ctx.db.insert("questions", {
       userId: identity.subject,
@@ -35,6 +46,44 @@ export const submit = mutation({
     });
 
     return questionId;
+  },
+});
+
+export const getQuestionAccess = query({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return {
+        canAskQuestion: false,
+        hasAskedQuestion: false,
+        isPremium: false,
+      };
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) {
+      return {
+        canAskQuestion: false,
+        hasAskedQuestion: false,
+        isPremium: false,
+      };
+    }
+
+    const existingQuestion = await ctx.db
+      .query("questions")
+      .withIndex("by_userId", (q) => q.eq("userId", identity.subject))
+      .first();
+    const hasAskedQuestion = existingQuestion !== null;
+
+    return {
+      canAskQuestion: user.isPremium || !hasAskedQuestion,
+      hasAskedQuestion,
+      isPremium: user.isPremium,
+    };
   },
 });
 

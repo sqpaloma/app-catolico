@@ -371,6 +371,7 @@ export const generateConsensus = internalAction({
       limitedAnswers.length,
     );
     const responsePatterns = buildResponsePatterns(answerGroups, limitedAnswers);
+    const mostReliablePattern = responsePatterns.slice(0, 1);
 
     // --- Step 5: Generate source-grounded spiritual guidance ---
     const sourceGuidance = await generateSourceGuidance({
@@ -384,8 +385,8 @@ export const generateConsensus = internalAction({
       await ctx.runMutation(internal.questions.saveConsensus, {
         questionId,
         consensusResponse: sourceGuidance,
-        confidenceScore: responsePatterns[0]?.confidenceScore,
-        responsePatterns,
+        confidenceScore: mostReliablePattern[0]?.confidenceScore,
+        responsePatterns: mostReliablePattern,
         sourceGuidance,
       });
     }

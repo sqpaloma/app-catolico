@@ -30,6 +30,7 @@ export default function QuestionDetailScreen() {
   const questionId = id as Id<"questions">;
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const [showReliabilityInfo, setShowReliabilityInfo] = useState(false);
 
   const { userId } = useAuth();
   const question = useQuery(api.questions.getById, { questionId });
@@ -54,9 +55,13 @@ export default function QuestionDetailScreen() {
 
   const config = statusConfig[question.status];
   const guidanceText = question.sourceGuidance ?? question.consensusResponse ?? null;
+  const directorBasedAnswer = question.responsePatterns?.[0] ?? null;
+  const reliabilityExplanation = directorBasedAnswer
+    ? `Este percentual compara respostas semelhantes entre os diretores: ${directorBasedAnswer.matchingAnswerCount} de ${directorBasedAnswer.totalAnswerCount} respostas apontaram para esta mesma direção. Ele indica a força relativa desta resposta entre as demais, não uma garantia absoluta.`
+    : "";
   const hasStructuredResponse =
     Boolean(question.sourceGuidance) ||
-    Boolean(question.responsePatterns && question.responsePatterns.length > 0);
+    Boolean(directorBasedAnswer);
 
   const parsedGuidance = (() => {
     if (!guidanceText) return null;
@@ -99,6 +104,9 @@ export default function QuestionDetailScreen() {
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustContentInsets={false}
         contentInsetAdjustmentBehavior="never"
+        onTouchStart={() => {
+          if (showReliabilityInfo) setShowReliabilityInfo(false);
+        }}
       >
         {/* Header */}
         <View
@@ -219,11 +227,11 @@ export default function QuestionDetailScreen() {
           </View>
         </View>
 
-        {/* Response patterns */}
-        {question.responsePatterns && question.responsePatterns.length > 0 && (
+        {/* Director-based answer */}
+        {directorBasedAnswer && (
           <View style={{ paddingHorizontal: 20, marginTop: 16 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              <Ionicons name="git-branch-outline" size={18} color="#8B1A1A" />
+              <Ionicons name="people-outline" size={18} color="#8B1A1A" />
               <Text
                 style={{
                   fontSize: 13,
@@ -233,93 +241,136 @@ export default function QuestionDetailScreen() {
                   textTransform: "uppercase",
                 }}
               >
-                Padrões encontrados nas respostas
+                Resposta baseada nos diretores
               </Text>
             </View>
-            <View style={{ gap: 10 }}>
-              {question.responsePatterns.map((pattern, idx) => (
-                <View
-                  key={`${pattern.representativeText}-${idx}`}
-                  style={{
-                    backgroundColor: "#fff",
-                    borderRadius: 16,
-                    padding: 16,
-                    ...Platform.select({
-                      ios: {
-                        shadowColor: "#000",
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.06,
-                        shadowRadius: 8,
-                      },
-                      android: { elevation: 3 },
-                    }),
-                  }}
+            <View
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: 16,
+                padding: 16,
+                ...Platform.select({
+                  ios: {
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.06,
+                    shadowRadius: 8,
+                  },
+                  android: { elevation: 3 },
+                }),
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10, gap: 12 }}>
+                <Text style={{ fontSize: 14, fontWeight: "700", color: "#8B1A1A", flex: 1 }}>
+                  Resposta com maior concordância
+                </Text>
+                <Pressable
+                  onHoverIn={() => setShowReliabilityInfo(true)}
+                  onHoverOut={() => setShowReliabilityInfo(false)}
+                  onPress={() => setShowReliabilityInfo(true)}
+                  style={{ position: "relative", zIndex: showReliabilityInfo ? 20 : 1 }}
                 >
-                  <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10, gap: 12 }}>
-                    <Text style={{ fontSize: 14, fontWeight: "700", color: "#8B1A1A", flex: 1 }}>
-                      Resposta {idx + 1}
-                    </Text>
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 4,
-                        backgroundColor:
-                          pattern.confidenceScore >= 80
-                            ? "#E8F5E9"
-                            : pattern.confidenceScore >= 60
-                              ? "#FFF8E1"
-                              : "#FBE9E7",
-                        paddingHorizontal: 8,
-                        paddingVertical: 4,
-                        borderRadius: 10,
-                      }}
-                    >
-                      <Ionicons
-                        name="shield-checkmark"
-                        size={13}
-                        color={
-                          pattern.confidenceScore >= 80
-                            ? "#2E7D32"
-                            : pattern.confidenceScore >= 60
-                              ? "#F9A825"
-                              : "#E65100"
-                        }
-                      />
-                      <Text
-                        style={{
-                          fontSize: 11,
-                          fontWeight: "700",
-                          color:
-                            pattern.confidenceScore >= 80
-                              ? "#2E7D32"
-                              : pattern.confidenceScore >= 60
-                                ? "#F9A825"
-                                : "#E65100",
-                        }}
-                      >
-                        {pattern.confidenceScore}% Confiável
-                      </Text>
-                    </View>
-                  </View>
-                  <Text style={{ fontSize: 15, color: "#333", lineHeight: 24 }}>
-                    {pattern.representativeText}
-                  </Text>
                   <View
                     style={{
                       flexDirection: "row",
                       alignItems: "center",
-                      gap: 6,
-                      marginTop: 12,
+                      gap: 4,
+                      backgroundColor:
+                        directorBasedAnswer.confidenceScore >= 80
+                          ? "#E8F5E9"
+                          : directorBasedAnswer.confidenceScore >= 60
+                            ? "#FFF8E1"
+                            : "#FBE9E7",
+                      paddingHorizontal: 8,
+                      paddingVertical: 4,
+                      borderRadius: 10,
                     }}
                   >
-                    <Ionicons name="people-outline" size={14} color="#999" />
-                    <Text style={{ fontSize: 12, color: "#888", fontStyle: "italic" }}>
-                      {pattern.matchingAnswerCount} de {pattern.totalAnswerCount} respostas semelhantes
+                    <Ionicons
+                      name="shield-checkmark"
+                      size={13}
+                      color={
+                        directorBasedAnswer.confidenceScore >= 80
+                          ? "#2E7D32"
+                          : directorBasedAnswer.confidenceScore >= 60
+                            ? "#F9A825"
+                            : "#E65100"
+                      }
+                    />
+                    <Text
+                      style={{
+                        fontSize: 11,
+                        fontWeight: "700",
+                        color:
+                          directorBasedAnswer.confidenceScore >= 80
+                            ? "#2E7D32"
+                            : directorBasedAnswer.confidenceScore >= 60
+                              ? "#F9A825"
+                              : "#E65100",
+                      }}
+                    >
+                      {directorBasedAnswer.confidenceScore}% Confiável
                     </Text>
+                    <Ionicons
+                      name="information-circle-outline"
+                      size={13}
+                      color={
+                        directorBasedAnswer.confidenceScore >= 80
+                          ? "#2E7D32"
+                          : directorBasedAnswer.confidenceScore >= 60
+                            ? "#F9A825"
+                            : "#E65100"
+                      }
+                    />
                   </View>
-                </View>
-              ))}
+
+                  {showReliabilityInfo && (
+                    <View
+                      style={{
+                        position: "absolute",
+                        right: 0,
+                        top: 30,
+                        width: 250,
+                        backgroundColor: "#FFFFFF",
+                        borderWidth: 1,
+                        borderColor: "rgba(139,26,26,0.12)",
+                        borderRadius: 12,
+                        padding: 12,
+                        zIndex: 30,
+                        ...Platform.select({
+                          ios: {
+                            shadowColor: "#000",
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 0.22,
+                            shadowRadius: 16,
+                          },
+                          android: { elevation: 16 },
+                        }),
+                      }}
+                    >
+                      <Text style={{ color: "#1a1a1a", fontSize: 12, lineHeight: 18 }}>
+                        {reliabilityExplanation}
+                      </Text>
+                    </View>
+                  )}
+                </Pressable>
+              </View>
+              <Text style={{ fontSize: 15, color: "#333", lineHeight: 24 }}>
+                {directorBasedAnswer.representativeText}
+              </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 6,
+                  marginTop: 12,
+                }}
+              >
+                <Ionicons name="people-outline" size={14} color="#999" />
+                <Text style={{ fontSize: 12, color: "#888", fontStyle: "italic" }}>
+                  {directorBasedAnswer.matchingAnswerCount} de {directorBasedAnswer.totalAnswerCount} respostas semelhantes
+                </Text>
+              </View>
             </View>
           </View>
         )}
