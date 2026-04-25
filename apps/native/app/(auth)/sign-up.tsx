@@ -21,6 +21,33 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 WebBrowser.maybeCompleteAuthSession();
 
+type ClerkErrorLike = {
+  errors?: Array<{ longMessage?: string; message?: string }>;
+  longMessage?: string;
+  message?: string;
+};
+
+const normalizeVerificationCode = (value: string) => value.replace(/\D/g, "").slice(0, 6);
+
+const getClerkErrorMessage = (err: unknown, fallback: string) => {
+  const clerkErr = err as ClerkErrorLike;
+  return String(
+    clerkErr?.errors?.[0]?.longMessage ??
+      clerkErr?.errors?.[0]?.message ??
+      clerkErr?.longMessage ??
+      clerkErr?.message ??
+      fallback,
+  );
+};
+
+const getIncompleteSignUpMessage = (status: string | null | undefined) => {
+  if (status === "missing_requirements") {
+    return "Código confirmado, mas ainda faltam informações obrigatórias para concluir o cadastro.";
+  }
+
+  return `Cadastro incompleto (status: ${status ?? "desconhecido"}).`;
+};
+
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const { startSSOFlow } = useSSO();
@@ -107,12 +134,8 @@ export default function SignUpScreen() {
             "Não foi possível verificar sua conta externa. Tente novamente ou use email/senha.",
           );
         }
-      } catch (err: any) {
-        const msg =
-          err?.errors?.[0]?.longMessage ??
-          err?.message ??
-          "Não foi possível continuar. Tente novamente.";
-        setErrorMessage(msg);
+      } catch (err: unknown) {
+        setErrorMessage(getClerkErrorMessage(err, "Não foi possível continuar. Tente novamente."));
       } finally {
         setOauthLoading(null);
       }
@@ -143,19 +166,12 @@ export default function SignUpScreen() {
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setPendingVerification(true);
     } catch (err: unknown) {
-      const clerkErr = err as {
-        errors?: Array<{ longMessage?: string; message?: string }>;
-        longMessage?: string;
-        message?: string;
-      };
-      const message =
-        clerkErr?.errors?.[0]?.longMessage ??
-        clerkErr?.errors?.[0]?.message ??
-        clerkErr?.longMessage ??
-        clerkErr?.message ??
-        "Não foi possível criar a conta. Verifique os dados.";
+      const message = getClerkErrorMessage(
+        err,
+        "Não foi possível criar a conta. Verifique os dados.",
+      );
       console.error("Clerk sign-up error:", err);
-      setErrorMessage(String(message));
+      setErrorMessage(message);
     } finally {
       setIsLoading(false);
     }
@@ -163,19 +179,35 @@ export default function SignUpScreen() {
 
   const onVerifyPress = async () => {
     if (!isLoaded) return;
+    const verificationCode = normalizeVerificationCode(code);
+
+    if (verificationCode.length !== 6) {
+      Alert.alert("Erro", "Digite o código de 6 dígitos enviado por email.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
+      const signUpAttempt = await signUp.attemptEmailAddressVerification({
+        code: verificationCode,
+      });
 
       if (signUpAttempt.status === "complete") {
+        if (!signUpAttempt.createdSessionId) {
+          console.warn("Clerk sign-up completed without session", signUpAttempt);
+          Alert.alert("Erro", "Verificação concluída, mas não foi possível iniciar a sessão.");
+          return;
+        }
+
         await setActive({ session: signUpAttempt.createdSessionId });
         router.replace("/");
       } else {
-        Alert.alert("Erro", "Não foi possível verificar. Tente novamente.");
+        console.warn("Incomplete Clerk sign-up verification", signUpAttempt);
+        Alert.alert("Erro", getIncompleteSignUpMessage(signUpAttempt.status));
       }
-    } catch {
-      Alert.alert("Erro", "Código inválido. Verifique e tente novamente.");
+    } catch (err: unknown) {
+      Alert.alert("Erro", getClerkErrorMessage(err, "Código inválido. Verifique e tente novamente."));
     } finally {
       setIsLoading(false);
     }
@@ -300,15 +332,15 @@ export default function SignUpScreen() {
                 placeholder="000000"
                 placeholderTextColor="#aaa"
                 keyboardType="number-pad"
-                onChangeText={setCode}
+                onChangeText={(text) => setCode(normalizeVerificationCode(text))}
                 editable={!isLoading}
               />
 
               <Pressable
                 onPress={onVerifyPress}
-                disabled={!code || isLoading}
+                disabled={code.length !== 6 || isLoading}
                 style={({ pressed }) => ({
-                  backgroundColor: !code || isLoading
+                  backgroundColor: code.length !== 6 || isLoading
                     ? "#c4948b"
                     : pressed
                       ? "#7B1616"

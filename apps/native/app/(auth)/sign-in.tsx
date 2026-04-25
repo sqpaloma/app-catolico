@@ -19,6 +19,37 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 WebBrowser.maybeCompleteAuthSession();
 
+type ClerkErrorLike = {
+  errors?: Array<{ longMessage?: string; message?: string }>;
+  longMessage?: string;
+  message?: string;
+};
+
+const normalizeVerificationCode = (value: string) => value.replace(/\D/g, "").slice(0, 6);
+
+const getClerkErrorMessage = (err: unknown, fallback: string) => {
+  const clerkErr = err as ClerkErrorLike;
+  return String(
+    clerkErr?.errors?.[0]?.longMessage ??
+      clerkErr?.errors?.[0]?.message ??
+      clerkErr?.longMessage ??
+      clerkErr?.message ??
+      fallback,
+  );
+};
+
+const getIncompleteSignInMessage = (status: string | null | undefined) => {
+  if (status === "needs_second_factor") {
+    return "Código confirmado, mas o login ainda precisa de uma segunda verificação.";
+  }
+
+  if (status === "needs_client_trust") {
+    return "Código confirmado, mas este dispositivo ainda precisa ser confiável.";
+  }
+
+  return `Login incompleto (status: ${status ?? "desconhecido"}).`;
+};
+
 export default function SignInScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
   const { startSSOFlow } = useSSO();
@@ -85,12 +116,8 @@ export default function SignInScreen() {
             "Não foi possível verificar sua conta externa. Tente novamente ou use email/senha.",
           );
         }
-      } catch (err: any) {
-        const msg =
-          err?.errors?.[0]?.longMessage ??
-          err?.message ??
-          "Não foi possível continuar. Tente novamente.";
-        setErrorMessage(msg);
+      } catch (err: unknown) {
+        setErrorMessage(getClerkErrorMessage(err, "Não foi possível continuar. Tente novamente."));
       } finally {
         setOauthLoading(null);
       }
@@ -127,9 +154,8 @@ export default function SignInScreen() {
       } else {
         setErrorMessage(`Login incompleto (status: ${status}).`);
       }
-    } catch (err: any) {
-      const msg = err?.errors?.[0]?.longMessage ?? err?.message ?? "Email ou senha incorretos.";
-      setErrorMessage(msg);
+    } catch (err: unknown) {
+      setErrorMessage(getClerkErrorMessage(err, "Email ou senha incorretos."));
     } finally {
       setIsLoading(false);
     }
@@ -137,22 +163,36 @@ export default function SignInScreen() {
 
   const onVerifyPress = async () => {
     if (!isLoaded) return;
+    const verificationCode = normalizeVerificationCode(code);
+
+    if (verificationCode.length !== 6) {
+      Alert.alert("Erro", "Digite o código de 6 dígitos enviado por email.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const result = await signIn.attemptSecondFactor({
         strategy: "email_code",
-        code,
+        code: verificationCode,
       });
 
       if (result.status === "complete") {
+        if (!result.createdSessionId) {
+          console.warn("Clerk sign-in completed without session", result);
+          Alert.alert("Erro", "Verificação concluída, mas não foi possível iniciar a sessão.");
+          return;
+        }
+
         await setActive({ session: result.createdSessionId });
         router.replace("/");
       } else {
-        Alert.alert("Erro", "Não foi possível verificar. Tente novamente.");
+        console.warn("Incomplete Clerk sign-in verification", result);
+        Alert.alert("Erro", getIncompleteSignInMessage(result.status));
       }
-    } catch {
-      Alert.alert("Erro", "Código inválido. Verifique e tente novamente.");
+    } catch (err: unknown) {
+      Alert.alert("Erro", getClerkErrorMessage(err, "Código inválido. Verifique e tente novamente."));
     } finally {
       setIsLoading(false);
     }
@@ -277,15 +317,15 @@ export default function SignInScreen() {
                 placeholder="000000"
                 placeholderTextColor="#aaa"
                 keyboardType="number-pad"
-                onChangeText={setCode}
+                onChangeText={(text) => setCode(normalizeVerificationCode(text))}
                 editable={!isLoading}
               />
 
               <Pressable
                 onPress={onVerifyPress}
-                disabled={!code || isLoading}
+                disabled={code.length !== 6 || isLoading}
                 style={({ pressed }) => ({
-                  backgroundColor: !code || isLoading
+                  backgroundColor: code.length !== 6 || isLoading
                     ? "#c4948b"
                     : pressed
                       ? "#7B1616"
