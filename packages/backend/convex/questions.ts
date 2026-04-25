@@ -53,11 +53,33 @@ export const saveConsensus = internalMutation({
     questionId: v.id("questions"),
     consensusResponse: v.string(),
     confidenceScore: v.optional(v.number()),
+    responsePatterns: v.optional(
+      v.array(
+        v.object({
+          representativeText: v.string(),
+          confidenceScore: v.number(),
+          matchingAnswerCount: v.number(),
+          totalAnswerCount: v.number(),
+        }),
+      ),
+    ),
+    sourceGuidance: v.optional(v.string()),
   },
-  handler: async (ctx, { questionId, consensusResponse, confidenceScore }) => {
+  handler: async (
+    ctx,
+    {
+      questionId,
+      consensusResponse,
+      confidenceScore,
+      responsePatterns,
+      sourceGuidance,
+    },
+  ) => {
     await ctx.db.patch(questionId, {
       consensusResponse,
       confidenceScore,
+      responsePatterns,
+      sourceGuidance,
       status: "consensus_ready",
     });
   },

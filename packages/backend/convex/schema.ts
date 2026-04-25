@@ -30,6 +30,17 @@ export default defineSchema({
     ),
     consensusResponse: v.optional(v.string()),
     confidenceScore: v.optional(v.number()),
+    responsePatterns: v.optional(
+      v.array(
+        v.object({
+          representativeText: v.string(),
+          confidenceScore: v.number(),
+          matchingAnswerCount: v.number(),
+          totalAnswerCount: v.number(),
+        }),
+      ),
+    ),
+    sourceGuidance: v.optional(v.string()),
     answerCount: v.number(),
   })
     .index("by_userId", ["userId"])
