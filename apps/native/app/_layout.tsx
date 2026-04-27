@@ -1,6 +1,5 @@
 import "@/global.css";
 import { api } from "@app-catolico/backend/convex/_generated/api";
-import { env } from "@app-catolico/env/native";
 import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import {
@@ -13,21 +12,44 @@ import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { HeroUINativeProvider } from "heroui-native";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
+import { ErrorBoundary } from "@/components/error-boundary";
 import { AppThemeProvider } from "@/contexts/app-theme-context";
 
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch(() => {
+  // Best-effort: ignore if already hidden.
+});
 
 export const unstable_settings = {
   initialRouteName: "(tabs)",
 };
 
-const convex = new ConvexReactClient(env.EXPO_PUBLIC_CONVEX_URL, {
-  unsavedChangesWarning: false,
-});
+type AppEnv = {
+  convex: ConvexReactClient;
+  clerkPublishableKey: string;
+};
+
+// Reads env vars and instantiates the Convex client. Throws on missing/invalid
+// env so the ErrorBoundary above can render a real error screen instead of a
+// blank white screen (which is what would happen if this threw at module
+// import time, before React even mounts).
+function loadAppEnv(): AppEnv {
+  // Lazy require so a failure in env validation doesn't crash module import.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { env } = require("@app-catolico/env/native") as typeof import("@app-catolico/env/native");
+
+  const convex = new ConvexReactClient(env.EXPO_PUBLIC_CONVEX_URL, {
+    unsavedChangesWarning: false,
+  });
+
+  return {
+    convex,
+    clerkPublishableKey: env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
+  };
+}
 
 function EnsureUser() {
   const { isSignedIn } = useAuth();
@@ -112,15 +134,17 @@ function StackLayout() {
   );
 }
 
-export default function Layout() {
+function InnerLayout() {
   const [fontsLoaded, fontError] = useFonts({
     XanhMono: XanhMono_400Regular,
     "XanhMono-Italic": XanhMono_400Regular_Italic,
   });
 
+  const appEnv = useMemo<AppEnv>(() => loadAppEnv(), []);
+
   useEffect(() => {
     if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
+      SplashScreen.hideAsync().catch(() => {});
     }
   }, [fontsLoaded, fontError]);
 
@@ -129,9 +153,9 @@ export default function Layout() {
   return (
     <ClerkProvider
       tokenCache={tokenCache}
-      publishableKey={env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      publishableKey={appEnv.clerkPublishableKey}
     >
-      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+      <ConvexProviderWithClerk client={appEnv.convex} useAuth={useAuth}>
         <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#8B1A1A" }}>
           <StatusBar style="light" />
           <KeyboardProvider>
@@ -144,5 +168,13 @@ export default function Layout() {
         </GestureHandlerRootView>
       </ConvexProviderWithClerk>
     </ClerkProvider>
+  );
+}
+
+export default function Layout() {
+  return (
+    <ErrorBoundary>
+      <InnerLayout />
+    </ErrorBoundary>
   );
 }

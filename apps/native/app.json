@@ -1,7 +1,7 @@
 {
   "expo": {
     "scheme": "safe",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "orientation": "default",
     "backgroundColor": "#8B1A1A",
     "androidStatusBar": {
@@ -29,7 +29,15 @@
     "slug": "safe",
     "plugins": [
       "expo-font",
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/logo.png",
+          "backgroundColor": "#8B1A1A",
+          "imageWidth": 200,
+          "resizeMode": "contain"
+        }
+      ],
       "expo-secure-store"
     ],
     "experiments": {
