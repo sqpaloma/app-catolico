@@ -13,7 +13,7 @@
     "owner": "sqpaloma",
     "ios": {
       "bundleIdentifier": "com.safe-espiritual.safe",
-      "buildNumber": "10",
+      "buildNumber": "11",
       "supportsTablet": true,
       "icon": "./assets/images/logo.png",
       "infoPlist": {
@@ -41,15 +41,7 @@
           "resizeMode": "contain"
         }
       ],
-      "expo-secure-store",
-      [
-        "@sentry/react-native/expo",
-        {
-          "url": "https://sentry.io/",
-          "project": "react-native",
-          "organization": "safe-7b"
-        }
-      ]
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
