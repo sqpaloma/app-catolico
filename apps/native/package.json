@@ -31,6 +31,7 @@
     "@gorhom/bottom-sheet": "^5",
     "@react-navigation/drawer": "^7.3.9",
     "@react-navigation/elements": "^2.8.1",
+    "@sentry/react-native": "~7.2.0",
     "convex": "catalog:",
     "dotenv": "catalog:",
     "expo": "~54.0.33",

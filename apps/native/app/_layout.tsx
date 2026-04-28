@@ -12,12 +12,13 @@ import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { HeroUINativeProvider } from "heroui-native";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
 import { ErrorBoundary } from "@/components/error-boundary";
 import { AppThemeProvider } from "@/contexts/app-theme-context";
+import { captureException, initSentry } from "@/lib/sentry";
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   // Best-effort: ignore if already hidden.
@@ -32,24 +33,42 @@ type AppEnv = {
   clerkPublishableKey: string;
 };
 
-// Reads env vars and instantiates the Convex client. Throws on missing/invalid
-// env so the ErrorBoundary above can render a real error screen instead of a
-// blank white screen (which is what would happen if this threw at module
-// import time, before React even mounts).
-function loadAppEnv(): AppEnv {
-  // Lazy require so a failure in env validation doesn't crash module import.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { env } = require("@app-catolico/env/native") as typeof import("@app-catolico/env/native");
+type BootResult =
+  | { ok: true; appEnv: AppEnv }
+  | { ok: false; error: Error };
 
-  const convex = new ConvexReactClient(env.EXPO_PUBLIC_CONVEX_URL, {
-    unsavedChangesWarning: false,
-  });
+// Loads env, initializes Sentry, and instantiates the Convex client.
+// Runs synchronously at module import time so any failure is caught here
+// rather than propagated as an async error in the JS event loop, which is
+// what crashed Hermes during App Store review.
+function bootApp(): BootResult {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { env } = require("@app-catolico/env/native") as typeof import("@app-catolico/env/native");
 
-  return {
-    convex,
-    clerkPublishableKey: env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
-  };
+    initSentry(env.EXPO_PUBLIC_SENTRY_DSN);
+
+    const convex = new ConvexReactClient(env.EXPO_PUBLIC_CONVEX_URL, {
+      unsavedChangesWarning: false,
+    });
+
+    return {
+      ok: true,
+      appEnv: {
+        convex,
+        clerkPublishableKey: env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
+      },
+    };
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error(String(e));
+    SplashScreen.hideAsync().catch(() => {});
+    captureException(error, { source: "bootApp" });
+    if (__DEV__) console.error("[bootApp]", error);
+    return { ok: false, error };
+  }
 }
+
+const bootResult = bootApp();
 
 function EnsureUser() {
   const { isSignedIn } = useAuth();
@@ -59,7 +78,10 @@ function EnsureUser() {
   useEffect(() => {
     if (isSignedIn && !didEnsure.current) {
       didEnsure.current = true;
-      ensureUser().catch(console.error);
+      ensureUser().catch((e) => {
+        captureException(e, { source: "EnsureUser.ensureUser" });
+        if (__DEV__) console.error(e);
+      });
     }
     if (!isSignedIn) {
       didEnsure.current = false;
@@ -134,15 +156,16 @@ function StackLayout() {
   );
 }
 
-function InnerLayout() {
+function InnerLayout({ appEnv }: { appEnv: AppEnv }) {
   const [fontsLoaded, fontError] = useFonts({
     XanhMono: XanhMono_400Regular,
     "XanhMono-Italic": XanhMono_400Regular_Italic,
   });
 
-  const appEnv = useMemo<AppEnv>(() => loadAppEnv(), []);
-
   useEffect(() => {
+    if (fontError) {
+      captureException(fontError, { source: "useFonts" });
+    }
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync().catch(() => {});
     }
@@ -172,9 +195,24 @@ function InnerLayout() {
 }
 
 export default function Layout() {
+  if (!bootResult.ok) {
+    // Throwing inside render lets ErrorBoundary catch and render a real
+    // error screen, instead of letting the failure escape into a microtask
+    // where Hermes can't reliably build a JSError (which is what crashed on
+    // the App Store reviewer's iPad).
+    return (
+      <ErrorBoundary>
+        <BootErrorThrower error={bootResult.error} />
+      </ErrorBoundary>
+    );
+  }
   return (
     <ErrorBoundary>
-      <InnerLayout />
+      <InnerLayout appEnv={bootResult.appEnv} />
     </ErrorBoundary>
   );
+}
+
+function BootErrorThrower({ error }: { error: Error }): never {
+  throw error;
 }

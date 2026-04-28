@@ -6,6 +6,7 @@ export const env = createEnv({
   client: {
     EXPO_PUBLIC_CONVEX_URL: z.url(),
     EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
+    EXPO_PUBLIC_SENTRY_DSN: z.url().optional(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

@@ -2,6 +2,8 @@ import * as SplashScreen from "expo-splash-screen";
 import React from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 
+import { captureException } from "@/lib/sentry";
+
 type Props = { children: React.ReactNode };
 type State = { error: Error | null };
 
@@ -15,6 +17,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     SplashScreen.hideAsync().catch(() => {
       // No-op: splash may already be hidden.
+    });
+    captureException(error, {
+      componentStack: errorInfo.componentStack,
+      source: "ErrorBoundary",
     });
     if (__DEV__) {
       console.error("[ErrorBoundary]", error, errorInfo);
