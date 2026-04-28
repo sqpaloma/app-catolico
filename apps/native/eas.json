@@ -1,7 +1,7 @@
 {
   "cli": {
     "version": ">= 18.5.0",
-    "appVersionSource": "remote"
+    "appVersionSource": "local"
   },
   "build": {
     "development": {
@@ -29,7 +29,7 @@
       "ios": {
         "appleId": "upcraftcrew@gmail.com",
         "ascAppId": "6762007455",
-        "appleTeamId": "SEU_TEAM_ID"
+        "appleTeamId": "59M2JY4R7J"
       },
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",
