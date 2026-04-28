@@ -19,6 +19,14 @@ export function initSentry(dsn: string | undefined) {
       enableNativeCrashHandling: true,
       enableAutoSessionTracking: true,
       attachStacktrace: true,
+      sendDefaultPii: true,
+      enableLogs: true,
+      replaysSessionSampleRate: 0.1,
+      replaysOnErrorSampleRate: 1,
+      integrations: [
+        Sentry.mobileReplayIntegration(),
+        Sentry.feedbackIntegration(),
+      ],
     });
     initialized = true;
   } catch (e) {

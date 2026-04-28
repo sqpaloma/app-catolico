@@ -18,7 +18,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 
 import { ErrorBoundary } from "@/components/error-boundary";
 import { AppThemeProvider } from "@/contexts/app-theme-context";
-import { captureException, initSentry } from "@/lib/sentry";
+import { Sentry, captureException, initSentry } from "@/lib/sentry";
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   // Best-effort: ignore if already hidden.
@@ -194,7 +194,7 @@ function InnerLayout({ appEnv }: { appEnv: AppEnv }) {
   );
 }
 
-export default function Layout() {
+export default Sentry.wrap(function Layout() {
   if (!bootResult.ok) {
     // Throwing inside render lets ErrorBoundary catch and render a real
     // error screen, instead of letting the failure escape into a microtask
@@ -211,7 +211,7 @@ export default function Layout() {
       <InnerLayout appEnv={bootResult.appEnv} />
     </ErrorBoundary>
   );
-}
+});
 
 function BootErrorThrower({ error }: { error: Error }): never {
   throw error;

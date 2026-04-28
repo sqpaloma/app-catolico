@@ -26,3 +26,8 @@ uniwind-types.d.ts
 
 expo-env.d.ts
 # @end expo-cli
+.env.local
+
+# Sentry (contains auth token)
+sentry.properties
+

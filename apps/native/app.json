@@ -41,7 +41,15 @@
           "resizeMode": "contain"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "react-native",
+          "organization": "safe-7b"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
