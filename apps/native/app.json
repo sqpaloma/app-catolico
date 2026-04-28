@@ -1,5 +1,6 @@
 {
   "expo": {
+    "version": "1.0.0",
     "scheme": "safe",
     "userInterfaceStyle": "light",
     "orientation": "default",

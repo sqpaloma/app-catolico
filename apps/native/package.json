@@ -10,7 +10,16 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "prebuild": "expo prebuild",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "version:patch": "node scripts/bump-version.mjs patch",
+    "version:minor": "node scripts/bump-version.mjs minor",
+    "version:major": "node scripts/bump-version.mjs major",
+    "version:set": "node scripts/bump-version.mjs set",
+    "release:patch": "npm run version:patch && npm run release:commit && npm run release:build",
+    "release:minor": "npm run version:minor && npm run release:commit && npm run release:build",
+    "release:major": "npm run version:major && npm run release:commit && npm run release:build",
+    "release:commit": "node -e \"const v=require('./package.json').version;require('child_process').execSync('git add app.json package.json && git commit -m \\\"chore(release): v'+v+'\\\" && git tag v'+v,{stdio:'inherit'})\"",
+    "release:build": "eas build --platform all --profile production --auto-submit --non-interactive"
   },
   "dependencies": {
     "@app-catolico/backend": "workspace:*",
