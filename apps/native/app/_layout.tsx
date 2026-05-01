@@ -43,8 +43,19 @@ type BootResult =
 // what crashed Hermes during App Store review.
 function bootApp(): BootResult {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { env } = require("@app-catolico/env/native") as typeof import("@app-catolico/env/native");
+    const env = {
+      EXPO_PUBLIC_CONVEX_URL: process.env.EXPO_PUBLIC_CONVEX_URL!,
+      EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY:
+        process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!,
+      EXPO_PUBLIC_SENTRY_DSN: process.env.EXPO_PUBLIC_SENTRY_DSN,
+    };
+
+    if (!env.EXPO_PUBLIC_CONVEX_URL) {
+      throw new Error("Missing EXPO_PUBLIC_CONVEX_URL");
+    }
+    if (!env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+      throw new Error("Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY");
+    }
 
     initSentry(env.EXPO_PUBLIC_SENTRY_DSN);
 
@@ -64,7 +75,7 @@ function bootApp(): BootResult {
     SplashScreen.hideAsync().catch(() => {});
     captureException(error, { source: "bootApp" });
     if (__DEV__) console.error("[bootApp]", error);
-    (error as Record<string, unknown>).__bootDiag = {
+    (error as unknown as Record<string, unknown>).__bootDiag = {
       name: error.name,
       message: error.message,
       envCheck: {
