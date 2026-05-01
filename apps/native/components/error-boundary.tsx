@@ -85,26 +85,36 @@ export class ErrorBoundary extends React.Component<Props, State> {
             </Text>
           </Pressable>
 
-          {__DEV__ ? (
-            <ScrollView
+          {/* TODO: revert to __DEV__ guard before App Store submission */}
+          <ScrollView
+            style={{
+              maxHeight: 240,
+              backgroundColor: "rgba(0,0,0,0.2)",
+              borderRadius: 8,
+              padding: 12,
+            }}
+          >
+            <Text
+              selectable
               style={{
-                maxHeight: 240,
-                backgroundColor: "rgba(0,0,0,0.2)",
-                borderRadius: 8,
-                padding: 12,
+                color: "rgba(255,255,255,0.85)",
+                fontSize: 11,
+                fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
               }}
             >
-              <Text
-                style={{
-                  color: "rgba(255,255,255,0.85)",
-                  fontSize: 11,
-                  fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
-                }}
-              >
-                {String(error.stack ?? error.message ?? error)}
-              </Text>
-            </ScrollView>
-          ) : null}
+              {String(error.message ?? error)}
+              {"\n\n"}
+              {String(
+                (error as Record<string, unknown>).__bootDiag
+                  ? JSON.stringify(
+                      (error as Record<string, unknown>).__bootDiag,
+                      null,
+                      2,
+                    )
+                  : "",
+              )}
+            </Text>
+          </ScrollView>
         </View>
       );
     }

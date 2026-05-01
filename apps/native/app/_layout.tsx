@@ -64,6 +64,15 @@ function bootApp(): BootResult {
     SplashScreen.hideAsync().catch(() => {});
     captureException(error, { source: "bootApp" });
     if (__DEV__) console.error("[bootApp]", error);
+    (error as Record<string, unknown>).__bootDiag = {
+      name: error.name,
+      message: error.message,
+      envCheck: {
+        convexUrl: typeof process.env.EXPO_PUBLIC_CONVEX_URL,
+        clerkKey: typeof process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
+        sentryDsn: typeof process.env.EXPO_PUBLIC_SENTRY_DSN,
+      },
+    };
     return { ok: false, error };
   }
 }
