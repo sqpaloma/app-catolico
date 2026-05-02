@@ -159,7 +159,7 @@ export function LoginRequiredScreen() {
             }}
           >
             <Text style={{ fontSize: 14, color: "#888" }}>Não tem conta?</Text>
-            <Pressable onPress={() => router.push("/(auth)/sign-up")}>
+            <Pressable onPress={() => router.push("/(auth)/onboarding-quiz")}>
               <Text style={{ fontSize: 14, color: "#8B1A1A", fontWeight: "700" }}>
                 Criar conta
               </Text>

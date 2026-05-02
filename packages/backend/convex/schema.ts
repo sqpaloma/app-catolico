@@ -7,6 +7,21 @@ export default defineSchema({
     anonymousId: v.string(),
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
+    gender: v.optional(
+      v.union(v.literal("masculino"), v.literal("feminino")),
+    ),
+    ageGroup: v.optional(
+      v.union(
+        v.literal("-18"),
+        v.literal("18-25"),
+        v.literal("25-35"),
+        v.literal("35-45"),
+        v.literal("45-55"),
+        v.literal("55+"),
+      ),
+    ),
+    hasDepression: v.optional(v.boolean()),
+    goesToChurch: v.optional(v.boolean()),
     isDirector: v.optional(v.boolean()),
     isPremium: v.boolean(),
     premiumUntil: v.optional(v.number()),

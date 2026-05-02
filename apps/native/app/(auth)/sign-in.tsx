@@ -629,7 +629,7 @@ export default function SignInScreen() {
           }}
         >
           <Text style={{ fontSize: 14, color: "#888" }}>Não tem conta?</Text>
-          <Link href="/(auth)/sign-up">
+          <Link href="/(auth)/onboarding-quiz">
             <Text style={{ fontSize: 14, color: "#8B1A1A", fontWeight: "700" }}>Criar conta</Text>
           </Link>
         </View>

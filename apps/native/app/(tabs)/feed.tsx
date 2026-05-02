@@ -6,7 +6,6 @@ import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { useMutation, useQuery } from "convex/react";
-import { Spinner } from "heroui-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -483,15 +482,7 @@ function DiarioContent() {
 }
 
 export default function DiarioScreen() {
-  const { isSignedIn, isLoaded } = useAuth();
-
-  if (!isLoaded) {
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f5f0eb" }}>
-        <Spinner size="lg" />
-      </View>
-    );
-  }
+  const { isSignedIn } = useAuth();
 
   if (!isSignedIn) {
     return <LoginRequiredScreen />;

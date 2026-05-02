@@ -315,15 +315,7 @@ function MyQuestionsContent() {
 }
 
 export default function MyQuestionsScreen() {
-  const { isSignedIn, isLoaded } = useAuth();
-
-  if (!isLoaded) {
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f5f0eb" }}>
-        <Spinner size="lg" />
-      </View>
-    );
-  }
+  const { isSignedIn } = useAuth();
 
   if (!isSignedIn) {
     return <LoginRequiredScreen />;

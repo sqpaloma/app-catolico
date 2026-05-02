@@ -98,7 +98,7 @@ function EnsureUser() {
   useEffect(() => {
     if (isSignedIn && !didEnsure.current) {
       didEnsure.current = true;
-      ensureUser().catch((e) => {
+      ensureUser({}).catch((e) => {
         captureException(e, { source: "EnsureUser.ensureUser" });
         if (__DEV__) console.error(e);
       });

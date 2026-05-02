@@ -10,8 +10,28 @@ function generateAnonymousId(): string {
   return id;
 }
 
+const genderValidator = v.optional(
+  v.union(v.literal("masculino"), v.literal("feminino")),
+);
+const ageGroupValidator = v.optional(
+  v.union(
+    v.literal("-18"),
+    v.literal("18-25"),
+    v.literal("25-35"),
+    v.literal("35-45"),
+    v.literal("45-55"),
+    v.literal("55+"),
+  ),
+);
+
 export const ensureUser = mutation({
-  handler: async (ctx) => {
+  args: {
+    gender: genderValidator,
+    ageGroup: ageGroupValidator,
+    hasDepression: v.optional(v.boolean()),
+    goesToChurch: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Não autenticado");
 
@@ -27,6 +47,10 @@ export const ensureUser = mutation({
       anonymousId: generateAnonymousId(),
       firstName: identity.givenName ?? undefined,
       lastName: identity.familyName ?? undefined,
+      gender: args.gender ?? undefined,
+      ageGroup: args.ageGroup ?? undefined,
+      hasDepression: args.hasDepression ?? undefined,
+      goesToChurch: args.goesToChurch ?? undefined,
       isDirector: true,
       isPremium: false,
     });

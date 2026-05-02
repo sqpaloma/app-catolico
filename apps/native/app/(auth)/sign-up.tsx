@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
-import { Link, useRouter } from "expo-router";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -18,6 +18,8 @@ import {
 import { TERMS_OF_USE_PT } from "@/constants/legal/terms-pt";
 import { Text, TextInput } from "@/components/ui/themed-text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useMutation } from "convex/react";
+import { api } from "@app-catolico/backend/convex/_generated/api";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -53,6 +55,12 @@ export default function SignUpScreen() {
   const { startSSOFlow } = useSSO();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{
+    gender?: string;
+    ageGroup?: string;
+    hasDepression?: string;
+    goesToChurch?: string;
+  }>();
 
   useEffect(() => {
     void WebBrowser.warmUpAsync();
@@ -63,6 +71,8 @@ export default function SignUpScreen() {
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [pendingVerification, setPendingVerification] = useState(false);
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -71,6 +81,8 @@ export default function SignUpScreen() {
   const [errorMessage, setErrorMessage] = useState("");
   const [acceptedLegal, setAcceptedLegal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
+
+  const ensureUser = useMutation(api.users.ensureUser);
 
   const passwordChecks = {
     length: password.length >= 8,
@@ -159,10 +171,20 @@ export default function SignUpScreen() {
       return;
     }
 
+    if (!firstName.trim()) {
+      setErrorMessage("Preencha seu nome.");
+      return;
+    }
+
+    if (!lastName.trim()) {
+      setErrorMessage("Preencha seu sobrenome.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      await signUp.create({ emailAddress, password });
+      await signUp.create({ emailAddress, password, firstName: firstName.trim(), lastName: lastName.trim() });
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setPendingVerification(true);
     } catch (err: unknown) {
@@ -201,6 +223,16 @@ export default function SignUpScreen() {
         }
 
         await setActive({ session: signUpAttempt.createdSessionId });
+        try {
+          await ensureUser({
+            gender: (params.gender as "masculino" | "feminino") || undefined,
+            ageGroup: (params.ageGroup as "-18" | "18-25" | "25-35" | "35-45" | "45-55" | "55+") || undefined,
+            hasDepression: params.hasDepression === "true" ? true : params.hasDepression === "false" ? false : undefined,
+            goesToChurch: params.goesToChurch === "true" ? true : params.goesToChurch === "false" ? false : undefined,
+          });
+        } catch (e) {
+          console.warn("ensureUser after sign-up failed, will retry on layout", e);
+        }
         router.replace("/");
       } else {
         console.warn("Incomplete Clerk sign-up verification", signUpAttempt);
@@ -449,6 +481,54 @@ export default function SignUpScreen() {
           >
             <View style={{ marginBottom: 12 }}>
               <Text style={{ fontSize: 13, fontWeight: "600", color: "#666", marginBottom: 8, marginLeft: 4 }}>
+                Nome
+              </Text>
+              <TextInput
+                style={{
+                  backgroundColor: "#f5f0eb",
+                  borderRadius: 12,
+                  padding: 16,
+                  fontSize: 16,
+                  color: "#1a1a1a",
+                }}
+                autoCapitalize="words"
+                value={firstName}
+                placeholder="Seu nome"
+                placeholderTextColor="#aaa"
+                onChangeText={(text) => {
+                  setFirstName(text);
+                  if (errorMessage) setErrorMessage("");
+                }}
+                editable={!isLoading}
+              />
+            </View>
+
+            <View style={{ marginBottom: 12 }}>
+              <Text style={{ fontSize: 13, fontWeight: "600", color: "#666", marginBottom: 8, marginLeft: 4 }}>
+                Sobrenome
+              </Text>
+              <TextInput
+                style={{
+                  backgroundColor: "#f5f0eb",
+                  borderRadius: 12,
+                  padding: 16,
+                  fontSize: 16,
+                  color: "#1a1a1a",
+                }}
+                autoCapitalize="words"
+                value={lastName}
+                placeholder="Seu sobrenome"
+                placeholderTextColor="#aaa"
+                onChangeText={(text) => {
+                  setLastName(text);
+                  if (errorMessage) setErrorMessage("");
+                }}
+                editable={!isLoading}
+              />
+            </View>
+
+            <View style={{ marginBottom: 12 }}>
+              <Text style={{ fontSize: 13, fontWeight: "600", color: "#666", marginBottom: 8, marginLeft: 4 }}>
                 Email
               </Text>
               <TextInput
@@ -609,13 +689,15 @@ export default function SignUpScreen() {
               disabled={
                 !emailAddress ||
                 !password ||
+                !firstName.trim() ||
+                !lastName.trim() ||
                 !acceptedLegal ||
                 isLoading ||
                 !!oauthLoading
               }
               style={({ pressed }) => ({
                 backgroundColor:
-                  !emailAddress || !password || !acceptedLegal || isLoading
+                  !emailAddress || !password || !firstName.trim() || !lastName.trim() || !acceptedLegal || isLoading
                   ? "#c4948b"
                   : pressed
                     ? "#7B1616"
