@@ -482,9 +482,9 @@ function DiarioContent() {
 }
 
 export default function DiarioScreen() {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
 
-  if (!isSignedIn) {
+  if (!isLoaded || !isSignedIn) {
     return <LoginRequiredScreen />;
   }
 

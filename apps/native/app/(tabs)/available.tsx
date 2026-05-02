@@ -286,9 +286,9 @@ function AvailableQuestionsContent() {
 }
 
 export default function AvailableQuestionsScreen() {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
 
-  if (!isSignedIn) {
+  if (!isLoaded || !isSignedIn) {
     return <LoginRequiredScreen />;
   }
 

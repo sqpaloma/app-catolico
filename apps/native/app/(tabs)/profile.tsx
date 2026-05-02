@@ -374,9 +374,9 @@ function ProfileContent() {
 }
 
 export default function ProfileScreen() {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
 
-  if (!isSignedIn) {
+  if (!isLoaded || !isSignedIn) {
     return <LoginRequiredScreen />;
   }
 

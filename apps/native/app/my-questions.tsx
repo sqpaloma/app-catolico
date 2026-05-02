@@ -315,9 +315,9 @@ function MyQuestionsContent() {
 }
 
 export default function MyQuestionsScreen() {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
 
-  if (!isSignedIn) {
+  if (!isLoaded || !isSignedIn) {
     return <LoginRequiredScreen />;
   }
 
