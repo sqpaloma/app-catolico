@@ -1,7 +1,7 @@
 import "@/global.css";
 import { api } from "@app-catolico/backend/convex/_generated/api";
-import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
-import { tokenCache } from "@clerk/clerk-expo/token-cache";
+import { ClerkProvider, useAuth } from "@clerk/expo";
+import { tokenCache } from "@clerk/expo/token-cache";
 import {
   XanhMono_400Regular,
   XanhMono_400Regular_Italic,

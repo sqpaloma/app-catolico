@@ -1,6 +1,6 @@
 import { api } from "@app-catolico/backend/convex/_generated/api";
 import type { Id } from "@app-catolico/backend/convex/_generated/dataModel";
-import { useAuth, useUser } from "@clerk/clerk-expo";
+import { useAuth, useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";

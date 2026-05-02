@@ -1,4 +1,4 @@
-import { useSignUp, useSSO } from "@clerk/clerk-expo";
+import { useSignUp, useSSO } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Linking from "expo-linking";
@@ -51,7 +51,7 @@ const getIncompleteSignUpMessage = (status: string | null | undefined) => {
 };
 
 export default function SignUpScreen() {
-  const { isLoaded, signUp, setActive } = useSignUp();
+  const { signUp } = useSignUp();
   const { startSSOFlow } = useSSO();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -98,7 +98,6 @@ export default function SignUpScreen() {
 
   const onSSOPress = useCallback(
     async (strategy: "oauth_google" | "oauth_apple") => {
-      if (!isLoaded) return;
       if (!acceptedLegal) {
         setErrorMessage(
           "Aceite os Termos de Uso e a Política de Privacidade para continuar.",
@@ -152,11 +151,10 @@ export default function SignUpScreen() {
         setOauthLoading(null);
       }
     },
-    [isLoaded, startSSOFlow, router, acceptedLegal],
+    [startSSOFlow, router, acceptedLegal],
   );
 
   const onSignUpPress = async () => {
-    if (!isLoaded) return;
     setErrorMessage("");
 
     if (!acceptedLegal) {
@@ -184,8 +182,33 @@ export default function SignUpScreen() {
     setIsLoading(true);
 
     try {
-      await signUp.create({ emailAddress, password, firstName: firstName.trim(), lastName: lastName.trim() });
-      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      const createResult = await signUp.create({
+        emailAddress,
+        password,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+      });
+
+      if (createResult.error) {
+        const message = getClerkErrorMessage(
+          createResult.error,
+          "Não foi possível criar a conta. Verifique os dados.",
+        );
+        setErrorMessage(message);
+        return;
+      }
+
+      const sendResult = await signUp.verifications.sendEmailCode();
+
+      if (sendResult.error) {
+        const message = getClerkErrorMessage(
+          sendResult.error,
+          "Não foi possível enviar o código de verificação.",
+        );
+        setErrorMessage(message);
+        return;
+      }
+
       setPendingVerification(true);
     } catch (err: unknown) {
       const message = getClerkErrorMessage(
@@ -200,7 +223,6 @@ export default function SignUpScreen() {
   };
 
   const onVerifyPress = async () => {
-    if (!isLoaded) return;
     const verificationCode = normalizeVerificationCode(code);
 
     if (verificationCode.length !== 6) {
@@ -211,18 +233,17 @@ export default function SignUpScreen() {
     setIsLoading(true);
 
     try {
-      const signUpAttempt = await signUp.attemptEmailAddressVerification({
+      const { error } = await signUp.verifications.verifyEmailCode({
         code: verificationCode,
       });
 
-      if (signUpAttempt.status === "complete") {
-        if (!signUpAttempt.createdSessionId) {
-          console.warn("Clerk sign-up completed without session", signUpAttempt);
-          Alert.alert("Erro", "Verificação concluída, mas não foi possível iniciar a sessão.");
-          return;
-        }
+      if (error) {
+        Alert.alert("Erro", getClerkErrorMessage(error, "Código inválido. Verifique e tente novamente."));
+        return;
+      }
 
-        await setActive({ session: signUpAttempt.createdSessionId });
+      if (signUp.status === "complete") {
+        await signUp.finalize();
         try {
           await ensureUser({
             gender: (params.gender as "masculino" | "feminino") || undefined,
@@ -235,8 +256,8 @@ export default function SignUpScreen() {
         }
         router.replace("/");
       } else {
-        console.warn("Incomplete Clerk sign-up verification", signUpAttempt);
-        Alert.alert("Erro", getIncompleteSignUpMessage(signUpAttempt.status));
+        console.warn("Incomplete Clerk sign-up verification", signUp.status);
+        Alert.alert("Erro", getIncompleteSignUpMessage(signUp.status));
       }
     } catch (err: unknown) {
       Alert.alert("Erro", getClerkErrorMessage(err, "Código inválido. Verifique e tente novamente."));

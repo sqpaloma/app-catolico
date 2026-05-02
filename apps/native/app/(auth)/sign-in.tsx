@@ -1,4 +1,4 @@
-import { useSignIn, useSSO } from "@clerk/clerk-expo";
+import { useSignIn, useSSO } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Linking from "expo-linking";
@@ -51,7 +51,7 @@ const getIncompleteSignInMessage = (status: string | null | undefined) => {
 };
 
 export default function SignInScreen() {
-  const { signIn, setActive, isLoaded } = useSignIn();
+  const { signIn } = useSignIn();
   const { startSSOFlow } = useSSO();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -74,7 +74,6 @@ export default function SignInScreen() {
 
   const onSSOPress = useCallback(
     async (strategy: "oauth_google" | "oauth_apple") => {
-      if (!isLoaded) return;
       setOauthLoading(strategy === "oauth_google" ? "google" : "apple");
 
       try {
@@ -122,37 +121,32 @@ export default function SignInScreen() {
         setOauthLoading(null);
       }
     },
-    [isLoaded, startSSOFlow, router],
+    [startSSOFlow, router],
   );
 
   const onSignInPress = async () => {
-    if (!isLoaded) return;
     setErrorMessage("");
     setIsLoading(true);
 
     try {
-      let signInAttempt = await signIn.create({
+      const { error } = await signIn.password({
         identifier: emailAddress,
         password,
       });
 
-      if (signInAttempt.status === "needs_first_factor") {
-        signInAttempt = await signIn.attemptFirstFactor({
-          strategy: "password",
-          password,
-        });
+      if (error) {
+        setErrorMessage(getClerkErrorMessage(error, "Email ou senha incorretos."));
+        return;
       }
 
-      const status = signInAttempt.status as string | null;
-
-      if (status === "complete") {
-        await setActive({ session: signInAttempt.createdSessionId });
+      if (signIn.status === "complete") {
+        await signIn.finalize();
         router.replace("/");
-      } else if (status === "needs_second_factor" || status === "needs_client_trust") {
-        await signIn.prepareSecondFactor({ strategy: "email_code" });
+      } else if (signIn.status === "needs_second_factor") {
+        await signIn.mfa.sendEmailCode();
         setPendingVerification(true);
       } else {
-        setErrorMessage(`Login incompleto (status: ${status}).`);
+        setErrorMessage(getIncompleteSignInMessage(signIn.status));
       }
     } catch (err: unknown) {
       setErrorMessage(getClerkErrorMessage(err, "Email ou senha incorretos."));
@@ -162,7 +156,6 @@ export default function SignInScreen() {
   };
 
   const onVerifyPress = async () => {
-    if (!isLoaded) return;
     const verificationCode = normalizeVerificationCode(code);
 
     if (verificationCode.length !== 6) {
@@ -173,23 +166,20 @@ export default function SignInScreen() {
     setIsLoading(true);
 
     try {
-      const result = await signIn.attemptSecondFactor({
-        strategy: "email_code",
+      const { error } = await signIn.mfa.verifyEmailCode({
         code: verificationCode,
       });
 
-      if (result.status === "complete") {
-        if (!result.createdSessionId) {
-          console.warn("Clerk sign-in completed without session", result);
-          Alert.alert("Erro", "Verificação concluída, mas não foi possível iniciar a sessão.");
-          return;
-        }
+      if (error) {
+        Alert.alert("Erro", getClerkErrorMessage(error, "Código inválido. Verifique e tente novamente."));
+        return;
+      }
 
-        await setActive({ session: result.createdSessionId });
+      if (signIn.status === "complete") {
+        await signIn.finalize();
         router.replace("/");
       } else {
-        console.warn("Incomplete Clerk sign-in verification", result);
-        Alert.alert("Erro", getIncompleteSignInMessage(result.status));
+        Alert.alert("Erro", getIncompleteSignInMessage(signIn.status));
       }
     } catch (err: unknown) {
       Alert.alert("Erro", getClerkErrorMessage(err, "Código inválido. Verifique e tente novamente."));

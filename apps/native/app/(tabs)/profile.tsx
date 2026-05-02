@@ -1,5 +1,5 @@
 import { api } from "@app-catolico/backend/convex/_generated/api";
-import { useAuth, useClerk, useUser } from "@clerk/clerk-expo";
+import { useAuth, useClerk, useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
