@@ -24,7 +24,6 @@
   "dependencies": {
     "@app-catolico/backend": "workspace:*",
     "@app-catolico/env": "workspace:*",
-    "@clerk/clerk-expo": "^2.19.31",
     "@clerk/expo": "^3.2.7",
     "@expo-google-fonts/xanh-mono": "^0.4.1",
     "@expo/metro-runtime": "~6.1.2",

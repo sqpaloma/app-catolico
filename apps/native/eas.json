@@ -26,6 +26,7 @@
       "env": {
         "EXPO_PUBLIC_CONVEX_URL": "https://rightful-frog-372.convex.cloud",
         "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsuc2FmZWNhdGhvbGljLmFwcCQ",
+        "EXPO_PUBLIC_SENTRY_DSN": "https://1234f9bcd0f0eef141ff91a3f29056ba@o4511298336784384.ingest.us.sentry.io/4511298340519936",
         "EAS_BUILD_NO_EXPO_GO_WARNING": "true"
       }
     }
