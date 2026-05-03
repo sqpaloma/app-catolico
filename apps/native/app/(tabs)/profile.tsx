@@ -19,6 +19,7 @@ import { LoginRequiredScreen } from "@/components/login-required-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useRevenueCat } from "@/contexts/revenuecat-context";
 
 function ProfileContent() {
   const { user: clerkUser } = useUser();
@@ -26,6 +27,7 @@ function ProfileContent() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isPremium, isLoading } = useCurrentUser();
+  const { presentPaywall } = useRevenueCat();
   const posts = useQuery(api.posts.listMine);
 
   const handleSignOut = async () => {
@@ -215,29 +217,24 @@ function ProfileContent() {
                 </Text>
               </View>
             </View>
-            <Pressable
-              onPress={() => {
-                if (isPremium) {
-                  router.push("/invoices");
-                } else {
-                  router.push("/pricing");
-                }
-              }}
-              style={({ pressed }) => ({
-                backgroundColor: pressed ? "#7B1616" : "#8B1A1A",
-                borderRadius: 12,
-                paddingVertical: 12,
-                alignItems: "center",
-                flexDirection: "row",
-                justifyContent: "center",
-                gap: 8,
-              })}
-            >
-
-              <Text style={{ color: "#fff", fontSize: 14, fontWeight: "700" }}>
-                {isPremium ? "Ver Faturas" : "Assinar Agora"}
-              </Text>
-            </Pressable>
+            {!isPremium && (
+              <Pressable
+                onPress={() => presentPaywall()}
+                style={({ pressed }) => ({
+                  backgroundColor: pressed ? "#7B1616" : "#8B1A1A",
+                  borderRadius: 12,
+                  paddingVertical: 12,
+                  alignItems: "center",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  gap: 8,
+                })}
+              >
+                <Text style={{ color: "#fff", fontSize: 14, fontWeight: "700" }}>
+                  Assinar Agora
+                </Text>
+              </Pressable>
+            )}
           </View>
 
         </View>

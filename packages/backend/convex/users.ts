@@ -109,6 +109,27 @@ export const setPremiumStatus = internalMutation({
   },
 });
 
+export const syncPremiumFromClient = mutation({
+  args: {
+    isPremium: v.boolean(),
+  },
+  handler: async (ctx, { isPremium }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Não autenticado");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) return;
+
+    if (user.isPremium !== isPremium) {
+      await ctx.db.patch(user._id, { isPremium });
+    }
+  },
+});
+
 export const getMeInternal = internalQuery({
   args: { clerkId: v.string() },
   handler: async (ctx, { clerkId }) => {
@@ -119,28 +140,3 @@ export const getMeInternal = internalQuery({
   },
 });
 
-export const setPremiumByAsaasCustomer = internalMutation({
-  args: {
-    asaasCustomerId: v.string(),
-    isPremium: v.boolean(),
-    premiumUntil: v.optional(v.number()),
-  },
-  handler: async (ctx, { asaasCustomerId, isPremium, premiumUntil }) => {
-    const users = await ctx.db.query("users").collect();
-    const user = users.find((u) => u.asaasCustomerId === asaasCustomerId);
-    if (!user) throw new Error("Usuário não encontrado para este customer Asaas");
-
-    await ctx.db.patch(user._id, { isPremium, premiumUntil });
-  },
-});
-
-export const setAsaasCustomerId = internalMutation({
-  args: {
-    userId: v.id("users"),
-    asaasCustomerId: v.string(),
-    asaasSubscriptionId: v.optional(v.string()),
-  },
-  handler: async (ctx, { userId, asaasCustomerId, asaasSubscriptionId }) => {
-    await ctx.db.patch(userId, { asaasCustomerId, asaasSubscriptionId });
-  },
-});

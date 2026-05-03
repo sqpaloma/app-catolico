@@ -25,8 +25,6 @@ export default defineSchema({
     isDirector: v.optional(v.boolean()),
     isPremium: v.boolean(),
     premiumUntil: v.optional(v.number()),
-    asaasCustomerId: v.optional(v.string()),
-    asaasSubscriptionId: v.optional(v.string()),
   })
     .index("by_clerkId", ["clerkId"])
     .index("by_anonymousId", ["anonymousId"]),
@@ -74,30 +72,6 @@ export default defineSchema({
     .index("by_questionId", ["questionId"])
     .index("by_directorId", ["directorId"]),
 
-  orders: defineTable({
-    userId: v.string(),
-    asaasCustomerId: v.string(),
-    asaasSubscriptionId: v.string(),
-    status: v.union(
-      v.literal("pending_payment"),
-      v.literal("active"),
-      v.literal("cancelled"),
-      v.literal("overdue"),
-    ),
-    plan: v.literal("premium"),
-    value: v.number(),
-    billingType: v.union(
-      v.literal("PIX"),
-      v.literal("BOLETO"),
-      v.literal("CREDIT_CARD"),
-      v.literal("UNDEFINED"),
-    ),
-    paymentLink: v.optional(v.string()),
-    createdAt: v.number(),
-  })
-    .index("by_userId", ["userId"])
-    .index("by_asaasSubscriptionId", ["asaasSubscriptionId"]),
-
   posts: defineTable({
     userId: v.string(),
     text: v.string(),
@@ -121,30 +95,4 @@ export default defineSchema({
     .index("by_directorId", ["directorId"])
     .index("by_directeeId", ["directeeId"]),
 
-  invoices: defineTable({
-    userId: v.string(),
-    orderId: v.id("orders"),
-    asaasPaymentId: v.string(),
-    status: v.union(
-      v.literal("pending"),
-      v.literal("confirmed"),
-      v.literal("received"),
-      v.literal("overdue"),
-      v.literal("refunded"),
-      v.literal("cancelled"),
-    ),
-    billingType: v.string(),
-    value: v.number(),
-    dueDate: v.string(),
-    paymentDate: v.optional(v.string()),
-    invoiceUrl: v.optional(v.string()),
-    bankSlipUrl: v.optional(v.string()),
-    pixQrCodeBase64: v.optional(v.string()),
-    pixCopiaECola: v.optional(v.string()),
-    boletoLinhaDigitavel: v.optional(v.string()),
-    createdAt: v.number(),
-  })
-    .index("by_userId", ["userId"])
-    .index("by_orderId", ["orderId"])
-    .index("by_asaasPaymentId", ["asaasPaymentId"]),
 });

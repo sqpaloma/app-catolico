@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { useRevenueCat } from "@/contexts/revenuecat-context";
 import React, { useEffect, useState } from "react";
 import {
   Animated,
@@ -54,6 +55,7 @@ export default function ConfessarScreen() {
   const insets = useSafeAreaInsets();
   const { isSignedIn } = useAuth();
   const router = useRouter();
+  const { presentPaywall } = useRevenueCat();
   const [text, setText] = useState("");
   const [category, setCategory] = useState<string>("Outro");
   const [showPicker, setShowPicker] = useState(false);
@@ -105,7 +107,7 @@ export default function ConfessarScreen() {
     }
 
     if (questionAccess?.canAskQuestion === false) {
-      router.push("/pricing");
+      presentPaywall();
       return;
     }
 
@@ -122,7 +124,7 @@ export default function ConfessarScreen() {
       });
     } catch (error) {
       if (isQuestionLimitError(error)) {
-        router.push("/pricing");
+        presentPaywall();
         return;
       }
 
