@@ -1,11 +1,9 @@
-import { api } from "@app-catolico/backend/convex/_generated/api";
 import { useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { useAction } from "convex/react";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -18,8 +16,6 @@ import {
 } from "react-native";
 import { Text, TextInput } from "@/components/ui/themed-text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import { useCurrentUser } from "@/hooks/use-current-user";
 
 const cardShadow = Platform.select({
   ios: {
@@ -35,9 +31,6 @@ export default function SettingsScreen() {
   const { user: clerkUser } = useUser();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isPremium } = useCurrentUser();
-  const cancelSubscription = useAction(api.asaas.cancelSubscription);
-
   const [firstName, setFirstName] = useState(clerkUser?.firstName ?? "");
   const [lastName, setLastName] = useState(clerkUser?.lastName ?? "");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -46,7 +39,6 @@ export default function SettingsScreen() {
   const [savingName, setSavingName] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [savingPhoto, setSavingPhoto] = useState(false);
-  const [cancellingSubscription, setCancellingSubscription] = useState(false);
 
   const nameChanged =
     firstName !== (clerkUser?.firstName ?? "") ||
@@ -123,31 +115,6 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleCancelSubscription = () => {
-    Alert.alert(
-      "Cancelar Assinatura",
-      "Tem certeza que deseja cancelar sua assinatura Premium? Você perderá acesso às vantagens exclusivas.",
-      [
-        { text: "Não", style: "cancel" },
-        {
-          text: "Sim, cancelar",
-          style: "destructive",
-          onPress: async () => {
-            setCancellingSubscription(true);
-            try {
-              await cancelSubscription();
-              Alert.alert("Assinatura Cancelada", "Sua assinatura foi cancelada com sucesso.");
-            } catch (err) {
-              console.error("Error cancelling subscription:", err);
-              Alert.alert("Erro", "Não foi possível cancelar a assinatura. Tente novamente.");
-            } finally {
-              setCancellingSubscription(false);
-            }
-          },
-        },
-      ],
-    );
-  };
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f5f0eb" }}>
@@ -429,63 +396,6 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Subscription cancellation card */}
-        {isPremium && (
-          <View style={{ paddingHorizontal: 20, marginTop: 16 }}>
-            <View style={{ backgroundColor: "#fff", borderRadius: 16, padding: 24, ...cardShadow }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                <Ionicons name="star" size={18} color="#f5a623" />
-                <Text
-                  style={{
-                    color: "#8B1A1A",
-                    fontSize: 12,
-                    fontWeight: "700",
-                    letterSpacing: 1.5,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Assinatura Premium
-                </Text>
-              </View>
-
-              <Text style={{ fontSize: 14, color: "#555", lineHeight: 22, marginBottom: 20 }}>
-                Você possui uma assinatura Premium ativa. Ao cancelar, você perderá acesso às
-                vantagens exclusivas.
-              </Text>
-
-              <Pressable
-                onPress={handleCancelSubscription}
-                disabled={cancellingSubscription}
-                style={({ pressed }) => ({
-                  borderWidth: 2,
-                  borderColor: cancellingSubscription ? "#c4948b" : "#B71C1C",
-                  backgroundColor: pressed ? "rgba(183, 28, 28, 0.08)" : "transparent",
-                  borderRadius: 12,
-                  paddingVertical: 16,
-                  alignItems: "center",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  gap: 8,
-                })}
-              >
-                {cancellingSubscription ? (
-                  <ActivityIndicator color="#B71C1C" size="small" />
-                ) : (
-                  <Ionicons name="close-circle-outline" size={20} color="#B71C1C" />
-                )}
-                <Text
-                  style={{
-                    color: cancellingSubscription ? "#c4948b" : "#B71C1C",
-                    fontSize: 16,
-                    fontWeight: "700",
-                  }}
-                >
-                  {cancellingSubscription ? "Cancelando..." : "Cancelar Assinatura"}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        )}
       </ScrollView>
     </View>
   );

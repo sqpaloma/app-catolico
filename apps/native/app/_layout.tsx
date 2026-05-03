@@ -18,6 +18,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 
 import { ErrorBoundary } from "@/components/error-boundary";
 import { AppThemeProvider } from "@/contexts/app-theme-context";
+import { RevenueCatProvider } from "@/contexts/revenuecat-context";
 import { Sentry, captureException, initSentry } from "@/lib/sentry";
 
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -133,22 +134,6 @@ function StackLayout() {
           }}
         />
         <Stack.Screen
-          name="pricing"
-          options={{
-            headerShown: false,
-            presentation: "card",
-          }}
-        />
-        <Stack.Screen
-          name="invoices"
-          options={{
-            headerShown: true,
-            headerTitle: "Faturas",
-            headerBackTitle: "Voltar",
-            presentation: "card",
-          }}
-        />
-        <Stack.Screen
           name="settings"
           options={{
             headerShown: false,
@@ -161,13 +146,6 @@ function StackLayout() {
             headerShown: true,
             headerTitle: "Diário do Dirigido",
             headerBackTitle: "Voltar",
-            presentation: "card",
-          }}
-        />
-        <Stack.Screen
-          name="checkout"
-          options={{
-            headerShown: false,
             presentation: "card",
           }}
         />
@@ -204,7 +182,9 @@ function InnerLayout({ appEnv }: { appEnv: AppEnv }) {
           <KeyboardProvider>
             <AppThemeProvider>
               <HeroUINativeProvider>
-                <StackLayout />
+                <RevenueCatProvider>
+                  <StackLayout />
+                </RevenueCatProvider>
               </HeroUINativeProvider>
             </AppThemeProvider>
           </KeyboardProvider>
