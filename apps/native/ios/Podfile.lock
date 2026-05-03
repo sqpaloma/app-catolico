@@ -187,6 +187,11 @@ PODS:
   - libwebp/webp (1.5.0):
     - libwebp/sharpyuv
   - PromisesObjC (2.4.0)
+  - PurchasesHybridCommon (18.1.0):
+    - RevenueCat (= 5.68.0)
+  - PurchasesHybridCommonUI (18.1.0):
+    - PurchasesHybridCommon (= 18.1.0)
+    - RevenueCatUI (= 5.68.0)
   - RCTDeprecation (0.81.5)
   - RCTRequired (0.81.5)
   - RCTTypeSafety (0.81.5):
@@ -1930,6 +1935,9 @@ PODS:
     - React-utils (= 0.81.5)
     - ReactNativeDependencies
   - ReactNativeDependencies (0.81.5)
+  - RevenueCat (5.68.0)
+  - RevenueCatUI (5.68.0):
+    - RevenueCat (= 5.68.0)
   - RNGestureHandler (2.28.0):
     - hermes-engine
     - RCTRequired
@@ -1952,6 +1960,12 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - RNPaywalls (10.0.1):
+    - PurchasesHybridCommonUI (= 18.1.0)
+    - React-Core
+  - RNPurchases (10.0.1):
+    - PurchasesHybridCommon (= 18.1.0)
+    - React-Core
   - RNReanimated (4.1.7):
     - hermes-engine
     - RCTRequired
@@ -2321,6 +2335,8 @@ DEPENDENCIES:
   - "ReactCommon/turbomodule/core (from `../../../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.29.0_@types+react@19.1.17_bufferutil@4.1.0_react@19.1.0_utf-8-validate@6.0.6/node_modules/react-native/ReactCommon`)"
   - "ReactNativeDependencies (from `../../../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.29.0_@types+react@19.1.17_bufferutil@4.1.0_react@19.1.0_utf-8-validate@6.0.6/node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)"
   - "RNGestureHandler (from `../../../node_modules/.pnpm/react-native-gesture-handler@2.28.0_react-native@0.81.5_@babel+core@7.29.0_@types+react_230bb48b59a390e4cd26d51593534105/node_modules/react-native-gesture-handler`)"
+  - "RNPaywalls (from `../../../node_modules/.pnpm/react-native-purchases-ui@10.0.1_react-native-purchases@10.0.1_react-native-web@0.21.2__88d818e064896b9c5ecb4211a72a4b53/node_modules/react-native-purchases-ui`)"
+  - "RNPurchases (from `../../../node_modules/.pnpm/react-native-purchases@10.0.1_react-native-web@0.21.2_react-dom@19.1.0_react@19.1.0__re_369b8a0c310c0a58408938f0482b35ef/node_modules/react-native-purchases`)"
   - "RNReanimated (from `../../../node_modules/.pnpm/react-native-reanimated@4.1.7_react-native-worklets@0.5.1_@babel+core@7.29.0_react-nati_1fbcfc42fc7bbddbf622549dc8f25886/node_modules/react-native-reanimated`)"
   - "RNScreens (from `../../../node_modules/.pnpm/react-native-screens@4.16.0_react-native@0.81.5_@babel+core@7.29.0_@types+react@19.1.17_df748bb3ee5bf4738a0a530afbc39255/node_modules/react-native-screens`)"
   - "RNSentry (from `../../../node_modules/.pnpm/@sentry+react-native@7.2.0_expo@54.0.33_react-native@0.81.5_@babel+core@7.29.0_@types+r_3721894a90df6134679f6c7e22d9774e/node_modules/@sentry/react-native`)"
@@ -2340,6 +2356,10 @@ SPEC REPOS:
     - libdav1d
     - libwebp
     - PromisesObjC
+    - PurchasesHybridCommon
+    - PurchasesHybridCommonUI
+    - RevenueCat
+    - RevenueCatUI
     - SDWebImage
     - SDWebImageAVIFCoder
     - SDWebImageSVGCoder
@@ -2532,6 +2552,10 @@ EXTERNAL SOURCES:
     :podspec: "../../../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.29.0_@types+react@19.1.17_bufferutil@4.1.0_react@19.1.0_utf-8-validate@6.0.6/node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec"
   RNGestureHandler:
     :path: "../../../node_modules/.pnpm/react-native-gesture-handler@2.28.0_react-native@0.81.5_@babel+core@7.29.0_@types+react_230bb48b59a390e4cd26d51593534105/node_modules/react-native-gesture-handler"
+  RNPaywalls:
+    :path: "../../../node_modules/.pnpm/react-native-purchases-ui@10.0.1_react-native-purchases@10.0.1_react-native-web@0.21.2__88d818e064896b9c5ecb4211a72a4b53/node_modules/react-native-purchases-ui"
+  RNPurchases:
+    :path: "../../../node_modules/.pnpm/react-native-purchases@10.0.1_react-native-web@0.21.2_react-dom@19.1.0_react@19.1.0__re_369b8a0c310c0a58408938f0482b35ef/node_modules/react-native-purchases"
   RNReanimated:
     :path: "../../../node_modules/.pnpm/react-native-reanimated@4.1.7_react-native-worklets@0.5.1_@babel+core@7.29.0_react-nati_1fbcfc42fc7bbddbf622549dc8f25886/node_modules/react-native-reanimated"
   RNScreens:
@@ -2581,6 +2605,8 @@ SPEC CHECKSUMS:
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
+  PurchasesHybridCommon: 32902b8fad349cf549f096183926ee33af00e36a
+  PurchasesHybridCommonUI: 658bc5ca18c14a4bcc543740a3acc092cd0064f6
   RCTDeprecation: 943572d4be82d480a48f4884f670135ae30bf990
   RCTRequired: 8f3cfc90cc25cf6e420ddb3e7caaaabc57df6043
   RCTTypeSafety: 16a4144ca3f959583ab019b57d5633df10b5e97c
@@ -2647,7 +2673,11 @@ SPEC CHECKSUMS:
   ReactCodegen: e78066e2d3d4035f9a8c5225be8df8bcac254d50
   ReactCommon: 08810150b1206cc44aecf5f6ae19af32f29151a8
   ReactNativeDependencies: 71ce9c28beb282aa720ea7b46980fff9669f428a
+  RevenueCat: c535d3739d51163f6d9d5dbd01c7b5d93b718ff5
+  RevenueCatUI: fb23ded3007789db7a240f05c35c2237a197d629
   RNGestureHandler: 2914750df066d89bf9d8f48a10ad5f0051108ac3
+  RNPaywalls: 051e2576b934bd1accdab123ebccc04c1e658a0d
+  RNPurchases: ef34b2c0c1fcdab1df209fde0d95b026f90ae329
   RNReanimated: 30fa7fd7f1b124669d45e7a3b27410f75052eb82
   RNScreens: d8d6f1792f6e7ac12b0190d33d8d390efc0c1845
   RNSentry: 41979b419908128847ef662cc130a400b7576fa9

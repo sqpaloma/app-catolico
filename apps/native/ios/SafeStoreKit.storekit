@@ -1,0 +1,65 @@
+{
+  "identifier" : "SafeStoreKit",
+  "type" : "Default",
+  "version" : 3,
+  "subscriptionGroups" : [
+    {
+      "id" : "20B5B8E3-D75E-4814-8F31-ABCDEF123456",
+      "localizations" : [],
+      "name" : "Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "19.90",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "F4A6C84D-F496-D588-00CE-334A12345678",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Acesso completo a todos os recursos premium",
+              "displayName" : "Premium Mensal",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "premium_monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Premium Mensal",
+          "subscriptionGroupID" : "20B5B8E3-D75E-4814-8F31-ABCDEF123456",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : []
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "199.00",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Acesso completo a todos os recursos premium por 1 ano",
+              "displayName" : "Premium Anual",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "premium_yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Premium Anual",
+          "subscriptionGroupID" : "20B5B8E3-D75E-4814-8F31-ABCDEF123456",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : []
+        }
+      ]
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "pt_BR",
+    "_storefront" : "BRA",
+    "_storeKitErrors" : [],
+    "_timeRate" : 0
+  }
+}

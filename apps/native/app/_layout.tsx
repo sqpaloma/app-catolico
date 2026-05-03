@@ -141,6 +141,13 @@ function StackLayout() {
           }}
         />
         <Stack.Screen
+          name="paywall"
+          options={{
+            headerShown: false,
+            presentation: "modal",
+          }}
+        />
+        <Stack.Screen
           name="directee-feed/[userId]"
           options={{
             headerShown: true,

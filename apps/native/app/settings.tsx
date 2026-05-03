@@ -1,11 +1,13 @@
+import { api } from "@app-catolico/backend/convex/_generated/api";
 import { useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
+import { useMutation } from "convex/react";
 
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -14,8 +16,10 @@ import {
   ScrollView,
   View,
 } from "react-native";
+import Purchases from "react-native-purchases";
 import { Text, TextInput } from "@/components/ui/themed-text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 const cardShadow = Platform.select({
   ios: {
@@ -36,9 +40,12 @@ export default function SettingsScreen() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
+  const { isPremium } = useCurrentUser();
+  const deleteMyAccount = useMutation(api.users.deleteMyAccount);
   const [savingName, setSavingName] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [savingPhoto, setSavingPhoto] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const nameChanged =
     firstName !== (clerkUser?.firstName ?? "") ||
@@ -115,6 +122,64 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleCancelSubscription = useCallback(() => {
+    Alert.alert(
+      "Cancelar assinatura",
+      "Deseja cancelar sua assinatura? Você perderá o acesso Premium ao final do período atual.",
+      [
+        { text: "Voltar", style: "cancel" },
+        {
+          text: "Cancelar assinatura",
+          style: "destructive",
+          onPress: () => {
+            Purchases.showManageSubscriptions().catch((e) => {
+              if (__DEV__) console.error("[Settings] manage subs error:", e);
+            });
+          },
+        },
+      ],
+    );
+  }, []);
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Excluir conta",
+      "Tem certeza? Todos os seus dados serão apagados permanentemente.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sim, excluir",
+          style: "destructive",
+          onPress: () => {
+            Alert.alert(
+              "Confirmação final",
+              "Esta ação é irreversível. Deseja realmente excluir sua conta?",
+              [
+                { text: "Voltar", style: "cancel" },
+                {
+                  text: "Excluir definitivamente",
+                  style: "destructive",
+                  onPress: async () => {
+                    setDeleting(true);
+                    try {
+                      await deleteMyAccount();
+                      await clerkUser?.delete();
+                      router.replace("/(auth)/sign-in");
+                    } catch (err) {
+                      console.error("Error deleting account:", err);
+                      Alert.alert("Erro", "Não foi possível excluir sua conta. Tente novamente.");
+                    } finally {
+                      setDeleting(false);
+                    }
+                  },
+                },
+              ],
+            );
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f5f0eb" }}>
@@ -392,6 +457,105 @@ export default function SettingsScreen() {
               <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
                 {savingPassword ? "Alterando..." : "Alterar Senha"}
               </Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Cancel subscription card */}
+        {isPremium && (
+          <View style={{ paddingHorizontal: 20, marginTop: 16 }}>
+            <View style={{ backgroundColor: "#fff", borderRadius: 16, padding: 24, ...cardShadow }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                <Ionicons name="card-outline" size={18} color="#8B1A1A" />
+                <Text
+                  style={{
+                    color: "#8B1A1A",
+                    fontSize: 12,
+                    fontWeight: "700",
+                    letterSpacing: 1.5,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Assinatura
+                </Text>
+              </View>
+
+              <Text style={{ fontSize: 13, color: "#666", marginBottom: 16, lineHeight: 18 }}>
+                Você possui o plano Premium ativo. Caso deseje cancelar, você manterá o acesso até o final do período vigente.
+              </Text>
+
+              <Pressable
+                onPress={handleCancelSubscription}
+                style={({ pressed }) => ({
+                  borderWidth: 1.5,
+                  borderColor: "#D32F2F",
+                  borderRadius: 12,
+                  paddingVertical: 14,
+                  alignItems: "center",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  gap: 8,
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <Ionicons name="close-circle-outline" size={18} color="#D32F2F" />
+                <Text style={{ color: "#D32F2F", fontSize: 15, fontWeight: "700" }}>
+                  Cancelar Assinatura
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+
+        {/* Delete account card */}
+        <View style={{ paddingHorizontal: 20, marginTop: 16 }}>
+          <View style={{ backgroundColor: "#fff", borderRadius: 16, padding: 24, ...cardShadow }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 16 }}>
+              <Ionicons name="warning-outline" size={18} color="#D32F2F" />
+              <Text
+                style={{
+                  color: "#D32F2F",
+                  fontSize: 12,
+                  fontWeight: "700",
+                  letterSpacing: 1.5,
+                  textTransform: "uppercase",
+                }}
+              >
+                Zona de Perigo
+              </Text>
+            </View>
+
+            <Text style={{ fontSize: 13, color: "#666", marginBottom: 16, lineHeight: 18 }}>
+              Ao excluir sua conta, todos os seus dados serão removidos permanentemente e não poderão ser recuperados.
+            </Text>
+
+            <Pressable
+              onPress={handleDeleteAccount}
+              disabled={deleting}
+              style={({ pressed }) => ({
+                backgroundColor: deleting
+                  ? "#e0a0a0"
+                  : pressed
+                    ? "#B71C1C"
+                    : "#D32F2F",
+                borderRadius: 12,
+                paddingVertical: 16,
+                alignItems: "center",
+                flexDirection: "row",
+                justifyContent: "center",
+                gap: 8,
+              })}
+            >
+              {deleting ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <>
+                  <Ionicons name="trash-outline" size={18} color="#fff" />
+                  <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
+                    Excluir Conta
+                  </Text>
+                </>
+              )}
             </Pressable>
           </View>
         </View>

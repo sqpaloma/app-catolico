@@ -3,6 +3,15 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 
 const QUESTION_LIMIT_REACHED = "QUESTION_LIMIT_REACHED";
+const PREMIUM_DAILY_LIMIT_REACHED = "PREMIUM_DAILY_LIMIT_REACHED";
+
+const BRT_OFFSET_MS = 3 * 60 * 60 * 1000;
+
+function startOfDayBRT(now: number): number {
+  const nowBRT = now - BRT_OFFSET_MS;
+  const dayStartBRT = nowBRT - (nowBRT % (24 * 60 * 60 * 1000));
+  return dayStartBRT + BRT_OFFSET_MS;
+}
 
 export const submit = mutation({
   args: {
@@ -20,13 +29,17 @@ export const submit = mutation({
 
     if (!user) throw new Error("Usuário não encontrado. Faça login novamente.");
 
-    if (!user.isPremium) {
-      const existingQuestion = await ctx.db
-        .query("questions")
-        .withIndex("by_userId", (q) => q.eq("userId", identity.subject))
-        .first();
+    const existing = await ctx.db
+      .query("questions")
+      .withIndex("by_userId", (q) => q.eq("userId", identity.subject))
+      .collect();
 
-      if (existingQuestion) throw new Error(QUESTION_LIMIT_REACHED);
+    if (user.isPremium) {
+      const todayStart = startOfDayBRT(Date.now());
+      const askedToday = existing.some((q) => q._creationTime >= todayStart);
+      if (askedToday) throw new Error(PREMIUM_DAILY_LIMIT_REACHED);
+    } else {
+      if (existing.length >= 5) throw new Error(QUESTION_LIMIT_REACHED);
     }
 
     const questionId = await ctx.db.insert("questions", {
@@ -55,8 +68,10 @@ export const getQuestionAccess = query({
     if (!identity) {
       return {
         canAskQuestion: false,
-        hasAskedQuestion: false,
+        questionCount: 0,
+        questionsRemaining: 0,
         isPremium: false,
+        premiumAskedToday: false,
       };
     }
 
@@ -68,21 +83,38 @@ export const getQuestionAccess = query({
     if (!user) {
       return {
         canAskQuestion: false,
-        hasAskedQuestion: false,
+        questionCount: 0,
+        questionsRemaining: 0,
         isPremium: false,
+        premiumAskedToday: false,
       };
     }
 
-    const existingQuestion = await ctx.db
+    const existingQuestions = await ctx.db
       .query("questions")
       .withIndex("by_userId", (q) => q.eq("userId", identity.subject))
-      .first();
-    const hasAskedQuestion = existingQuestion !== null;
+      .collect();
+
+    const questionCount = existingQuestions.length;
+
+    if (user.isPremium) {
+      const todayStart = startOfDayBRT(Date.now());
+      const askedToday = existingQuestions.some((q) => q._creationTime >= todayStart);
+      return {
+        canAskQuestion: !askedToday,
+        questionCount,
+        questionsRemaining: null,
+        isPremium: true,
+        premiumAskedToday: askedToday,
+      };
+    }
 
     return {
-      canAskQuestion: user.isPremium || !hasAskedQuestion,
-      hasAskedQuestion,
-      isPremium: user.isPremium,
+      canAskQuestion: questionCount < 5,
+      questionCount,
+      questionsRemaining: Math.max(0, 5 - questionCount),
+      isPremium: false,
+      premiumAskedToday: false,
     };
   },
 });

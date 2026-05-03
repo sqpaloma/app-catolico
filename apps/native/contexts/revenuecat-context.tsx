@@ -9,25 +9,21 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Platform } from "react-native";
 import Purchases, {
   CustomerInfo,
   LOG_LEVEL,
 } from "react-native-purchases";
-import RevenueCatUI, { PAYWALL_RESULT } from "react-native-purchases-ui";
 
 const ENTITLEMENT_ID = "Safe Pro";
 
 type RevenueCatContextValue = {
   isPremium: boolean;
   isReady: boolean;
-  presentPaywall: () => Promise<boolean>;
 };
 
 const RevenueCatContext = createContext<RevenueCatContextValue>({
   isPremium: false,
   isReady: false,
-  presentPaywall: async () => false,
 });
 
 export function useRevenueCat() {
@@ -70,7 +66,9 @@ export function RevenueCatProvider({ children }: { children: React.ReactNode }) 
         if (__DEV__) console.error("[RevenueCat] logIn error:", e);
       });
     } else if (!isSignedIn) {
-      Purchases.logOut().catch(() => {});
+      Purchases.isAnonymous().then((anonymous) => {
+        if (!anonymous) Purchases.logOut().catch(() => {});
+      }).catch(() => {});
       setIsPremium(false);
     }
   }, [isSignedIn, userId, isReady]);
@@ -101,27 +99,8 @@ export function RevenueCatProvider({ children }: { children: React.ReactNode }) 
     }
   }, [isSignedIn, syncPremium]);
 
-  const presentPaywall = useCallback(async (): Promise<boolean> => {
-    try {
-      const result = await RevenueCatUI.presentPaywallIfNeeded({
-        requiredEntitlementIdentifier: ENTITLEMENT_ID,
-      });
-
-      switch (result) {
-        case PAYWALL_RESULT.PURCHASED:
-        case PAYWALL_RESULT.RESTORED:
-          return true;
-        default:
-          return false;
-      }
-    } catch (e) {
-      if (__DEV__) console.error("[RevenueCat] paywall error:", e);
-      return false;
-    }
-  }, []);
-
   return (
-    <RevenueCatContext.Provider value={{ isPremium, isReady, presentPaywall }}>
+    <RevenueCatContext.Provider value={{ isPremium, isReady }}>
       {children}
     </RevenueCatContext.Provider>
   );

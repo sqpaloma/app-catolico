@@ -4,7 +4,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useRevenueCat } from "@/contexts/revenuecat-context";
 import React, { useEffect, useState } from "react";
 import {
   Animated,
@@ -29,6 +28,10 @@ const CATEGORIES = [
 ] as const;
 
 const QUESTION_LIMIT_REACHED = "QUESTION_LIMIT_REACHED";
+const PREMIUM_DAILY_LIMIT_REACHED = "PREMIUM_DAILY_LIMIT_REACHED";
+
+const FREE_QUESTION_LIMIT = 5;
+const MIN_QUESTION_LENGTH = 10;
 
 type FeedbackModal = {
   visible: boolean;
@@ -36,6 +39,16 @@ type FeedbackModal = {
   iconColor: string;
   title: string;
   message: string;
+};
+
+type LimitWarning = {
+  visible: boolean;
+  icon: keyof typeof Ionicons.glyphMap;
+  iconColor: string;
+  iconBg: string;
+  title: string;
+  message: string;
+  showPremiumButton: boolean;
 };
 
 const MODAL_HIDDEN: FeedbackModal = {
@@ -46,22 +59,34 @@ const MODAL_HIDDEN: FeedbackModal = {
   message: "",
 };
 
-function isQuestionLimitError(error: unknown) {
+const LIMIT_HIDDEN: LimitWarning = {
+  visible: false,
+  icon: "information-circle",
+  iconColor: "#E65100",
+  iconBg: "#FFF3E0",
+  title: "",
+  message: "",
+  showPremiumButton: false,
+};
+
+function getErrorType(error: unknown): "free_limit" | "premium_daily" | "other" {
   const message = error instanceof Error ? error.message : String(error);
-  return message.includes(QUESTION_LIMIT_REACHED);
+  if (message.includes(PREMIUM_DAILY_LIMIT_REACHED)) return "premium_daily";
+  if (message.includes(QUESTION_LIMIT_REACHED)) return "free_limit";
+  return "other";
 }
 
 export default function ConfessarScreen() {
   const insets = useSafeAreaInsets();
   const { isSignedIn } = useAuth();
   const router = useRouter();
-  const { presentPaywall } = useRevenueCat();
   const [text, setText] = useState("");
   const [category, setCategory] = useState<string>("Outro");
   const [showPicker, setShowPicker] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showInfoAlert, setShowInfoAlert] = useState(true);
   const [feedback, setFeedback] = useState<FeedbackModal>(MODAL_HIDDEN);
+  const [limitWarning, setLimitWarning] = useState<LimitWarning>(LIMIT_HIDDEN);
   const fadeAnim = useState(() => new Animated.Value(0))[0];
   const submitQuestion = useMutation(api.questions.submit);
   const questionAccess = useQuery(api.questions.getQuestionAccess);
@@ -88,6 +113,43 @@ export default function ConfessarScreen() {
     setFeedback({ ...info, visible: true });
 
   const closeFeedback = () => setFeedback(MODAL_HIDDEN);
+  const closeLimitWarning = () => setLimitWarning(LIMIT_HIDDEN);
+
+  const showLimitWarningForRemaining = (remaining: number) => {
+    if (remaining === 0) {
+      setLimitWarning({
+        visible: true,
+        icon: "alert-circle",
+        iconColor: "#B71C1C",
+        iconBg: "#FFEBEE",
+        title: "Perguntas esgotadas",
+        message:
+          "Você usou todas as suas 5 perguntas gratuitas. Assine o Premium para continuar perguntando sem limites.",
+        showPremiumButton: true,
+      });
+    } else if (remaining === 1) {
+      setLimitWarning({
+        visible: true,
+        icon: "warning",
+        iconColor: "#E65100",
+        iconBg: "#FFF3E0",
+        title: "Última pergunta!",
+        message:
+          "Você só tem mais 1 pergunta gratuita. Depois disso, será necessário o plano Premium para continuar.",
+        showPremiumButton: true,
+      });
+    } else {
+      setLimitWarning({
+        visible: true,
+        icon: "information-circle",
+        iconColor: "#E65100",
+        iconBg: "#FFF3E0",
+        title: "Pergunta enviada!",
+        message: `Você ainda tem ${remaining} pergunta${remaining > 1 ? "s" : ""} gratuita${remaining > 1 ? "s" : ""} restante${remaining > 1 ? "s" : ""}. Assine o Premium para perguntas ilimitadas.`,
+        showPremiumButton: false,
+      });
+    }
+  };
 
   const handleSubmit = async () => {
     if (!isSignedIn) {
@@ -106,25 +168,77 @@ export default function ConfessarScreen() {
       return;
     }
 
-    if (questionAccess?.canAskQuestion === false) {
-      presentPaywall();
+    if (trimmed.length < MIN_QUESTION_LENGTH) {
+      showFeedback({
+        icon: "alert-circle",
+        iconColor: "#E65100",
+        title: "Mensagem muito curta",
+        message: "Escreva um pouco mais para que possamos orientar você melhor.",
+      });
       return;
     }
+
+    const isPremiumUser = questionAccess?.isPremium === true;
+
+    if (!isPremiumUser && questionAccess?.canAskQuestion === false) {
+      router.push("/paywall");
+      return;
+    }
+
+    if (isPremiumUser && questionAccess?.premiumAskedToday) {
+      setLimitWarning({
+        visible: true,
+        icon: "time-outline",
+        iconColor: "#5C6BC0",
+        iconBg: "#E8EAF6",
+        title: "Limite diário atingido",
+        message:
+          "Você já enviou sua pergunta de hoje. Como Premium, você pode enviar uma nova pergunta amanhã.",
+        showPremiumButton: false,
+      });
+      return;
+    }
+
+    const remainingBefore = questionAccess?.questionsRemaining ?? FREE_QUESTION_LIMIT;
 
     setIsSubmitting(true);
     try {
       await submitQuestion({ text: trimmed, category });
       setText("");
       setCategory("Outro");
-      showFeedback({
-        icon: "checkmark-circle",
-        iconColor: "#2E7D32",
-        title: "Enviado!",
-        message: "Sua mensagem foi enviada. Um diretor espiritual responderá em breve com orientação e oração.",
-      });
+
+      if (isPremiumUser) {
+        setLimitWarning({
+          visible: true,
+          icon: "checkmark-circle",
+          iconColor: "#2E7D32",
+          iconBg: "#E8F5E9",
+          title: "Enviado!",
+          message:
+            "Sua mensagem foi enviada. Um diretor espiritual responderá em breve.\n\nComo Premium, você pode enviar uma nova pergunta amanhã.",
+          showPremiumButton: false,
+        });
+      } else {
+        const newRemaining = (remainingBefore as number) - 1;
+        showLimitWarningForRemaining(newRemaining);
+      }
     } catch (error) {
-      if (isQuestionLimitError(error)) {
-        presentPaywall();
+      const errorType = getErrorType(error);
+      if (errorType === "free_limit") {
+        router.push("/paywall");
+        return;
+      }
+      if (errorType === "premium_daily") {
+        setLimitWarning({
+          visible: true,
+          icon: "time-outline",
+          iconColor: "#5C6BC0",
+          iconBg: "#E8EAF6",
+          title: "Limite diário atingido",
+          message:
+            "Você já enviou sua pergunta de hoje. Como Premium, você pode enviar uma nova pergunta amanhã.",
+          showPremiumButton: false,
+        });
         return;
       }
 
@@ -419,6 +533,125 @@ export default function ConfessarScreen() {
             >
               <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
                 OK
+              </Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Limit warning modal */}
+      <Modal visible={limitWarning.visible} transparent animationType="fade" onRequestClose={closeLimitWarning}>
+        <Pressable
+          onPress={closeLimitWarning}
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 32,
+          }}
+        >
+          <Pressable
+            onPress={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 20,
+              width: "100%",
+              maxWidth: 320,
+              paddingTop: 32,
+              paddingBottom: 20,
+              paddingHorizontal: 24,
+              alignItems: "center",
+              ...Platform.select({
+                ios: {
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 8 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 24,
+                },
+                android: { elevation: 10 },
+              }),
+            }}
+          >
+            <View
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: limitWarning.iconBg,
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 16,
+              }}
+            >
+              <Ionicons name={limitWarning.icon} size={30} color={limitWarning.iconColor} />
+            </View>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "800",
+                color: "#1a1a1a",
+                textAlign: "center",
+                marginBottom: 8,
+              }}
+            >
+              {limitWarning.title}
+            </Text>
+            <Text
+              style={{
+                fontSize: 15,
+                color: "#666",
+                textAlign: "center",
+                lineHeight: 22,
+                marginBottom: 24,
+              }}
+            >
+              {limitWarning.message}
+            </Text>
+            {limitWarning.showPremiumButton && (
+              <Pressable
+                onPress={() => {
+                  closeLimitWarning();
+                  router.push("/paywall");
+                }}
+                style={({ pressed }) => ({
+                  backgroundColor: pressed ? "#7B1616" : "#8B1A1A",
+                  borderRadius: 14,
+                  paddingVertical: 14,
+                  paddingHorizontal: 32,
+                  width: "100%",
+                  alignItems: "center",
+                  marginBottom: 10,
+                })}
+              >
+                <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
+                  Ver Premium
+                </Text>
+              </Pressable>
+            )}
+            <Pressable
+              onPress={closeLimitWarning}
+              style={({ pressed }) => ({
+                backgroundColor: limitWarning.showPremiumButton
+                  ? "transparent"
+                  : pressed
+                    ? "#7B1616"
+                    : "#8B1A1A",
+                borderRadius: 14,
+                paddingVertical: 14,
+                paddingHorizontal: 32,
+                width: "100%",
+                alignItems: "center",
+              })}
+            >
+              <Text
+                style={{
+                  color: limitWarning.showPremiumButton ? "#888" : "#fff",
+                  fontSize: 16,
+                  fontWeight: limitWarning.showPremiumButton ? "600" : "700",
+                }}
+              >
+                {limitWarning.showPremiumButton ? "Fechar" : "OK"}
               </Text>
             </Pressable>
           </Pressable>

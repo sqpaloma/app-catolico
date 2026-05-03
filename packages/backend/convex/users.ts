@@ -115,7 +115,7 @@ export const syncPremiumFromClient = mutation({
   },
   handler: async (ctx, { isPremium }) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Não autenticado");
+    if (!identity) return;
 
     const user = await ctx.db
       .query("users")
@@ -127,6 +127,62 @@ export const syncPremiumFromClient = mutation({
     if (user.isPremium !== isPremium) {
       await ctx.db.patch(user._id, { isPremium });
     }
+  },
+});
+
+export const deleteMyAccount = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Não autenticado");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) throw new Error("Usuário não encontrado");
+
+    const posts = await ctx.db
+      .query("posts")
+      .withIndex("by_userId", (q) => q.eq("userId", user.clerkId))
+      .collect();
+    for (const post of posts) {
+      await ctx.db.delete(post._id);
+    }
+
+    const questions = await ctx.db
+      .query("questions")
+      .withIndex("by_userId", (q) => q.eq("userId", user.clerkId))
+      .collect();
+    for (const question of questions) {
+      const answers = await ctx.db
+        .query("answers")
+        .withIndex("by_questionId", (q) => q.eq("questionId", question._id))
+        .collect();
+      for (const answer of answers) {
+        await ctx.db.delete(answer._id);
+      }
+      await ctx.db.delete(question._id);
+    }
+
+    const directorships = await ctx.db
+      .query("directorships")
+      .withIndex("by_directorId", (q) => q.eq("directorId", user.clerkId))
+      .collect();
+    for (const d of directorships) {
+      await ctx.db.delete(d._id);
+    }
+
+    const directeeships = await ctx.db
+      .query("directorships")
+      .withIndex("by_directeeId", (q) => q.eq("directeeId", user.clerkId))
+      .collect();
+    for (const d of directeeships) {
+      await ctx.db.delete(d._id);
+    }
+
+    await ctx.db.delete(user._id);
   },
 });
 

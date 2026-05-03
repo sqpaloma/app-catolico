@@ -259,7 +259,7 @@ function MyQuestionsContent() {
                       style={{ fontSize: 15, color: "#333", lineHeight: 22 }}
                       numberOfLines={3}
                     >
-                      {question.normalizedText}
+                      {question.originalText}
                     </Text>
 
                     {question.category && (

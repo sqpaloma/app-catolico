@@ -7,31 +7,31 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0AA5AE899C575D007E3C5612 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB43E7A629D40D15ECE366B8 /* ExpoModulesProvider.swift */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		35ACD27DD25C70715C4A50A3 /* libPods-Safe.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A01CEA3ABFA2BDC92F151E50 /* libPods-Safe.a */; };
+		33290D4378D20DFA14CC057E /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39DD60363C4D9D58F67A91BF /* ExpoModulesProvider.swift */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		4B808D0E610C4C26BFA0E284 /* ClerkViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050553FABDBF467F80E547BC /* ClerkViewFactory.swift */; };
+		7D1D4C8135B57DFBE0E7955B /* libPods-Safe.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F1CB379F71593893500DC0B2 /* libPods-Safe.a */; };
+		860F83851C596A629285217C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 4DEE89DC8969A52942095C5B /* PrivacyInfo.xcprivacy */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		D3FD9B25EB9E4D56C1359453 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 22634808C09F6987E0F030FE /* PrivacyInfo.xcprivacy */; };
+		D2DD92F71BDA4BF1B48665C4 /* ClerkViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112DE5B7BDFF43AB8B616EE2 /* ClerkViewFactory.swift */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		050553FABDBF467F80E547BC /* ClerkViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClerkViewFactory.swift; path = Safe/ClerkViewFactory.swift; sourceTree = "<group>"; };
+		112DE5B7BDFF43AB8B616EE2 /* ClerkViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClerkViewFactory.swift; path = Safe/ClerkViewFactory.swift; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Safe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Safe.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Safe/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Safe/Info.plist; sourceTree = "<group>"; };
-		22634808C09F6987E0F030FE /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Safe/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		A01CEA3ABFA2BDC92F151E50 /* libPods-Safe.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Safe.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A9337DF3EA5246E73E32E895 /* Pods-Safe.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Safe.debug.xcconfig"; path = "Target Support Files/Pods-Safe/Pods-Safe.debug.xcconfig"; sourceTree = "<group>"; };
+		39DD60363C4D9D58F67A91BF /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Safe/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		4DEE89DC8969A52942095C5B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Safe/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		A6DCB8C0634D4AB570B7BDD2 /* Pods-Safe.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Safe.release.xcconfig"; path = "Target Support Files/Pods-Safe/Pods-Safe.release.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Safe/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		BB43E7A629D40D15ECE366B8 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Safe/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		E8C9DF2B7CD8C226D90D868F /* Pods-Safe.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Safe.release.xcconfig"; path = "Target Support Files/Pods-Safe/Pods-Safe.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Safe/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* Safe-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Safe-Bridging-Header.h"; path = "Safe/Safe-Bridging-Header.h"; sourceTree = "<group>"; };
+		F1CB379F71593893500DC0B2 /* libPods-Safe.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Safe.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FAA05CE116FD938F062E46C2 /* Pods-Safe.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Safe.debug.xcconfig"; path = "Target Support Files/Pods-Safe/Pods-Safe.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,21 +39,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				35ACD27DD25C70715C4A50A3 /* libPods-Safe.a in Frameworks */,
+				7D1D4C8135B57DFBE0E7955B /* libPods-Safe.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0618D44202F295BD3CDFE7FE /* Safe */ = {
-			isa = PBXGroup;
-			children = (
-				BB43E7A629D40D15ECE366B8 /* ExpoModulesProvider.swift */,
-			);
-			name = Safe;
-			sourceTree = "<group>";
-		};
 		13B07FAE1A68108700A75B9A /* Safe */ = {
 			isa = PBXGroup;
 			children = (
@@ -63,17 +55,25 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				050553FABDBF467F80E547BC /* ClerkViewFactory.swift */,
-				22634808C09F6987E0F030FE /* PrivacyInfo.xcprivacy */,
+				112DE5B7BDFF43AB8B616EE2 /* ClerkViewFactory.swift */,
+				4DEE89DC8969A52942095C5B /* PrivacyInfo.xcprivacy */,
 			);
 			name = Safe;
+			sourceTree = "<group>";
+		};
+		29C012586506AB603EFD8B35 /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				9EF24EAFEE860F952BB2C543 /* Safe */,
+			);
+			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				A01CEA3ABFA2BDC92F151E50 /* libPods-Safe.a */,
+				F1CB379F71593893500DC0B2 /* libPods-Safe.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -85,14 +85,6 @@
 			name = Libraries;
 			sourceTree = "<group>";
 		};
-		837BE06F03E364CC14F84A3E /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				0618D44202F295BD3CDFE7FE /* Safe */,
-			);
-			name = ExpoModulesProviders;
-			sourceTree = "<group>";
-		};
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
@@ -100,8 +92,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				D8D19A65A2A4CA451692317A /* Pods */,
-				837BE06F03E364CC14F84A3E /* ExpoModulesProviders */,
+				8B2E43FB0B1D16081BB28F60 /* Pods */,
+				29C012586506AB603EFD8B35 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -116,6 +108,24 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		8B2E43FB0B1D16081BB28F60 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				FAA05CE116FD938F062E46C2 /* Pods-Safe.debug.xcconfig */,
+				A6DCB8C0634D4AB570B7BDD2 /* Pods-Safe.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		9EF24EAFEE860F952BB2C543 /* Safe */ = {
+			isa = PBXGroup;
+			children = (
+				39DD60363C4D9D58F67A91BF /* ExpoModulesProvider.swift */,
+			);
+			name = Safe;
+			sourceTree = "<group>";
+		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
 			isa = PBXGroup;
 			children = (
@@ -123,16 +133,6 @@
 			);
 			name = Supporting;
 			path = Safe/Supporting;
-			sourceTree = "<group>";
-		};
-		D8D19A65A2A4CA451692317A /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				A9337DF3EA5246E73E32E895 /* Pods-Safe.debug.xcconfig */,
-				E8C9DF2B7CD8C226D90D868F /* Pods-Safe.release.xcconfig */,
-			);
-			name = Pods;
-			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -143,13 +143,13 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Safe" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				987F19351E8426058FF42C9C /* [Expo] Configure project */,
+				E65B10D7620FF6A2DE78480D /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				B5184CE392D6545F0ABB0C81 /* [CP] Embed Pods Frameworks */,
+				5D1818D1156BF05CF1D699A7 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -157,8 +157,8 @@
 			);
 			name = Safe;
 			packageProductDependencies = (
-				3EFB4CEA780F43948382C0AE /* ClerkKit */,
-				6765B61A60F544848BEFA269 /* ClerkKitUI */,
+				8CD017D096F34D35877E14FC /* ClerkKit */,
+				A3B8CAA4C0B74768B97D7736 /* ClerkKitUI */,
 			);
 			productName = Safe;
 			productReference = 13B07F961A680F5B00A75B9A /* Safe.app */;
@@ -174,6 +174,8 @@
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1250;
+						DevelopmentTeam = "59M2JY4R7J";
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -187,7 +189,7 @@
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			packageReferences = (
-				35B72BEE8170434BBBC708A2 /* XCRemoteSwiftPackageReference "clerk-ios" */,
+				5A598C6482ED4A07B62DAFAB /* XCRemoteSwiftPackageReference "clerk-ios" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -206,7 +208,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				D3FD9B25EB9E4D56C1359453 /* PrivacyInfo.xcprivacy in Resources */,
+				860F83851C596A629285217C /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -252,6 +254,28 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		5D1818D1156BF05CF1D699A7 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Safe/Pods-Safe-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/React-Core-prebuilt/React.framework/React",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ReactNativeDependencies/ReactNativeDependencies.framework/ReactNativeDependencies",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/React.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ReactNativeDependencies.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Safe/Pods-Safe-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -269,9 +293,12 @@
 				"${PODS_CONFIGURATION_BUILD_DIR}/GoogleSignIn/GoogleSignIn.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/GoogleUtilities/GoogleUtilities_Privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/PromisesObjC/FBLPromises_Privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/PurchasesHybridCommon/PurchasesHybridCommon.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RNSVG/RNSVGFilters.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/React-Core_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/React-cxxreact/React-cxxreact_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/RevenueCat/RevenueCat.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/RevenueCatUI/RevenueCat_RevenueCatUI.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/SDWebImage/SDWebImage.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/Sentry/Sentry.bundle",
 			);
@@ -287,9 +314,12 @@
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleSignIn.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleUtilities_Privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FBLPromises_Privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/PurchasesHybridCommon.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNSVGFilters.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-Core_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-cxxreact_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RevenueCat.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RevenueCat_RevenueCatUI.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SDWebImage.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Sentry.bundle",
 			);
@@ -298,7 +328,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Safe/Pods-Safe-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		987F19351E8426058FF42C9C /* [Expo] Configure project */ = {
+		E65B10D7620FF6A2DE78480D /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -322,28 +352,6 @@
 			shellPath = /bin/sh;
 			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Safe/expo-configure-project.sh\"\n";
 		};
-		B5184CE392D6545F0ABB0C81 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Safe/Pods-Safe-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/React-Core-prebuilt/React.framework/React",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ReactNativeDependencies/ReactNativeDependencies.framework/ReactNativeDependencies",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/React.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ReactNativeDependencies.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Safe/Pods-Safe-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -352,8 +360,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				4B808D0E610C4C26BFA0E284 /* ClerkViewFactory.swift in Sources */,
-				0AA5AE899C575D007E3C5612 /* ExpoModulesProvider.swift in Sources */,
+				D2DD92F71BDA4BF1B48665C4 /* ClerkViewFactory.swift in Sources */,
+				33290D4378D20DFA14CC057E /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -362,7 +370,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A9337DF3EA5246E73E32E895 /* Pods-Safe.debug.xcconfig */;
+			baseConfigurationReference = FAA05CE116FD938F062E46C2 /* Pods-Safe.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -393,12 +401,15 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
+				DEVELOPMENT_TEAM = "59M2JY4R7J";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 			};
 			name = Debug;
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E8C9DF2B7CD8C226D90D868F /* Pods-Safe.release.xcconfig */;
+			baseConfigurationReference = A6DCB8C0634D4AB570B7BDD2 /* Pods-Safe.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -423,6 +434,9 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
+				DEVELOPMENT_TEAM = "59M2JY4R7J";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 			};
 			name = Release;
 		};
@@ -568,7 +582,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		35B72BEE8170434BBBC708A2 /* XCRemoteSwiftPackageReference "clerk-ios" */ = {
+		5A598C6482ED4A07B62DAFAB /* XCRemoteSwiftPackageReference "clerk-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/clerk/clerk-ios.git";
 			requirement = {
@@ -579,14 +593,14 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3EFB4CEA780F43948382C0AE /* ClerkKit */ = {
+		8CD017D096F34D35877E14FC /* ClerkKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 35B72BEE8170434BBBC708A2 /* XCRemoteSwiftPackageReference "clerk-ios" */;
+			package = 5A598C6482ED4A07B62DAFAB /* XCRemoteSwiftPackageReference "clerk-ios" */;
 			productName = ClerkKit;
 		};
-		6765B61A60F544848BEFA269 /* ClerkKitUI */ = {
+		A3B8CAA4C0B74768B97D7736 /* ClerkKitUI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 35B72BEE8170434BBBC708A2 /* XCRemoteSwiftPackageReference "clerk-ios" */;
+			package = 5A598C6482ED4A07B62DAFAB /* XCRemoteSwiftPackageReference "clerk-ios" */;
 			productName = ClerkKitUI;
 		};
 /* End XCSwiftPackageProductDependency section */

@@ -19,7 +19,6 @@ import { LoginRequiredScreen } from "@/components/login-required-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useRevenueCat } from "@/contexts/revenuecat-context";
 
 function ProfileContent() {
   const { user: clerkUser } = useUser();
@@ -27,7 +26,6 @@ function ProfileContent() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isPremium, isLoading } = useCurrentUser();
-  const { presentPaywall } = useRevenueCat();
   const posts = useQuery(api.posts.listMine);
 
   const handleSignOut = async () => {
@@ -202,24 +200,32 @@ function ProfileContent() {
               }),
             }}
           >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 12 }}>
-              <Ionicons
-                name={isPremium ? "star" : "trophy-outline"}
-                size={28}
-                color={isPremium ? "#f5a623" : "#8B1A1A"}
-              />
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 16, fontWeight: "700", color: "#1a1a1a" }}>
-                  {isPremium ? "Premium Ativo" : "Tornar Premium"}
-                </Text>
-                <Text style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
-                  {isPremium ? "Gerencie sua assinatura" : "Acesse vantagens exclusivas"}
-                </Text>
+            <Pressable
+              onPress={() => router.push(isPremium ? "/settings" : "/paywall")}
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: isPremium ? 0 : 12 }}>
+                <Ionicons
+                  name={isPremium ? "star" : "trophy-outline"}
+                  size={28}
+                  color={isPremium ? "#f5a623" : "#8B1A1A"}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 16, fontWeight: "700", color: "#1a1a1a" }}>
+                    {isPremium ? "Premium Ativo" : "Tornar Premium"}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
+                    {isPremium ? "Gerencie sua assinatura" : "Acesse vantagens exclusivas"}
+                  </Text>
+                </View>
+                {isPremium && (
+                  <Ionicons name="chevron-forward" size={20} color="#888" />
+                )}
               </View>
-            </View>
+            </Pressable>
             {!isPremium && (
               <Pressable
-                onPress={() => presentPaywall()}
+                onPress={() => router.push("/paywall")}
                 style={({ pressed }) => ({
                   backgroundColor: pressed ? "#7B1616" : "#8B1A1A",
                   borderRadius: 12,

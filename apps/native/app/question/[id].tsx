@@ -222,7 +222,7 @@ export default function QuestionDetailScreen() {
               </View>
             )}
             <Text style={{ fontSize: 16, color: "#1a1a1a", lineHeight: 26 }}>
-              {question.normalizedText}
+              {question.originalText}
             </Text>
           </View>
         </View>
@@ -568,7 +568,7 @@ export default function QuestionDetailScreen() {
                       style={{ fontSize: 14, color: "#333", lineHeight: 22 }}
                       numberOfLines={3}
                     >
-                      {q.normalizedText}
+                      {q.originalText}
                     </Text>
                     <View
                       style={{
