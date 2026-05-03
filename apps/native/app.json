@@ -13,7 +13,7 @@
     "owner": "sqpaloma",
     "ios": {
       "bundleIdentifier": "com.safe-espiritual.safe",
-      "buildNumber": "16",
+      "buildNumber": "17",
       "supportsTablet": true,
       "icon": "./assets/images/logo.png",
       "infoPlist": {
@@ -41,7 +41,8 @@
           "resizeMode": "contain"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "@clerk/expo"
     ],
     "experiments": {
       "typedRoutes": true
