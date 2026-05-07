@@ -7,7 +7,6 @@ import { Link, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Platform,
   Pressable,
@@ -25,8 +24,6 @@ type ClerkErrorLike = {
   message?: string;
 };
 
-const normalizeVerificationCode = (value: string) => value.replace(/\D/g, "").slice(0, 6);
-
 const getClerkErrorMessage = (err: unknown, fallback: string) => {
   const clerkErr = err as ClerkErrorLike;
   return String(
@@ -36,18 +33,6 @@ const getClerkErrorMessage = (err: unknown, fallback: string) => {
       clerkErr?.message ??
       fallback,
   );
-};
-
-const getIncompleteSignInMessage = (status: string | null | undefined) => {
-  if (status === "needs_second_factor") {
-    return "Código confirmado, mas o login ainda precisa de uma segunda verificação.";
-  }
-
-  if (status === "needs_client_trust") {
-    return "Código confirmado, mas este dispositivo ainda precisa ser confiável.";
-  }
-
-  return `Login incompleto (status: ${status ?? "desconhecido"}).`;
 };
 
 export default function SignInScreen() {
@@ -65,8 +50,6 @@ export default function SignInScreen() {
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
-  const [code, setCode] = useState("");
-  const [pendingVerification, setPendingVerification] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<"google" | "apple" | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -114,8 +97,13 @@ export default function SignInScreen() {
           setErrorMessage(
             "Não foi possível verificar sua conta externa. Tente novamente ou use email/senha.",
           );
+          return;
         }
+
+        console.warn("SSO flow did not complete. signIn:", JSON.stringify(ssoSignIn?.status), "signUp:", JSON.stringify(ssoSignUp?.status));
+        setErrorMessage("Não foi possível completar o login. Tente novamente.");
       } catch (err: unknown) {
+        console.error("SSO error:", err);
         setErrorMessage(getClerkErrorMessage(err, "Não foi possível continuar. Tente novamente."));
       } finally {
         setOauthLoading(null);
@@ -142,47 +130,11 @@ export default function SignInScreen() {
       if (signIn.status === "complete") {
         await signIn.finalize();
         router.replace("/");
-      } else if (signIn.status === "needs_second_factor") {
-        await signIn.mfa.sendEmailCode();
-        setPendingVerification(true);
       } else {
-        setErrorMessage(getIncompleteSignInMessage(signIn.status));
+        setErrorMessage(`Login incompleto (status: ${signIn.status ?? "desconhecido"}).`);
       }
     } catch (err: unknown) {
       setErrorMessage(getClerkErrorMessage(err, "Email ou senha incorretos."));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const onVerifyPress = async () => {
-    const verificationCode = normalizeVerificationCode(code);
-
-    if (verificationCode.length !== 6) {
-      Alert.alert("Erro", "Digite o código de 6 dígitos enviado por email.");
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const { error } = await signIn.mfa.verifyEmailCode({
-        code: verificationCode,
-      });
-
-      if (error) {
-        Alert.alert("Erro", getClerkErrorMessage(error, "Código inválido. Verifique e tente novamente."));
-        return;
-      }
-
-      if (signIn.status === "complete") {
-        await signIn.finalize();
-        router.replace("/");
-      } else {
-        Alert.alert("Erro", getIncompleteSignInMessage(signIn.status));
-      }
-    } catch (err: unknown) {
-      Alert.alert("Erro", getClerkErrorMessage(err, "Código inválido. Verifique e tente novamente."));
     } finally {
       setIsLoading(false);
     }
@@ -197,144 +149,6 @@ export default function SignInScreen() {
     },
     android: { elevation: 6 },
   });
-
-  if (pendingVerification) {
-    return (
-      <View style={{ flex: 1, backgroundColor: "#f5f0eb" }}>
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 16 }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          automaticallyAdjustContentInsets={false}
-          contentInsetAdjustmentBehavior="never"
-        >
-          <View
-            style={{
-              backgroundColor: "#8B1A1A",
-              paddingTop: insets.top + 8,
-              paddingBottom: 12,
-              paddingHorizontal: 20,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-              <View
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 18,
-                  backgroundColor: "rgba(255,255,255,0.15)",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Image
-                  source={require("../../assets/images/logo.png")}
-                  style={{ width: 20, height: 20 }}
-                  resizeMode="contain"
-                />
-              </View>
-              <Text style={{ color: "#fff", fontSize: 22, fontWeight: "800", letterSpacing: 1 }}>
-                SAFE
-              </Text>
-            </View>
-          </View>
-
-          <LinearGradient
-            colors={["#8B1A1A", "#A52422", "#b5726a", "#f5f0eb"]}
-            locations={[0, 0.45, 0.85, 1]}
-            style={{ paddingTop: 32, paddingBottom: 56, alignItems: "center", paddingHorizontal: 24 }}
-          >
-            <View
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 28,
-                backgroundColor: "rgba(255,255,255,0.2)",
-                alignItems: "center",
-                justifyContent: "center",
-                marginBottom: 16,
-              }}
-            >
-              <Ionicons name="mail" size={28} color="#fff" />
-            </View>
-            <Text
-              style={{
-                color: "#fff",
-                fontSize: 28,
-                fontWeight: "800",
-                textAlign: "center",
-                marginBottom: 8,
-              }}
-            >
-              Verificar Dispositivo
-            </Text>
-            <Text
-              style={{
-                color: "rgba(255,255,255,0.85)",
-                fontSize: 14,
-                textAlign: "center",
-                lineHeight: 20,
-              }}
-            >
-              Enviamos um código para {emailAddress}
-            </Text>
-          </LinearGradient>
-
-          <View style={{ paddingHorizontal: 20, marginTop: -32 }}>
-            <View
-              style={{
-                backgroundColor: "#fff",
-                borderRadius: 16,
-                padding: 24,
-                ...cardShadow,
-              }}
-            >
-              <TextInput
-                style={{
-                  backgroundColor: "#f5f0eb",
-                  borderRadius: 12,
-                  padding: 16,
-                  fontSize: 18,
-                  color: "#1a1a1a",
-                  textAlign: "center",
-                  letterSpacing: 8,
-                  marginBottom: 16,
-                }}
-                value={code}
-                placeholder="000000"
-                placeholderTextColor="#aaa"
-                keyboardType="number-pad"
-                onChangeText={(text) => setCode(normalizeVerificationCode(text))}
-                editable={!isLoading}
-              />
-
-              <Pressable
-                onPress={onVerifyPress}
-                disabled={code.length !== 6 || isLoading}
-                style={({ pressed }) => ({
-                  backgroundColor: code.length !== 6 || isLoading
-                    ? "#c4948b"
-                    : pressed
-                      ? "#7B1616"
-                      : "#8B1A1A",
-                  borderRadius: 12,
-                  paddingVertical: 16,
-                  alignItems: "center",
-                })}
-              >
-                <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
-                  {isLoading ? "Verificando..." : "Verificar"}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        </ScrollView>
-      </View>
-    );
-  }
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f5f0eb" }}>
