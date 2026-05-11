@@ -90,6 +90,13 @@ export default function PrivacyPolicyPage() {
                 provedor de login.
               </li>
               <li>
+                <strong>Dados de perfil e personalização:</strong> informações
+                fornecidas voluntariamente durante o cadastro, como sexo, faixa
+                etária e preferências pessoais. Esses dados são utilizados
+                exclusivamente para personalizar orientações e conteúdos
+                oferecidos a você no App.
+              </li>
+              <li>
                 <strong>Dados de uso do App:</strong> conteúdos que você envia,
                 como perguntas, mensagens no diário, respostas e interações com
                 diretores espirituais.
@@ -112,6 +119,11 @@ export default function PrivacyPolicyPage() {
               <li>
                 Prestação do serviço do App, criação e gestão de conta (execução
                 de contrato e procedimentos preliminares);
+              </li>
+              <li>
+                Personalização da experiência, utilizando dados de perfil
+                informados no cadastro para adequar orientações e conteúdos ao
+                seu contexto pessoal (consentimento e/ou legítimo interesse);
               </li>
               <li>
                 Comunicações relacionadas ao serviço, suporte e segurança

@@ -11,7 +11,7 @@ function generateAnonymousId(): string {
 }
 
 const genderValidator = v.optional(
-  v.union(v.literal("masculino"), v.literal("feminino")),
+  v.union(v.literal("masculino"), v.literal("feminino"), v.literal("prefiro_nao_identificar")),
 );
 const ageGroupValidator = v.optional(
   v.union(
