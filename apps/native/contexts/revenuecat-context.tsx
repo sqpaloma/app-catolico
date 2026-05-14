@@ -9,6 +9,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { Platform } from "react-native";
 import Purchases, {
   CustomerInfo,
   LOG_LEVEL,
@@ -42,9 +43,11 @@ export function RevenueCatProvider({ children }: { children: React.ReactNode }) 
     if (didConfigure.current) return;
     didConfigure.current = true;
 
-    const apiKey = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY;
+    const apiKey = Platform.OS === "ios"
+      ? process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_IOS
+      : process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID;
     if (!apiKey) {
-      if (__DEV__) console.warn("[RevenueCat] Missing EXPO_PUBLIC_REVENUECAT_API_KEY");
+      if (__DEV__) console.warn(`[RevenueCat] Missing API key for ${Platform.OS}`);
       return;
     }
 

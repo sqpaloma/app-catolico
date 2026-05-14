@@ -90,7 +90,7 @@ export default function SignUpScreen() {
   const callEnsureUser = useCallback(async () => {
     try {
       await ensureUser({
-        gender: (params.gender as "masculino" | "feminino") || undefined,
+        gender: (params.gender as "masculino" | "feminino" | "prefiro_nao_identificar") || undefined,
         ageGroup: (params.ageGroup as "-18" | "18-25" | "25-35" | "35-45" | "45-55" | "55+") || undefined,
         hasDepression: params.hasDepression === "true" ? true : params.hasDepression === "false" ? false : undefined,
         goesToChurch: params.goesToChurch === "true" ? true : params.goesToChurch === "false" ? false : undefined,

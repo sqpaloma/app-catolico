@@ -11,7 +11,7 @@ import {
 import { Text } from "@/components/ui/themed-text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-type Gender = "masculino" | "feminino";
+type Gender = "masculino" | "feminino" | "prefiro_nao_identificar";
 type AgeGroup = "-18" | "18-25" | "25-35" | "35-45" | "45-55" | "55+";
 
 interface QuizAnswers {
@@ -120,6 +120,7 @@ export default function OnboardingQuizScreen() {
             <View style={{ gap: 12 }}>
               {renderOptionButton("Masculino", answers.gender === "masculino", () => selectAndAdvance("gender", "masculino"), "male")}
               {renderOptionButton("Feminino", answers.gender === "feminino", () => selectAndAdvance("gender", "feminino"), "female")}
+              {renderOptionButton("Prefiro não identificar", answers.gender === "prefiro_nao_identificar", () => selectAndAdvance("gender", "prefiro_nao_identificar"), "remove-circle-outline")}
             </View>
           ),
         };
@@ -317,6 +318,32 @@ export default function OnboardingQuizScreen() {
         >
           {currentStep.content}
         </View>
+
+        {step === 0 && (
+          <View
+            style={{
+              marginTop: 16,
+              backgroundColor: "rgba(139, 26, 26, 0.06)",
+              borderRadius: 12,
+              padding: 14,
+              flexDirection: "row",
+              alignItems: "flex-start",
+              gap: 10,
+            }}
+          >
+            <Ionicons name="shield-checkmark-outline" size={18} color="#8B1A1A" style={{ marginTop: 1 }} />
+            <Text
+              style={{
+                flex: 1,
+                fontSize: 12,
+                color: "#666",
+                lineHeight: 18,
+              }}
+            >
+              Suas respostas são usadas para personalizar sua experiência e oferecer orientações mais adequadas ao seu perfil. Seus dados são protegidos conforme nossa Política de Privacidade.
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );

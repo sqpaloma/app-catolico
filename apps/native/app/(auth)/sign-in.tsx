@@ -7,6 +7,7 @@ import { Link, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Platform,
   Pressable,
@@ -19,9 +20,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 WebBrowser.maybeCompleteAuthSession();
 
 type ClerkErrorLike = {
-  errors?: Array<{ longMessage?: string; message?: string }>;
+  errors?: Array<{ code?: string; longMessage?: string; message?: string }>;
   longMessage?: string;
   message?: string;
+};
+
+const isIdentifierNotFound = (err: unknown): boolean => {
+  const clerkErr = err as ClerkErrorLike;
+  return clerkErr?.errors?.[0]?.code === "form_identifier_not_found";
 };
 
 const getClerkErrorMessage = (err: unknown, fallback: string) => {
@@ -82,12 +88,18 @@ export default function SignInScreen() {
         }
 
         if (ssoSignIn?.firstFactorVerification?.status === "transferable" && ssoSignUp) {
-          const response = await ssoSignUp.create({ transfer: true });
-          if (response.status === "complete" && ssoSetActive) {
-            await ssoSetActive({ session: response.createdSessionId });
-            router.replace("/");
-            return;
-          }
+          Alert.alert(
+            "Conta não encontrada",
+            "Você ainda não tem uma conta. Vamos criar uma?",
+            [
+              { text: "Cancelar", style: "cancel" },
+              {
+                text: "Criar conta",
+                onPress: () => router.push("/(auth)/onboarding-quiz"),
+              },
+            ],
+          );
+          return;
         }
 
         if (
@@ -123,6 +135,20 @@ export default function SignInScreen() {
       });
 
       if (error) {
+        if (isIdentifierNotFound(error)) {
+          Alert.alert(
+            "Conta não encontrada",
+            "Não encontramos uma conta com esse e-mail. Vamos criar uma?",
+            [
+              { text: "Cancelar", style: "cancel" },
+              {
+                text: "Criar conta",
+                onPress: () => router.push("/(auth)/onboarding-quiz"),
+              },
+            ],
+          );
+          return;
+        }
         setErrorMessage(getClerkErrorMessage(error, "Email ou senha incorretos."));
         return;
       }
@@ -130,11 +156,29 @@ export default function SignInScreen() {
       if (signIn.status === "complete") {
         await signIn.finalize();
         router.replace("/");
+      } else if (signIn.status === "needs_second_factor") {
+        setErrorMessage(
+          "Sua conta possui autenticação em dois fatores ativada. Por favor, entre em contato com o suporte para desativá-la.",
+        );
       } else {
         setErrorMessage(`Login incompleto (status: ${signIn.status ?? "desconhecido"}).`);
       }
     } catch (err: unknown) {
-      setErrorMessage(getClerkErrorMessage(err, "Email ou senha incorretos."));
+      if (isIdentifierNotFound(err)) {
+        Alert.alert(
+          "Conta não encontrada",
+          "Não encontramos uma conta com esse e-mail. Vamos criar uma?",
+          [
+            { text: "Cancelar", style: "cancel" },
+            {
+              text: "Criar conta",
+              onPress: () => router.push("/(auth)/onboarding-quiz"),
+            },
+          ],
+        );
+      } else {
+        setErrorMessage(getClerkErrorMessage(err, "Email ou senha incorretos."));
+      }
     } finally {
       setIsLoading(false);
     }
