@@ -1,10 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -13,7 +14,11 @@ import {
 import { Text } from "@/components/ui/themed-text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import Purchases, { PurchasesPackage } from "react-native-purchases";
+import Purchases, {
+  PurchasesPackage,
+  PurchasesStoreProduct,
+} from "react-native-purchases";
+import { useRevenueCat } from "@/contexts/revenuecat-context";
 
 const cardShadow = Platform.select({
   ios: {
@@ -32,37 +37,101 @@ const BENEFITS = [
   { icon: "shield-checkmark-outline" as const, text: "Acesso a conteúdos exclusivos" },
 ];
 
+const FALLBACK_PRODUCT_IDS = ["premium_monthly"];
+const EULA_URL = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
+const PRIVACY_URL = "https://safe-espiritual.com/privacidade";
+
+const AUTO_RENEW_DISCLOSURE =
+  "A assinatura é renovada automaticamente pelo mesmo período e preço, salvo cancelamento até 24 horas antes do fim do período atual. O pagamento será cobrado na sua conta Apple ID na confirmação. Você pode gerenciar e cancelar a qualquer momento nas Configurações da sua Apple ID.";
+
+type OfferState =
+  | { status: "loading" }
+  | { status: "package"; pkg: PurchasesPackage }
+  | { status: "product"; product: PurchasesStoreProduct }
+  | { status: "error" };
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
 export default function PaywallScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isReady } = useRevenueCat();
 
-  const [monthlyPkg, setMonthlyPkg] = useState<PurchasesPackage | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [offer, setOffer] = useState<OfferState>({ status: "loading" });
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
 
-  useEffect(() => {
-    Purchases.getOfferings()
-      .then((offerings) => {
-        const current = offerings.current;
-        if (current && current.availablePackages.length > 0) {
-          const monthly = current.availablePackages.find(
-            (p) => p.packageType === "MONTHLY",
-          ) ?? current.availablePackages[0];
-          setMonthlyPkg(monthly);
+  const loadOffer = useCallback(async () => {
+    setOffer({ status: "loading" });
+
+    const tryGetOfferings = async (): Promise<PurchasesPackage | null> => {
+      const offerings = await Purchases.getOfferings();
+      const current = offerings.current;
+      if (current && current.availablePackages.length > 0) {
+        return (
+          current.availablePackages.find((p) => p.packageType === "MONTHLY") ??
+          current.availablePackages[0]
+        );
+      }
+      return null;
+    };
+
+    const delays = [0, 800, 2000];
+    let lastError: unknown = null;
+    for (let i = 0; i < delays.length; i++) {
+      if (delays[i] > 0) await sleep(delays[i]);
+      try {
+        const pkg = await tryGetOfferings();
+        if (pkg) {
+          setOffer({ status: "package", pkg });
+          void Purchases.trackCustomPaywallImpression().catch(() => {});
+          return;
         }
-      })
-      .catch((e) => {
-        if (__DEV__) console.error("[Paywall] offerings error:", e);
-      })
-      .finally(() => setLoading(false));
+      } catch (e) {
+        lastError = e;
+      }
+    }
+
+    try {
+      const products = await Purchases.getProducts(FALLBACK_PRODUCT_IDS);
+      if (products.length > 0) {
+        setOffer({ status: "product", product: products[0] });
+        void Purchases.trackCustomPaywallImpression().catch(() => {});
+        return;
+      }
+    } catch (e) {
+      lastError = e;
+    }
+
+    if (__DEV__ && lastError) {
+      console.warn(
+        "[Paywall] Não foi possível carregar produtos. Em simulador via Expo CLI isso é esperado — abra pelo Xcode (Cmd+R) ou teste via TestFlight. Detalhe:",
+        lastError,
+      );
+    }
+    setOffer({ status: "error" });
   }, []);
 
+  useEffect(() => {
+    if (!isReady) return;
+    void loadOffer();
+  }, [isReady, loadOffer]);
+
+  const displayProduct: PurchasesStoreProduct | null =
+    offer.status === "package"
+      ? offer.pkg.product
+      : offer.status === "product"
+        ? offer.product
+        : null;
+
   const handlePurchase = async () => {
-    if (!monthlyPkg) return;
+    if (offer.status !== "package" && offer.status !== "product") return;
     setPurchasing(true);
     try {
-      const { customerInfo } = await Purchases.purchasePackage(monthlyPkg);
+      const { customerInfo } =
+        offer.status === "package"
+          ? await Purchases.purchasePackage(offer.pkg)
+          : await Purchases.purchaseStoreProduct(offer.product);
       const isPremium =
         typeof customerInfo.entitlements.active["Safe Pro"] !== "undefined";
       if (isPremium) {
@@ -80,6 +149,14 @@ export default function PaywallScreen() {
       setPurchasing(false);
     }
   };
+
+  const openEula = useCallback(() => {
+    void Linking.openURL(EULA_URL);
+  }, []);
+
+  const openPrivacy = useCallback(() => {
+    void Linking.openURL(PRIVACY_URL);
+  }, []);
 
   const handleRestore = async () => {
     setRestoring(true);
@@ -279,18 +356,32 @@ export default function PaywallScreen() {
               </Text>
             </View>
 
-            {loading ? (
+            {offer.status === "loading" ? (
               <View style={{ paddingVertical: 40, alignItems: "center" }}>
                 <ActivityIndicator size="large" color="#8B1A1A" />
                 <Text style={{ color: "#888", fontSize: 13, marginTop: 12 }}>
                   Carregando...
                 </Text>
               </View>
-            ) : !monthlyPkg ? (
+            ) : offer.status === "error" || !displayProduct ? (
               <View style={{ paddingVertical: 24, alignItems: "center" }}>
                 <Text style={{ color: "#888", fontSize: 14, textAlign: "center" }}>
-                  Nenhum plano disponível no momento.{"\n"}Tente novamente mais tarde.
+                  Não conseguimos carregar o plano agora.{"\n"}Verifique sua conexão e tente novamente.
                 </Text>
+                <Pressable
+                  onPress={loadOffer}
+                  style={({ pressed }) => ({
+                    marginTop: 16,
+                    paddingHorizontal: 24,
+                    paddingVertical: 12,
+                    borderRadius: 10,
+                    backgroundColor: pressed ? "#7B1616" : "#8B1A1A",
+                  })}
+                >
+                  <Text style={{ color: "#fff", fontSize: 14, fontWeight: "700" }}>
+                    Tentar novamente
+                  </Text>
+                </Pressable>
               </View>
             ) : (
               <>
@@ -304,14 +395,41 @@ export default function PaywallScreen() {
                     alignItems: "center",
                   }}
                 >
-                  <Text style={{ fontSize: 28, fontWeight: "800", color: "#8B1A1A" }}>
-                    {monthlyPkg.product.priceString}
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "700",
+                      color: "#1a1a1a",
+                      textAlign: "center",
+                    }}
+                  >
+                    {displayProduct.title || "Premium Mensal"}
                   </Text>
-                  <Text style={{ fontSize: 14, color: "#888", marginTop: 4 }}>
+                  <Text style={{ fontSize: 12, color: "#666", marginTop: 4 }}>
+                    Período: 1 mês — renovação automática
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 28,
+                      fontWeight: "800",
+                      color: "#8B1A1A",
+                      marginTop: 10,
+                    }}
+                  >
+                    {displayProduct.priceString}
+                  </Text>
+                  <Text style={{ fontSize: 14, color: "#888", marginTop: 2 }}>
                     por mês
                   </Text>
-                  <Text style={{ fontSize: 13, color: "#666", marginTop: 8, textAlign: "center" }}>
-                    {monthlyPkg.product.description || "Acesso completo ao Safe Premium"}
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      color: "#666",
+                      marginTop: 8,
+                      textAlign: "center",
+                    }}
+                  >
+                    {displayProduct.description || "Acesso completo ao Safe Premium"}
                   </Text>
                 </View>
 
@@ -338,6 +456,19 @@ export default function PaywallScreen() {
                     </Text>
                   )}
                 </Pressable>
+
+                {/* Auto-renewal disclosure (Apple Guideline 3.1.2) */}
+                <Text
+                  style={{
+                    fontSize: 11,
+                    color: "#888",
+                    lineHeight: 16,
+                    marginTop: 14,
+                    textAlign: "center",
+                  }}
+                >
+                  {AUTO_RENEW_DISCLOSURE}
+                </Text>
               </>
             )}
 
@@ -355,6 +486,46 @@ export default function PaywallScreen() {
                 </Text>
               )}
             </Pressable>
+
+            {/* Legal links (Apple Guideline 3.1.2(c)) */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 16,
+                marginTop: 12,
+                paddingTop: 12,
+                borderTopWidth: 1,
+                borderTopColor: "#f0ebe5",
+              }}
+            >
+              <Pressable onPress={openEula} hitSlop={8}>
+                <Text
+                  style={{
+                    color: "#666",
+                    fontSize: 12,
+                    fontWeight: "600",
+                    textDecorationLine: "underline",
+                  }}
+                >
+                  Termos de Uso
+                </Text>
+              </Pressable>
+              <Text style={{ color: "#bbb", fontSize: 12 }}>•</Text>
+              <Pressable onPress={openPrivacy} hitSlop={8}>
+                <Text
+                  style={{
+                    color: "#666",
+                    fontSize: 12,
+                    fontWeight: "600",
+                    textDecorationLine: "underline",
+                  }}
+                >
+                  Política de Privacidade
+                </Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </ScrollView>

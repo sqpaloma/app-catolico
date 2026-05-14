@@ -1,6 +1,6 @@
 {
   "expo": {
-    "version": "1.0.4",
+    "version": "1.0.5",
     "scheme": "safe",
     "userInterfaceStyle": "light",
     "orientation": "default",
@@ -13,7 +13,7 @@
     "owner": "sqpaloma",
     "ios": {
       "bundleIdentifier": "com.safe-espiritual.safe",
-      "buildNumber": "24",
+      "buildNumber": "26",
       "supportsTablet": true,
       "icon": "./assets/images/logo.png",
       "infoPlist": {
@@ -22,7 +22,7 @@
     },
     "android": {
       "package": "com.safeespiritual.app",
-      "versionCode": 13,
+      "versionCode": 14,
       "icon": "./assets/images/logo.png"
     },
     "web": {

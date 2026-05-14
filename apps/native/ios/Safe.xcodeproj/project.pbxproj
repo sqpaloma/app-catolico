@@ -24,6 +24,7 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Safe/Info.plist; sourceTree = "<group>"; };
 		39DD60363C4D9D58F67A91BF /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Safe/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		4DEE89DC8969A52942095C5B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Safe/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		7F0A1B2C3D4E5F6071829301 /* SafeStoreKit.storekit */ = {isa = PBXFileReference; lastKnownFileType = file.storekit; name = SafeStoreKit.storekit; path = SafeStoreKit.storekit; sourceTree = "<group>"; };
 		A6DCB8C0634D4AB570B7BDD2 /* Pods-Safe.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Safe.release.xcconfig"; path = "Target Support Files/Pods-Safe/Pods-Safe.release.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Safe/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
@@ -89,6 +90,7 @@
 			isa = PBXGroup;
 			children = (
 				13B07FAE1A68108700A75B9A /* Safe */,
+				7F0A1B2C3D4E5F6071829301 /* SafeStoreKit.storekit */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
