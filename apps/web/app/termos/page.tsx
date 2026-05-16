@@ -177,9 +177,8 @@ export default function TermsOfUsePage() {
 
           <div className="mt-10 border-t border-warm-300 pt-6">
             <p className="text-xs leading-relaxed text-gray-400">
-              Este documento é um modelo informativo. Revise com assessoria
-              jurídica para adequar ao seu negócio e às práticas reais de
-              tratamento de dados.
+              Em caso de dúvidas, entre em contato pelos canais indicados na
+              Política de Privacidade.
             </p>
           </div>
         </article>

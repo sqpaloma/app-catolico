@@ -49,7 +49,7 @@ export default function PrivacyPolicyPage() {
             Política de Privacidade
           </h1>
           <p className="mt-3 text-sm text-white/70">
-            Aplicativo SAFE — Última atualização: [Data da última atualização]
+            Aplicativo SAFE — Última atualização: Maio 2026
           </p>
         </div>
       </div>
@@ -60,7 +60,7 @@ export default function PrivacyPolicyPage() {
           <p className="leading-relaxed text-gray-600">
             Esta Política de Privacidade descreve como{" "}
             <strong className="text-gray-900">
-              [Nome do responsável pelo tratamento]
+              Safe Espiritual
             </strong>{" "}
             (&ldquo;nós&rdquo;, &ldquo;nosso&rdquo;) trata dados pessoais dos
             usuários do aplicativo SAFE (&ldquo;App&rdquo;), em conformidade com
@@ -69,13 +69,18 @@ export default function PrivacyPolicyPage() {
 
           <Section title="1. Controlador e contato">
             <p>
-              <strong>Controlador:</strong> [Nome do responsável pelo
-              tratamento]
+              <strong>Controlador:</strong> Safe Espiritual
               <br />
-              <strong>Endereço ou site:</strong> [Endereço ou site]
+              <strong>Site:</strong>{" "}
+              <a
+                href="https://www.safecatholic.app"
+                className="text-burgundy-600 underline-offset-2 hover:underline"
+              >
+                www.safecatholic.app
+              </a>
               <br />
               <strong>E-mail para exercício de direitos e dúvidas:</strong>{" "}
-              [E-mail de contato]
+              rodrigoastolfi@rodrigoastolfi.com.br
             </p>
           </Section>
 
@@ -246,9 +251,8 @@ export default function PrivacyPolicyPage() {
 
           <div className="mt-10 border-t border-warm-300 pt-6">
             <p className="text-xs leading-relaxed text-gray-400">
-              Este documento é um modelo informativo. Revise com assessoria
-              jurídica para adequar ao seu negócio e às práticas reais de
-              tratamento de dados.
+              Em caso de dúvidas, entre em contato pelo e-mail indicado na seção
+              1.
             </p>
           </div>
         </article>

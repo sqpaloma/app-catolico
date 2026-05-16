@@ -22,7 +22,7 @@
     },
     "android": {
       "package": "com.safeespiritual.app",
-      "versionCode": 14,
+      "versionCode": 15,
       "icon": "./assets/images/logo.png"
     },
     "web": {

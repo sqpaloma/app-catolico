@@ -43,7 +43,7 @@ function ProfileContent() {
   const displayEmail = clerkUser?.primaryEmailAddress?.emailAddress ?? "";
 
   const openPrivacyPolicy = useCallback(() => {
-    void Linking.openURL("https://safe-espiritual.com/privacidade");
+    void Linking.openURL("https://www.safecatholic.app/privacidade");
   }, []);
 
   return (

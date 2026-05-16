@@ -84,7 +84,7 @@ export default function SignUpScreen() {
   const allChecksPassed = Object.values(passwordChecks).every(Boolean);
 
   const openPrivacyPolicy = useCallback(() => {
-    void Linking.openURL("https://safe-espiritual.com/privacidade");
+    void Linking.openURL("https://www.safecatholic.app/privacidade");
   }, []);
 
   const callEnsureUser = useCallback(async () => {

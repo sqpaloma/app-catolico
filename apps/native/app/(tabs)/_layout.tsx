@@ -6,6 +6,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
 
+  const bottomInset =
+    Platform.OS === "ios"
+      ? Math.max(insets.bottom - 10, 4)
+      : Math.max(insets.bottom, 8);
+
   return (
     <Tabs
       screenOptions={{
@@ -15,8 +20,8 @@ export default function TabLayout() {
           borderTopColor: "rgba(139,26,26,0.1)",
           borderTopWidth: 1,
           paddingTop: 10,
-          paddingBottom: Platform.OS === "ios" ? Math.max(insets.bottom - 10, 4) : 8,
-          height: Platform.OS === "ios" ? 60 + Math.max(insets.bottom - 10, 4) : 62,
+          paddingBottom: bottomInset,
+          height: 60 + bottomInset,
           ...Platform.select({
             ios: {
               shadowColor: "#000",

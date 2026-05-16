@@ -39,10 +39,12 @@ const BENEFITS = [
 
 const FALLBACK_PRODUCT_IDS = ["premium_monthly"];
 const EULA_URL = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
-const PRIVACY_URL = "https://safe-espiritual.com/privacidade";
+const PRIVACY_URL = "https://www.safecatholic.app/privacidade";
+
+const TERMS_URL = "https://www.safecatholic.app/termos";
 
 const AUTO_RENEW_DISCLOSURE =
-  "A assinatura é renovada automaticamente pelo mesmo período e preço, salvo cancelamento até 24 horas antes do fim do período atual. O pagamento será cobrado na sua conta Apple ID na confirmação. Você pode gerenciar e cancelar a qualquer momento nas Configurações da sua Apple ID.";
+  "Esta é uma assinatura auto-renovável. A assinatura é renovada automaticamente pelo mesmo período e preço, salvo cancelamento até 24 horas antes do fim do período atual. O pagamento será cobrado na sua conta Apple ID na confirmação. Você pode gerenciar e cancelar a qualquer momento nas Configurações da sua conta Apple ID após a compra.";
 
 type OfferState =
   | { status: "loading" }
@@ -84,7 +86,7 @@ export default function PaywallScreen() {
         const pkg = await tryGetOfferings();
         if (pkg) {
           setOffer({ status: "package", pkg });
-          void Purchases.trackCustomPaywallImpression().catch(() => {});
+          void Purchases.trackCustomPaywallImpression().catch(() => { });
           return;
         }
       } catch (e) {
@@ -96,7 +98,7 @@ export default function PaywallScreen() {
       const products = await Purchases.getProducts(FALLBACK_PRODUCT_IDS);
       if (products.length > 0) {
         setOffer({ status: "product", product: products[0] });
-        void Purchases.trackCustomPaywallImpression().catch(() => {});
+        void Purchases.trackCustomPaywallImpression().catch(() => { });
         return;
       }
     } catch (e) {
@@ -152,6 +154,10 @@ export default function PaywallScreen() {
 
   const openEula = useCallback(() => {
     void Linking.openURL(EULA_URL);
+  }, []);
+
+  const openTerms = useCallback(() => {
+    void Linking.openURL(TERMS_URL);
   }, []);
 
   const openPrivacy = useCallback(() => {
@@ -395,6 +401,27 @@ export default function PaywallScreen() {
                     alignItems: "center",
                   }}
                 >
+                  <View
+                    style={{
+                      backgroundColor: "#8B1A1A",
+                      paddingHorizontal: 12,
+                      paddingVertical: 4,
+                      borderRadius: 8,
+                      marginBottom: 10,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "#fff",
+                        fontSize: 10,
+                        fontWeight: "700",
+                        letterSpacing: 1,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Assinatura Auto-Renovável
+                    </Text>
+                  </View>
                   <Text
                     style={{
                       fontSize: 16,
@@ -406,7 +433,7 @@ export default function PaywallScreen() {
                     {displayProduct.title || "Premium Mensal"}
                   </Text>
                   <Text style={{ fontSize: 12, color: "#666", marginTop: 4 }}>
-                    Período: 1 mês — renovação automática
+                    Duração: 1 mês — renovação automática
                   </Text>
                   <Text
                     style={{
@@ -490,41 +517,60 @@ export default function PaywallScreen() {
             {/* Legal links (Apple Guideline 3.1.2(c)) */}
             <View
               style={{
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 16,
                 marginTop: 12,
                 paddingTop: 12,
                 borderTopWidth: 1,
                 borderTopColor: "#f0ebe5",
               }}
             >
-              <Pressable onPress={openEula} hitSlop={8}>
-                <Text
-                  style={{
-                    color: "#666",
-                    fontSize: 12,
-                    fontWeight: "600",
-                    textDecorationLine: "underline",
-                  }}
-                >
-                  Termos de Uso
-                </Text>
-              </Pressable>
-              <Text style={{ color: "#bbb", fontSize: 12 }}>•</Text>
-              <Pressable onPress={openPrivacy} hitSlop={8}>
-                <Text
-                  style={{
-                    color: "#666",
-                    fontSize: 12,
-                    fontWeight: "600",
-                    textDecorationLine: "underline",
-                  }}
-                >
-                  Política de Privacidade
-                </Text>
-              </Pressable>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 12,
+                }}
+              >
+                <Pressable onPress={openTerms} hitSlop={8}>
+                  <Text
+                    style={{
+                      color: "#666",
+                      fontSize: 12,
+                      fontWeight: "600",
+                      textDecorationLine: "underline",
+                    }}
+                  >
+                    Termos de Uso
+                  </Text>
+                </Pressable>
+                <Text style={{ color: "#bbb", fontSize: 12 }}>•</Text>
+                <Pressable onPress={openPrivacy} hitSlop={8}>
+                  <Text
+                    style={{
+                      color: "#666",
+                      fontSize: 12,
+                      fontWeight: "600",
+                      textDecorationLine: "underline",
+                    }}
+                  >
+                    Política de Privacidade
+                  </Text>
+                </Pressable>
+                <Text style={{ color: "#bbb", fontSize: 12 }}>•</Text>
+                <Pressable onPress={openEula} hitSlop={8}>
+                  <Text
+                    style={{
+                      color: "#666",
+                      fontSize: 12,
+                      fontWeight: "600",
+                      textDecorationLine: "underline",
+                    }}
+                  >
+                    EULA (Apple)
+                  </Text>
+                </Pressable>
+              </View>
             </View>
           </View>
         </View>
