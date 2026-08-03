@@ -17,6 +17,7 @@ import {
   View,
 } from "react-native";
 import Purchases from "react-native-purchases";
+import { RequireAuth } from "@/components/require-auth";
 import { Text, TextInput } from "@/components/ui/themed-text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -31,7 +32,7 @@ const cardShadow = Platform.select({
   android: { elevation: 4 },
 });
 
-export default function SettingsScreen() {
+function SettingsContent() {
   const { user: clerkUser } = useUser();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -52,6 +53,15 @@ export default function SettingsScreen() {
     lastName !== (clerkUser?.lastName ?? "");
 
   const handlePickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert(
+        "Permissão necessária",
+        "Permita o acesso às fotos para atualizar sua foto de perfil.",
+      );
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
@@ -205,6 +215,8 @@ export default function SettingsScreen() {
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <Pressable
               onPress={() => router.back()}
+              accessibilityLabel="Voltar"
+              accessibilityRole="button"
               style={{
                 width: 36,
                 height: 36,
@@ -562,5 +574,13 @@ export default function SettingsScreen() {
 
       </ScrollView>
     </View>
+  );
+}
+
+export default function SettingsScreen() {
+  return (
+    <RequireAuth>
+      <SettingsContent />
+    </RequireAuth>
   );
 }

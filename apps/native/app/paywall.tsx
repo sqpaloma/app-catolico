@@ -208,6 +208,8 @@ export default function PaywallScreen() {
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <Pressable
               onPress={() => router.back()}
+              accessibilityLabel="Voltar"
+              accessibilityRole="button"
               style={{
                 width: 36,
                 height: 36,

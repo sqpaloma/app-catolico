@@ -8,6 +8,7 @@ import {
   Pressable,
   View,
 } from "react-native";
+import { saveOnboardingQuiz } from "@/lib/onboarding-quiz";
 import { Text } from "@/components/ui/themed-text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -51,15 +52,13 @@ export default function OnboardingQuizScreen() {
     if (step < TOTAL_STEPS - 1) {
       setStep(step + 1);
     } else {
-      router.push({
-        pathname: "/(auth)/sign-up",
-        params: {
-          gender: updated.gender ?? "",
-          ageGroup: updated.ageGroup ?? "",
-          hasDepression: updated.hasDepression ? "true" : "false",
-          goesToChurch: updated.goesToChurch ? "true" : "false",
-        },
+      saveOnboardingQuiz({
+        gender: updated.gender ?? undefined,
+        ageGroup: updated.ageGroup ?? undefined,
+        hasDepression: updated.hasDepression ?? undefined,
+        goesToChurch: updated.goesToChurch ?? undefined,
       });
+      router.push("/(auth)/sign-up");
     }
   };
 

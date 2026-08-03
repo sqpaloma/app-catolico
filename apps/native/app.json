@@ -13,17 +13,22 @@
     "owner": "sqpaloma",
     "ios": {
       "bundleIdentifier": "com.safe-espiritual.safe",
-      "buildNumber": "28",
+      "buildNumber": "29",
       "supportsTablet": true,
       "icon": "./assets/images/logo.png",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "O Safe precisa acessar suas fotos para anexar imagens ao diário espiritual e atualizar a foto de perfil."
       }
     },
     "android": {
       "package": "com.safeespiritual.app",
       "versionCode": 15,
-      "icon": "./assets/images/logo.png"
+      "icon": "./assets/images/logo.png",
+      "permissions": [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "bundler": "metro"
@@ -42,6 +47,12 @@
         }
       ],
       "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O Safe precisa acessar suas fotos para anexar imagens ao diário espiritual e atualizar a foto de perfil."
+        }
+      ],
       "@clerk/expo"
     ],
     "experiments": {

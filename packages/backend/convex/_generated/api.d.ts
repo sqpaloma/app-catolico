@@ -16,7 +16,6 @@ import type * as documents from "../documents.js";
 import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
 import type * as posts from "../posts.js";
-import type * as privateData from "../privateData.js";
 import type * as questions from "../questions.js";
 import type * as rag from "../rag.js";
 import type * as seed from "../seed.js";
@@ -37,7 +36,6 @@ declare const fullApi: ApiFromModules<{
   healthCheck: typeof healthCheck;
   http: typeof http;
   posts: typeof posts;
-  privateData: typeof privateData;
   questions: typeof questions;
   rag: typeof rag;
   seed: typeof seed;

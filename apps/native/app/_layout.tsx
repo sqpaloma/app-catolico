@@ -44,19 +44,10 @@ type BootResult =
 // what crashed Hermes during App Store review.
 function bootApp(): BootResult {
   try {
-    const env = {
-      EXPO_PUBLIC_CONVEX_URL: process.env.EXPO_PUBLIC_CONVEX_URL!,
-      EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY:
-        process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!,
-      EXPO_PUBLIC_SENTRY_DSN: process.env.EXPO_PUBLIC_SENTRY_DSN,
+    const { getNativeEnv } = require("@app-catolico/env/native") as {
+      getNativeEnv: typeof import("@app-catolico/env/native").getNativeEnv;
     };
-
-    if (!env.EXPO_PUBLIC_CONVEX_URL) {
-      throw new Error("Missing EXPO_PUBLIC_CONVEX_URL");
-    }
-    if (!env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY) {
-      throw new Error("Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY");
-    }
+    const env = getNativeEnv();
 
     initSentry(env.EXPO_PUBLIC_SENTRY_DSN);
 

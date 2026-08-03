@@ -2,6 +2,13 @@ import { internalMutation } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 
+function assertNotProductionSeed() {
+  const deployment = process.env.CONVEX_DEPLOYMENT ?? "";
+  if (deployment.startsWith("prod:") && process.env.DEV_SEED !== "1") {
+    throw new Error("Seed bloqueado em produção. Defina DEV_SEED=1 apenas em desenvolvimento.");
+  }
+}
+
 const TARGET_USER_DOCUMENT_ID =
   "jn77btmjw8shg4hmzkrrkw4dbh84rcn9" as Id<"users">;
 const TARGET_USER_FALLBACK_CLERK_ID = "jn77btmjw8shg4hmzkrrkw4dbh84rcn9";
@@ -30,6 +37,8 @@ export const seedRealTestUsers = internalMutation({
     premiumClerkId: v.string(),
   },
   handler: async (ctx, { userClerkId, directorClerkId, premiumClerkId }) => {
+    assertNotProductionSeed();
+
     const existingUser = await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", userClerkId))
@@ -114,7 +123,10 @@ export const seedRealTestUsers = internalMutation({
 });
 
 export const seedTestUsers = internalMutation({
+  args: {},
   handler: async (ctx) => {
+    assertNotProductionSeed();
+
     const existing = await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", "test_user_comum"))
@@ -216,6 +228,8 @@ export const seedTargetUser = internalMutation({
     postsCreated: v.number(),
   }),
   handler: async (ctx) => {
+    assertNotProductionSeed();
+
     const userByDocumentId = await ctx.db.get(TARGET_USER_DOCUMENT_ID);
     let user =
       userByDocumentId ??

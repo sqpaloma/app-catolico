@@ -1,11 +1,15 @@
 import { mutation, query, internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
+import { requireIdentity, requireUser } from "./lib/auth";
 
 function generateAnonymousId(): string {
+  const bytes = new Uint8Array(18);
+  // Convex mutations run in V8 — crypto.getRandomValues is available.
+  crypto.getRandomValues(bytes);
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
   let id = "";
-  for (let i = 0; i < 24; i++) {
-    id += chars[Math.floor(Math.random() * chars.length)];
+  for (let i = 0; i < bytes.length; i++) {
+    id += chars[bytes[i]! % chars.length];
   }
   return id;
 }
@@ -24,6 +28,22 @@ const ageGroupValidator = v.optional(
   ),
 );
 
+const userReturnValidator = v.object({
+  _id: v.id("users"),
+  _creationTime: v.number(),
+  clerkId: v.string(),
+  anonymousId: v.string(),
+  firstName: v.optional(v.string()),
+  lastName: v.optional(v.string()),
+  gender: genderValidator,
+  ageGroup: ageGroupValidator,
+  hasDepression: v.optional(v.boolean()),
+  goesToChurch: v.optional(v.boolean()),
+  isDirector: v.optional(v.boolean()),
+  isPremium: v.boolean(),
+  premiumUntil: v.optional(v.number()),
+});
+
 export const ensureUser = mutation({
   args: {
     gender: genderValidator,
@@ -31,9 +51,9 @@ export const ensureUser = mutation({
     hasDepression: v.optional(v.boolean()),
     goesToChurch: v.optional(v.boolean()),
   },
+  returns: userReturnValidator,
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Não autenticado");
+    const identity = await requireIdentity(ctx);
 
     const existing = await ctx.db
       .query("users")
@@ -55,11 +75,15 @@ export const ensureUser = mutation({
       isPremium: false,
     });
 
-    return await ctx.db.get(userId);
+    const created = await ctx.db.get(userId);
+    if (!created) throw new Error("Falha ao criar usuário");
+    return created;
   },
 });
 
 export const getMe = query({
+  args: {},
+  returns: v.union(userReturnValidator, v.null()),
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
@@ -76,18 +100,11 @@ export const updateName = mutation({
     firstName: v.string(),
     lastName: v.string(),
   },
+  returns: v.null(),
   handler: async (ctx, { firstName, lastName }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Não autenticado");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("Usuário não encontrado");
-
+    const { user } = await requireUser(ctx);
     await ctx.db.patch(user._id, { firstName, lastName });
+    return null;
   },
 });
 
@@ -97,57 +114,40 @@ export const setPremiumStatus = internalMutation({
     isPremium: v.boolean(),
     premiumUntil: v.optional(v.number()),
   },
+  returns: v.null(),
   handler: async (ctx, { clerkId, isPremium, premiumUntil }) => {
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", clerkId))
       .unique();
 
-    if (!user) throw new Error("Usuário não encontrado");
-
-    await ctx.db.patch(user._id, { isPremium, premiumUntil });
-  },
-});
-
-export const syncPremiumFromClient = mutation({
-  args: {
-    isPremium: v.boolean(),
-  },
-  handler: async (ctx, { isPremium }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return;
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) return;
-
-    if (user.isPremium !== isPremium) {
-      await ctx.db.patch(user._id, { isPremium });
+    if (!user) {
+      console.warn("[users.setPremiumStatus] user not found", clerkId);
+      return null;
     }
+
+    await ctx.db.patch(user._id, {
+      isPremium,
+      premiumUntil,
+    });
+    return null;
   },
 });
 
 export const deleteMyAccount = mutation({
   args: {},
+  returns: v.null(),
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Não autenticado");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("Usuário não encontrado");
+    const { user } = await requireUser(ctx);
 
     const posts = await ctx.db
       .query("posts")
       .withIndex("by_userId", (q) => q.eq("userId", user.clerkId))
       .collect();
     for (const post of posts) {
+      if (post.imageStorageId) {
+        await ctx.storage.delete(post.imageStorageId);
+      }
       await ctx.db.delete(post._id);
     }
 
@@ -183,6 +183,7 @@ export const deleteMyAccount = mutation({
     }
 
     await ctx.db.delete(user._id);
+    return null;
   },
 });
 
@@ -195,4 +196,3 @@ export const getMeInternal = internalQuery({
       .unique();
   },
 });
-

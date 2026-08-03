@@ -1,6 +1,5 @@
 import { api } from "@app-catolico/backend/convex/_generated/api";
 import type { Id } from "@app-catolico/backend/convex/_generated/dataModel";
-import { useAuth, useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -16,26 +15,30 @@ import {
   ScrollView,
   View,
 } from "react-native";
+import { RequireAuth } from "@/components/require-auth";
 import { Text, TextInput } from "@/components/ui/themed-text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const statusConfig = {
   pending: { label: "Aguardando diretores", bg: "#FFF3E0", color: "#E65100" },
   answering: { label: "Em resposta", bg: "#E3F2FD", color: "#1565C0" },
+  consensus_processing: { label: "Gerando orientação", bg: "#F3E5F5", color: "#7B1FA2" },
   consensus_ready: { label: "Orientação disponível", bg: "#E8F5E9", color: "#2E7D32" },
 };
 
-export default function QuestionDetailScreen() {
+function QuestionDetailContent() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const questionId = id as Id<"questions">;
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [showReliabilityInfo, setShowReliabilityInfo] = useState(false);
 
-  const { userId } = useAuth();
   const question = useQuery(api.questions.getById, { questionId });
   const answers = useQuery(api.answers.getByQuestion, { questionId });
-  const history = useQuery(api.questions.getHistoryByAnonymousId, { questionId });
+  const history = useQuery(api.questions.getHistoryByAnonymousId, {
+    questionId,
+  });
+  const isOwner = question?.isOwner === true;
 
   if (question === undefined || answers === undefined) {
     return (
@@ -123,6 +126,8 @@ export default function QuestionDetailScreen() {
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <Pressable
               onPress={() => router.back()}
+              accessibilityLabel="Voltar"
+              accessibilityRole="button"
               style={{
                 width: 36,
                 height: 36,
@@ -525,7 +530,7 @@ export default function QuestionDetailScreen() {
           </View>
         )}
 
-        {/* Premium user history */}
+        {/* Premium user history — anonymous texts only */}
         {question.isPremium && history && history.length > 0 && (
           <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
             <Text
@@ -538,10 +543,10 @@ export default function QuestionDetailScreen() {
                 marginBottom: 10,
               }}
             >
-              Histórico do Usuário
+              Histórico anônimo
             </Text>
             <Text style={{ fontSize: 12, color: "#888", marginBottom: 12 }}>
-              Perguntas anteriores deste usuário (anônimo) — visível por ser Premium.
+              Perguntas anteriores deste usuário (sem identificação) — visível por ser Premium.
             </Text>
             <View style={{ gap: 10 }}>
               {history.map((q) => {
@@ -591,8 +596,8 @@ export default function QuestionDetailScreen() {
           </View>
         )}
 
-        {/* Director answers — only visible to other directors, not the question author */}
-        {userId !== question.userId && answers.length > 0 && (
+        {/* Own answer only — never other directors' answers, never for the author */}
+        {!isOwner && answers && answers.length > 0 && (
           <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
             <Text
               style={{
@@ -604,7 +609,7 @@ export default function QuestionDetailScreen() {
                 marginBottom: 10,
               }}
             >
-              Respostas dos Diretores ({answers.length})
+              Sua resposta
             </Text>
             <View style={{ gap: 10 }}>
               {answers.map((answer) => (
@@ -625,12 +630,6 @@ export default function QuestionDetailScreen() {
                     }),
                   }}
                 >
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                    <Ionicons name="person-circle-outline" size={20} color="#8B1A1A" />
-                    <Text style={{ fontSize: 14, fontWeight: "600", color: "#555" }}>
-                      {answer.directorName}
-                    </Text>
-                  </View>
                   <Text style={{ fontSize: 15, color: "#333", lineHeight: 24 }}>
                     {answer.text}
                   </Text>
@@ -641,8 +640,8 @@ export default function QuestionDetailScreen() {
         )}
 
         {/* Director answer form — hidden for the question author */}
-        {userId !== question.userId && (
-          <DirectorAnswerForm questionId={questionId} answers={answers} />
+        {!isOwner && (
+          <DirectorAnswerForm questionId={questionId} hasOwnAnswer={(answers?.length ?? 0) > 0} />
         )}
       </ScrollView>
     </View>
@@ -763,20 +762,19 @@ function AppModal({ modal, onClose }: { modal: ModalInfo; onClose: () => void })
 
 function DirectorAnswerForm({
   questionId,
-  answers,
+  hasOwnAnswer,
 }: {
   questionId: Id<"questions">;
-  answers: Array<{ directorId: string; _id: string }>;
+  hasOwnAnswer: boolean;
 }) {
   const [text, setText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [modal, setModal] = useState<ModalInfo>(MODAL_INITIAL);
   const [shouldGoBack, setShouldGoBack] = useState(false);
   const submitAnswer = useMutation(api.answers.submit);
-  const { user } = useUser();
   const router = useRouter();
 
-  const alreadyAnswered = answers.some((a) => a.directorId === user?.id);
+  const alreadyAnswered = hasOwnAnswer;
 
   const showModal = (info: Omit<ModalInfo, "visible">) =>
     setModal({ ...info, visible: true });
@@ -929,5 +927,13 @@ function DirectorAnswerForm({
         )}
       </Pressable>
     </View>
+  );
+}
+
+export default function QuestionDetailScreen() {
+  return (
+    <RequireAuth>
+      <QuestionDetailContent />
+    </RequireAuth>
   );
 }

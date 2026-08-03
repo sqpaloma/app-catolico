@@ -145,6 +145,8 @@ function ProfileContent() {
             <View style={{ flexDirection: "row", gap: 10 }}>
               <Pressable
                 onPress={() => router.push("/settings")}
+                accessibilityLabel="Configurações"
+                accessibilityRole="button"
                 style={{
                   width: 36,
                   height: 36,
@@ -158,6 +160,8 @@ function ProfileContent() {
               </Pressable>
               <Pressable
                 onPress={handleSignOut}
+                accessibilityLabel="Sair da conta"
+                accessibilityRole="button"
                 style={{
                   width: 36,
                   height: 36,

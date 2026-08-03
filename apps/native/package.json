@@ -19,7 +19,8 @@
     "release:minor": "npm run version:minor && npm run release:commit && npm run release:build",
     "release:major": "npm run version:major && npm run release:commit && npm run release:build",
     "release:commit": "node -e \"const v=require('./package.json').version;require('child_process').execSync('git add app.json package.json && git commit -m \\\"chore(release): v'+v+'\\\" && git tag v'+v,{stdio:'inherit'})\"",
-    "release:build": "eas build --platform all --profile production --auto-submit --non-interactive"
+    "release:build": "eas build --platform all --profile production --auto-submit --non-interactive",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@app-catolico/backend": "workspace:*",
@@ -59,7 +60,6 @@
     "react-native-gesture-handler": "~2.28.0",
     "react-native-keyboard-controller": "1.18.5",
     "react-native-purchases": "^10.0.1",
-    "react-native-purchases-ui": "^10.0.1",
     "react-native-reanimated": "4.1.7",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",

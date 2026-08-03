@@ -6,12 +6,14 @@
   "author": "",
   "scripts": {
     "dev": "convex dev",
-    "dev:setup": "convex dev --configure --until-success"
+    "dev:setup": "convex dev --configure --until-success",
+    "lint": "eslint .",
+    "check-types": "tsc --noEmit -p convex/tsconfig.json"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.52",
     "@convex-dev/rag": "^0.7.2",
-    "@convex-dev/workpool": "^0.4.6",
+    "@convex-dev/workpool": "^0.3.2",
     "ai": "^6.0.156",
     "convex": "catalog:",
     "convex-helpers": "^0.1.114",
@@ -21,7 +23,11 @@
   },
   "devDependencies": {
     "@app-catolico/config": "workspace:*",
+    "@convex-dev/eslint-plugin": "^1.0.0",
     "@types/node": "^24.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
     "typescript": "^5"
   }
 }

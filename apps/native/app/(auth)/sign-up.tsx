@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -20,6 +20,11 @@ import { Text, TextInput } from "@/components/ui/themed-text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation } from "convex/react";
 import { api } from "@app-catolico/backend/convex/_generated/api";
+import {
+  clearOnboardingQuiz,
+  loadOnboardingQuiz,
+  type OnboardingQuizAnswers,
+} from "@/lib/onboarding-quiz";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -45,12 +50,9 @@ export default function SignUpScreen() {
   const { startSSOFlow } = useSSO();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams<{
-    gender?: string;
-    ageGroup?: string;
-    hasDepression?: string;
-    goesToChurch?: string;
-  }>();
+  const [quizAnswers] = useState<OnboardingQuizAnswers | null>(() =>
+    loadOnboardingQuiz(),
+  );
 
   useEffect(() => {
     void WebBrowser.warmUpAsync();
@@ -90,15 +92,16 @@ export default function SignUpScreen() {
   const callEnsureUser = useCallback(async () => {
     try {
       await ensureUser({
-        gender: (params.gender as "masculino" | "feminino" | "prefiro_nao_identificar") || undefined,
-        ageGroup: (params.ageGroup as "-18" | "18-25" | "25-35" | "35-45" | "45-55" | "55+") || undefined,
-        hasDepression: params.hasDepression === "true" ? true : params.hasDepression === "false" ? false : undefined,
-        goesToChurch: params.goesToChurch === "true" ? true : params.goesToChurch === "false" ? false : undefined,
+        gender: quizAnswers?.gender,
+        ageGroup: quizAnswers?.ageGroup,
+        hasDepression: quizAnswers?.hasDepression,
+        goesToChurch: quizAnswers?.goesToChurch,
       });
+      clearOnboardingQuiz();
     } catch (e) {
       console.warn("ensureUser failed, will retry on layout", e);
     }
-  }, [ensureUser, params]);
+  }, [ensureUser, quizAnswers]);
 
   const onSSOPress = useCallback(
     async (strategy: "oauth_google" | "oauth_apple") => {

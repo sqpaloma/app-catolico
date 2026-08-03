@@ -138,6 +138,15 @@ function DiarioContent() {
   const remaining = MAX_CHARS - text.length;
 
   const pickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert(
+        "Permissão necessária",
+        "Permita o acesso às fotos para anexar uma imagem ao diário.",
+      );
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
@@ -175,7 +184,7 @@ function DiarioContent() {
 
       await createPost({
         text: trimmed,
-        imageStorageId: imageStorageId as any,
+        imageStorageId: imageStorageId as Id<"_storage"> | undefined,
         visibleToDirector: false,
       });
 
@@ -354,7 +363,12 @@ function DiarioContent() {
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
             >
-              <Pressable onPress={pickImage} disabled={isSubmitting}>
+              <Pressable
+                onPress={pickImage}
+                disabled={isSubmitting}
+                accessibilityLabel="Adicionar imagem"
+                accessibilityRole="button"
+              >
                 <Ionicons
                   name="image-outline"
                   size={22}

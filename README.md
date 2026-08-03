@@ -1,100 +1,58 @@
-# app-catolico
+# Safe (app-catolico)
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines Next.js, Convex, and more.
+Monorepo do aplicativo Safe — direção espiritual católica anônima.
 
-## Features
+## Apps
 
-- **TypeScript** - For type safety and improved developer experience
-- **Next.js** - Full-stack React framework
-- **React Native** - Build mobile apps using React
-- **Expo** - Tools for React Native development
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **Shared UI package** - shadcn/ui primitives live in `packages/ui`
-- **Convex** - Reactive backend-as-a-service platform
-- **Authentication** - Clerk
-- **Turborepo** - Optimized monorepo build system
+| App | Papel | Porta |
+|-----|--------|-------|
+| `apps/native` | App mobile (Expo / React Native / Clerk / RevenueCat / Convex) | Expo |
+| `apps/web` | Site de marketing e páginas legais (Next.js estático) | `http://localhost:3000` |
 
-## Getting Started
+## Packages
 
-First, install the dependencies:
+| Package | Papel |
+|---------|--------|
+| `packages/backend` | Convex (schema, queries, mutations, AI/RAG, webhooks) |
+| `packages/env` | Validação Zod de env vars (native/web) |
+| `packages/ui` | Primitivos shadcn (reservado; web marketing não depende dele hoje) |
+| `packages/config` | TypeScript base compartilhado |
+
+## Setup
 
 ```bash
 pnpm install
+pnpm run dev:setup   # configura Convex
 ```
 
-## Convex Setup
+Copie variáveis de `packages/backend/.env.local` para o app nativo conforme necessário.
 
-This project uses Convex as a backend. You'll need to set up Convex before running the app:
+### Convex + Clerk
 
-```bash
-pnpm run dev:setup
-```
+- [Convex + Clerk](https://docs.convex.dev/auth/clerk)
+- `CLERK_JWT_ISSUER_DOMAIN` no Convex Dashboard
+- `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` / `EXPO_PUBLIC_CONVEX_URL` no native
 
-Follow the prompts to create a new Convex project and connect it to your application.
+### RevenueCat (premium)
 
-Copy environment variables from `packages/backend/.env.local` to `apps/*/.env`.
+1. Defina `REVENUECAT_WEBHOOK_SECRET` no Convex Dashboard (mín. 16 chars).
+2. No RevenueCat: Webhook URL `https://<deployment>.convex.site/webhooks/revenuecat` com o mesmo valor no header `Authorization`.
+3. O app usa `Purchases.logIn(clerkUserId)` — o `app_user_id` do webhook deve ser o Clerk user id.
 
-### Clerk Authentication Setup
+## Scripts
 
-- Follow the guide: [Convex + Clerk](https://docs.convex.dev/auth/clerk)
-- Set `CLERK_JWT_ISSUER_DOMAIN` in Convex Dashboard
-- Set `CLERK_PUBLISHABLE_KEY` in `apps/*/.env`
+- `pnpm run dev` — turbo dev
+- `pnpm run dev:native` — Expo
+- `pnpm run dev:web` — Next na porta 3000
+- `pnpm run dev:server` — Convex
+- `pnpm run check-types` — TypeScript em todos os packages
+- `pnpm run lint` — ESLint (quando configurado por package)
 
-Then, run the development server:
-
-```bash
-pnpm run dev
-```
-
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-Use the Expo Go app to run the mobile application.
-Your app will connect to the Convex cloud backend automatically.
-
-## UI Customization
-
-React web apps in this stack share shadcn/ui primitives through `packages/ui`.
-
-- Change design tokens and global styles in `packages/ui/src/styles/globals.css`
-- Update shared primitives in `packages/ui/src/components/*`
-- Adjust shadcn aliases or style config in `packages/ui/components.json` and `apps/web/components.json`
-
-### Add more shared components
-
-Run this from the project root to add more primitives to the shared UI package:
-
-```bash
-npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
-```
-
-Import shared components like this:
-
-```tsx
-import { Button } from "@app-catolico/ui/components/button";
-```
-
-### Add app-specific blocks
-
-If you want to add app-specific blocks instead of shared primitives, run the shadcn CLI from `apps/web`.
-
-## Project Structure
+## Estrutura
 
 ```
 app-catolico/
-├── apps/
-│   ├── web/         # Frontend application (Next.js)
-│   ├── native/      # Mobile application (React Native, Expo)
-├── packages/
-│   ├── ui/          # Shared shadcn/ui components and styles
-│   ├── backend/     # Convex backend functions and schema
-│   │   ├── convex/    # Convex functions and schema
-│   │   └── .env.local # Convex environment variables
+├── apps/native/     # Expo app
+├── apps/web/        # Landing + /privacidade /termos /suporte
+└── packages/backend/convex/
 ```
-
-## Available Scripts
-
-- `pnpm run dev`: Start all applications in development mode
-- `pnpm run build`: Build all applications
-- `pnpm run dev:web`: Start only the web application
-- `pnpm run dev:setup`: Setup and configure your Convex project
-- `pnpm run check-types`: Check TypeScript types across all apps
-- `pnpm run dev:native`: Start the React Native/Expo development server

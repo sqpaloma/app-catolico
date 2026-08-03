@@ -89,7 +89,9 @@ export default function ConfessarScreen() {
   const [limitWarning, setLimitWarning] = useState<LimitWarning>(LIMIT_HIDDEN);
   const fadeAnim = useState(() => new Animated.Value(0))[0];
   const submitQuestion = useMutation(api.questions.submit);
-  const questionAccess = useQuery(api.questions.getQuestionAccess);
+  const questionAccess = useQuery(api.questions.getQuestionAccess, {
+    now: Date.now(),
+  });
 
   useEffect(() => {
     if (showInfoAlert) {

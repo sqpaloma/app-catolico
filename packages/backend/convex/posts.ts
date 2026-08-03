@@ -1,12 +1,14 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { isPremiumActive, requireIdentity, requireUser } from "./lib/auth";
 
 const MAX_POST_LENGTH = 250;
 
 export const generateUploadUrl = mutation({
+  args: {},
+  returns: v.string(),
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Não autenticado");
+    await requireIdentity(ctx);
     return await ctx.storage.generateUploadUrl();
   },
 });
@@ -17,13 +19,17 @@ export const create = mutation({
     imageStorageId: v.optional(v.id("_storage")),
     visibleToDirector: v.boolean(),
   },
+  returns: v.id("posts"),
   handler: async (ctx, { text, imageStorageId, visibleToDirector }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Não autenticado");
+    const { identity, user } = await requireUser(ctx);
 
     if (text.length === 0) throw new Error("O texto não pode estar vazio.");
     if (text.length > MAX_POST_LENGTH) {
       throw new Error(`O texto deve ter no máximo ${MAX_POST_LENGTH} caracteres.`);
+    }
+
+    if (visibleToDirector && !isPremiumActive(user, Date.now())) {
+      throw new Error("Compartilhar com o diretor é um recurso Premium.");
     }
 
     return await ctx.db.insert("posts", {
@@ -37,6 +43,7 @@ export const create = mutation({
 });
 
 export const listMine = query({
+  args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return [];
@@ -58,13 +65,6 @@ export const listMine = query({
   },
 });
 
-export const getImageUrl = query({
-  args: { storageId: v.id("_storage") },
-  handler: async (ctx, { storageId }) => {
-    return await ctx.storage.getUrl(storageId);
-  },
-});
-
 export const listByDirectee = query({
   args: { directeeId: v.string() },
   handler: async (ctx, { directeeId }) => {
@@ -73,13 +73,10 @@ export const listByDirectee = query({
 
     const directorship = await ctx.db
       .query("directorships")
-      .withIndex("by_directorId", (q) => q.eq("directorId", identity.subject))
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("directeeId"), directeeId),
-          q.eq(q.field("status"), "active"),
-        ),
+      .withIndex("by_directorId_directeeId", (q) =>
+        q.eq("directorId", identity.subject).eq("directeeId", directeeId),
       )
+      .filter((q) => q.eq(q.field("status"), "active"))
       .unique();
 
     if (!directorship) {
@@ -96,7 +93,11 @@ export const listByDirectee = query({
 
     return await Promise.all(
       posts.map(async (post) => ({
-        ...post,
+        _id: post._id,
+        _creationTime: post._creationTime,
+        text: post.text,
+        visibleToDirector: post.visibleToDirector,
+        createdAt: post.createdAt,
         imageUrl: post.imageStorageId
           ? await ctx.storage.getUrl(post.imageStorageId)
           : null,
@@ -107,9 +108,9 @@ export const listByDirectee = query({
 
 export const remove = mutation({
   args: { postId: v.id("posts") },
+  returns: v.null(),
   handler: async (ctx, { postId }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Não autenticado");
+    const identity = await requireIdentity(ctx);
 
     const post = await ctx.db.get(postId);
     if (!post) throw new Error("Post não encontrado.");
@@ -122,5 +123,6 @@ export const remove = mutation({
     }
 
     await ctx.db.delete(postId);
+    return null;
   },
 });

@@ -85,36 +85,41 @@ export class ErrorBoundary extends React.Component<Props, State> {
             </Text>
           </Pressable>
 
-          {/* TODO: revert to __DEV__ guard before App Store submission */}
-          <ScrollView
-            style={{
-              maxHeight: 240,
-              backgroundColor: "rgba(0,0,0,0.2)",
-              borderRadius: 8,
-              padding: 12,
-            }}
-          >
-            <Text
-              selectable
+          {__DEV__ ? (
+            <ScrollView
               style={{
-                color: "rgba(255,255,255,0.85)",
-                fontSize: 11,
-                fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
+                maxHeight: 240,
+                backgroundColor: "rgba(0,0,0,0.2)",
+                borderRadius: 8,
+                padding: 12,
               }}
             >
-              {String(error.message ?? error)}
-              {"\n\n"}
-              {String(
-                (error as Record<string, unknown>).__bootDiag
-                  ? JSON.stringify(
-                      (error as Record<string, unknown>).__bootDiag,
-                      null,
-                      2,
-                    )
-                  : "",
-              )}
+              <Text
+                selectable
+                style={{
+                  color: "rgba(255,255,255,0.85)",
+                  fontSize: 11,
+                  fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
+                }}
+              >
+                {String(error.message ?? error)}
+                {"\n\n"}
+                {String(
+                  (error as unknown as Record<string, unknown>).__bootDiag
+                    ? JSON.stringify(
+                        (error as unknown as Record<string, unknown>).__bootDiag,
+                        null,
+                        2,
+                      )
+                    : "",
+                )}
+              </Text>
+            </ScrollView>
+          ) : (
+            <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 13, textAlign: "center" }}>
+              Se o problema continuar, escreva para suporte@safecatholic.app
             </Text>
-          </ScrollView>
+          )}
         </View>
       );
     }

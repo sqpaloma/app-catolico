@@ -39,6 +39,7 @@ export default defineSchema({
     status: v.union(
       v.literal("pending"),
       v.literal("answering"),
+      v.literal("consensus_processing"),
       v.literal("consensus_ready"),
     ),
     consensusResponse: v.optional(v.string()),
@@ -70,7 +71,8 @@ export default defineSchema({
     ),
   })
     .index("by_questionId", ["questionId"])
-    .index("by_directorId", ["directorId"]),
+    .index("by_directorId", ["directorId"])
+    .index("by_questionId_directorId", ["questionId", "directorId"]),
 
   posts: defineTable({
     userId: v.string(),
@@ -93,6 +95,14 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_directorId", ["directorId"])
-    .index("by_directeeId", ["directeeId"]),
+    .index("by_directeeId", ["directeeId"])
+    .index("by_directorId_status", ["directorId", "status"])
+    .index("by_directeeId_status", ["directeeId", "status"])
+    .index("by_directorId_directeeId", ["directorId", "directeeId"]),
 
+  rateLimits: defineTable({
+    key: v.string(),
+    windowStart: v.number(),
+    count: v.number(),
+  }).index("by_key", ["key"]),
 });

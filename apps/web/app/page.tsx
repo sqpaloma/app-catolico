@@ -451,26 +451,26 @@ export default function LandingPage() {
           <p className="mx-auto mt-4 max-w-lg text-base text-white/75 sm:text-lg">
             Comece sua jornada espiritual hoje. Gratuito, anônimo e seguro.
           </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <a
-              href="#"
-              className="flex items-center gap-3 rounded-2xl bg-white px-8 py-4 font-semibold text-burgundy-600 shadow-xl transition-transform hover:scale-105"
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <div
+              className="flex items-center gap-3 rounded-2xl bg-white/90 px-8 py-4 font-semibold text-burgundy-600 shadow-xl"
+              aria-disabled="true"
             >
               <svg className="h-8 w-8" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-1.707l2.387 1.381c.524.304.524 1.062 0 1.364l-2.387 1.382-2.537-2.537 2.537-2.59zM5.864 2.658L16.8 8.99l-2.302 2.302-8.635-8.635z" />
               </svg>
               <div className="text-left">
                 <span className="block text-[10px] uppercase tracking-wide text-burgundy-400">
-                  Disponível no
+                  Em breve no
                 </span>
                 <span className="block text-lg font-bold leading-tight">
                   Google Play
                 </span>
               </div>
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-3 rounded-2xl border-2 border-white/30 bg-white/10 px-8 py-4 font-semibold text-white backdrop-blur-sm transition-transform hover:scale-105"
+            </div>
+            <div
+              className="flex items-center gap-3 rounded-2xl border-2 border-white/30 bg-white/10 px-8 py-4 font-semibold text-white backdrop-blur-sm"
+              aria-disabled="true"
             >
               <svg className="h-8 w-8" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
@@ -483,7 +483,7 @@ export default function LandingPage() {
                   App Store
                 </span>
               </div>
-            </a>
+            </div>
           </div>
         </div>
       </section>
@@ -514,7 +514,19 @@ export default function LandingPage() {
                 href="/privacidade"
                 className="transition-colors hover:text-burgundy-600"
               >
-                Política de Privacidade
+                Privacidade
+              </a>
+              <a
+                href="/termos"
+                className="transition-colors hover:text-burgundy-600"
+              >
+                Termos
+              </a>
+              <a
+                href="/suporte"
+                className="transition-colors hover:text-burgundy-600"
+              >
+                Suporte
               </a>
               <span>&copy; {new Date().getFullYear()} Safe</span>
             </div>

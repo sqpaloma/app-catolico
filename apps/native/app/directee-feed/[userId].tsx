@@ -8,8 +8,9 @@ import { Text } from "@/components/ui/themed-text";
 import { Container } from "@/components/container";
 import { EmptyState } from "@/components/empty-state";
 import { PostCard } from "@/components/post-card";
+import { RequireAuth } from "@/components/require-auth";
 
-export default function DirecteeFeedScreen() {
+function DirecteeFeedContent() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const posts = useQuery(
     api.posts.listByDirectee,
@@ -52,12 +53,20 @@ export default function DirecteeFeedScreen() {
         }
         ListEmptyComponent={
           <EmptyState
-            icon="newspaper-outline"
-            title="Nenhuma publicação compartilhada"
-            description="Este fiel ainda não compartilhou publicações com você."
+            title="Nenhuma publicação"
+            description="Este fiel ainda não compartilhou nada no diário."
           />
         }
+        contentContainerStyle={{ flexGrow: 1 }}
       />
     </Container>
+  );
+}
+
+export default function DirecteeFeedScreen() {
+  return (
+    <RequireAuth>
+      <DirecteeFeedContent />
+    </RequireAuth>
   );
 }

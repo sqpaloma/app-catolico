@@ -60,6 +60,9 @@ export default function SignInScreen() {
   const [oauthLoading, setOauthLoading] = useState<"google" | "apple" | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [resetStep, setResetStep] = useState<"none" | "email" | "code">("none");
+  const [resetCode, setResetCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   const onSSOPress = useCallback(
     async (strategy: "oauth_google" | "oauth_apple") => {
@@ -179,6 +182,70 @@ export default function SignInScreen() {
       } else {
         setErrorMessage(getClerkErrorMessage(err, "Email ou senha incorretos."));
       }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onSendResetCode = async () => {
+    setErrorMessage("");
+    if (!emailAddress.trim()) {
+      setErrorMessage("Informe seu e-mail para recuperar a senha.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const createResult = await signIn.create({ identifier: emailAddress.trim() });
+      if (createResult.error) {
+        setErrorMessage(getClerkErrorMessage(createResult.error, "Não foi possível iniciar a recuperação."));
+        return;
+      }
+      const { error } = await signIn.resetPasswordEmailCode.sendCode();
+      if (error) {
+        setErrorMessage(getClerkErrorMessage(error, "Não foi possível enviar o código."));
+        return;
+      }
+      setResetStep("code");
+    } catch (err: unknown) {
+      setErrorMessage(getClerkErrorMessage(err, "Não foi possível enviar o código."));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onConfirmResetPassword = async () => {
+    setErrorMessage("");
+    if (!resetCode.trim() || newPassword.length < 8) {
+      setErrorMessage("Informe o código e uma nova senha com pelo menos 8 caracteres.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const verify = await signIn.resetPasswordEmailCode.verifyCode({
+        code: resetCode.trim(),
+      });
+      if (verify.error) {
+        setErrorMessage(getClerkErrorMessage(verify.error, "Código inválido."));
+        return;
+      }
+      const submit = await signIn.resetPasswordEmailCode.submitPassword({
+        password: newPassword,
+      });
+      if (submit.error) {
+        setErrorMessage(getClerkErrorMessage(submit.error, "Não foi possível salvar a nova senha."));
+        return;
+      }
+      if (signIn.status === "complete") {
+        await signIn.finalize();
+        setResetStep("none");
+        setResetCode("");
+        setNewPassword("");
+        router.replace("/");
+        return;
+      }
+      setErrorMessage("Não foi possível redefinir a senha. Tente novamente.");
+    } catch (err: unknown) {
+      setErrorMessage(getClerkErrorMessage(err, "Código inválido ou senha rejeitada."));
     } finally {
       setIsLoading(false);
     }
@@ -305,48 +372,149 @@ export default function SignInScreen() {
               />
             </View>
 
-            <View style={{ marginBottom: 12 }}>
-              <Text style={{ fontSize: 13, fontWeight: "600", color: "#666", marginBottom: 8, marginLeft: 4 }}>
-                Senha
-              </Text>
-              <View
-                style={{
-                  backgroundColor: "#f5f0eb",
-                  borderRadius: 12,
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
+            {resetStep === "none" ? (
+              <View style={{ marginBottom: 12 }}>
+                <Text style={{ fontSize: 13, fontWeight: "600", color: "#666", marginBottom: 8, marginLeft: 4 }}>
+                  Senha
+                </Text>
+                <View
+                  style={{
+                    backgroundColor: "#f5f0eb",
+                    borderRadius: 12,
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <TextInput
+                    style={{
+                      flex: 1,
+                      padding: 16,
+                      fontSize: 16,
+                      color: "#1a1a1a",
+                    }}
+                    value={password}
+                    placeholder="Sua senha"
+                    placeholderTextColor="#aaa"
+                    secureTextEntry={!showPassword}
+                    onChangeText={(text) => {
+                      setPassword(text);
+                      if (errorMessage) setErrorMessage("");
+                    }}
+                    editable={!isLoading}
+                  />
+                  <Pressable
+                    onPress={() => setShowPassword((prev) => !prev)}
+                    accessibilityLabel={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    hitSlop={8}
+                    style={{ paddingRight: 14, paddingLeft: 4 }}
+                  >
+                    <Ionicons
+                      name={showPassword ? "eye-off-outline" : "eye-outline"}
+                      size={22}
+                      color="#999"
+                    />
+                  </Pressable>
+                </View>
+                <Pressable
+                  onPress={() => {
+                    setErrorMessage("");
+                    setResetStep("email");
+                  }}
+                  accessibilityLabel="Esqueci minha senha"
+                  style={{ alignSelf: "flex-end", marginTop: 8, paddingVertical: 4 }}
+                >
+                  <Text style={{ fontSize: 13, color: "#8B1A1A", fontWeight: "600" }}>
+                    Esqueci minha senha
+                  </Text>
+                </Pressable>
+              </View>
+            ) : resetStep === "email" ? (
+              <View style={{ marginBottom: 12 }}>
+                <Text style={{ fontSize: 13, color: "#666", marginBottom: 12, lineHeight: 18 }}>
+                  Enviaremos um código para o e-mail informado acima.
+                </Text>
+                <Pressable
+                  onPress={onSendResetCode}
+                  disabled={!emailAddress || isLoading}
+                  accessibilityLabel="Enviar código de recuperação"
+                  style={({ pressed }) => ({
+                    backgroundColor: !emailAddress || isLoading ? "#c4948b" : pressed ? "#7B1616" : "#8B1A1A",
+                    borderRadius: 12,
+                    paddingVertical: 14,
+                    alignItems: "center",
+                    marginBottom: 8,
+                  })}
+                >
+                  <Text style={{ color: "#fff", fontSize: 15, fontWeight: "700" }}>
+                    {isLoading ? "Enviando..." : "Enviar código"}
+                  </Text>
+                </Pressable>
+                <Pressable onPress={() => setResetStep("none")} accessibilityLabel="Cancelar recuperação">
+                  <Text style={{ textAlign: "center", color: "#888", fontSize: 13 }}>Cancelar</Text>
+                </Pressable>
+              </View>
+            ) : (
+              <View style={{ marginBottom: 12, gap: 10 }}>
+                <Text style={{ fontSize: 13, color: "#666", lineHeight: 18 }}>
+                  Digite o código recebido e a nova senha.
+                </Text>
                 <TextInput
                   style={{
-                    flex: 1,
+                    backgroundColor: "#f5f0eb",
+                    borderRadius: 12,
                     padding: 16,
                     fontSize: 16,
                     color: "#1a1a1a",
                   }}
-                  value={password}
-                  placeholder="Sua senha"
+                  value={resetCode}
+                  placeholder="Código"
                   placeholderTextColor="#aaa"
-                  secureTextEntry={!showPassword}
-                  onChangeText={(text) => {
-                    setPassword(text);
-                    if (errorMessage) setErrorMessage("");
+                  keyboardType="number-pad"
+                  onChangeText={setResetCode}
+                  editable={!isLoading}
+                />
+                <TextInput
+                  style={{
+                    backgroundColor: "#f5f0eb",
+                    borderRadius: 12,
+                    padding: 16,
+                    fontSize: 16,
+                    color: "#1a1a1a",
                   }}
+                  value={newPassword}
+                  placeholder="Nova senha"
+                  placeholderTextColor="#aaa"
+                  secureTextEntry
+                  onChangeText={setNewPassword}
                   editable={!isLoading}
                 />
                 <Pressable
-                  onPress={() => setShowPassword((prev) => !prev)}
-                  hitSlop={8}
-                  style={{ paddingRight: 14, paddingLeft: 4 }}
+                  onPress={onConfirmResetPassword}
+                  disabled={isLoading}
+                  accessibilityLabel="Redefinir senha"
+                  style={({ pressed }) => ({
+                    backgroundColor: isLoading ? "#c4948b" : pressed ? "#7B1616" : "#8B1A1A",
+                    borderRadius: 12,
+                    paddingVertical: 14,
+                    alignItems: "center",
+                  })}
                 >
-                  <Ionicons
-                    name={showPassword ? "eye-off-outline" : "eye-outline"}
-                    size={22}
-                    color="#999"
-                  />
+                  <Text style={{ color: "#fff", fontSize: 15, fontWeight: "700" }}>
+                    {isLoading ? "Salvando..." : "Redefinir senha"}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    setResetStep("none");
+                    setResetCode("");
+                    setNewPassword("");
+                  }}
+                  accessibilityLabel="Voltar ao login"
+                >
+                  <Text style={{ textAlign: "center", color: "#888", fontSize: 13 }}>Voltar ao login</Text>
                 </Pressable>
               </View>
-            </View>
+            )}
 
             {errorMessage ? (
               <View
@@ -367,30 +535,33 @@ export default function SignInScreen() {
               </View>
             ) : null}
 
-            <Pressable
-              onPress={onSignInPress}
-              disabled={!emailAddress || !password || isLoading || !!oauthLoading}
-              style={({ pressed }) => ({
-                backgroundColor: !emailAddress || !password || isLoading
-                  ? "#c4948b"
-                  : pressed
-                    ? "#7B1616"
-                    : "#8B1A1A",
-                borderRadius: 12,
-                paddingVertical: 16,
-                alignItems: "center",
-                flexDirection: "row",
-                justifyContent: "center",
-                gap: 8,
-              })}
-            >
-              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
-                {isLoading ? "Entrando..." : "Entrar"}
-              </Text>
-              {!isLoading && (
-                <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.8)" />
-              )}
-            </Pressable>
+            {resetStep === "none" && (
+              <Pressable
+                onPress={onSignInPress}
+                disabled={!emailAddress || !password || isLoading || !!oauthLoading}
+                accessibilityLabel="Entrar"
+                style={({ pressed }) => ({
+                  backgroundColor: !emailAddress || !password || isLoading
+                    ? "#c4948b"
+                    : pressed
+                      ? "#7B1616"
+                      : "#8B1A1A",
+                  borderRadius: 12,
+                  paddingVertical: 16,
+                  alignItems: "center",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  gap: 8,
+                })}
+              >
+                <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
+                  {isLoading ? "Entrando..." : "Entrar"}
+                </Text>
+                {!isLoading && (
+                  <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.8)" />
+                )}
+              </Pressable>
+            )}
 
             <View
               style={{

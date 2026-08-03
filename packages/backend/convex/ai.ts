@@ -330,6 +330,7 @@ export const generateConsensus = internalAction({
       questionId,
     });
     if (!question) return;
+    if (question.status === "consensus_ready") return;
 
     const answers = await ctx.runQuery(internal.answers.listByQuestion, {
       questionId,

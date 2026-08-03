@@ -1,5 +1,4 @@
 import { api } from "@app-catolico/backend/convex/_generated/api";
-import { useAuth } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -7,13 +6,14 @@ import { useQuery } from "convex/react";
 import { Spinner } from "heroui-native";
 import React from "react";
 import { Image, Platform, Pressable, ScrollView, View } from "react-native";
+import { RequireAuth } from "@/components/require-auth";
 import { Text } from "@/components/ui/themed-text";
-import { LoginRequiredScreen } from "@/components/login-required-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const STATUS_CONFIG = {
   pending: { label: "Aguardando", bg: "#FFF3E0", color: "#E65100", icon: "time-outline" as const },
   answering: { label: "Em resposta", bg: "#E3F2FD", color: "#1565C0", icon: "chatbubbles-outline" as const },
+  consensus_processing: { label: "Gerando orientação", bg: "#F3E5F5", color: "#7B1FA2", icon: "sync-outline" as const },
   consensus_ready: { label: "Respondida", bg: "#E8F5E9", color: "#2E7D32", icon: "checkmark-circle-outline" as const },
 };
 
@@ -30,7 +30,12 @@ function MyQuestionsContent() {
     );
   }
 
-  const pendingCount = questions.filter((q) => q.status === "pending" || q.status === "answering").length;
+  const pendingCount = questions.filter(
+    (q) =>
+      q.status === "pending" ||
+      q.status === "answering" ||
+      q.status === "consensus_processing",
+  ).length;
   const answeredCount = questions.filter((q) => q.status === "consensus_ready").length;
 
   return (
@@ -56,6 +61,8 @@ function MyQuestionsContent() {
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <Pressable
               onPress={() => router.back()}
+              accessibilityLabel="Voltar"
+              accessibilityRole="button"
               style={{
                 width: 36,
                 height: 36,
@@ -315,11 +322,9 @@ function MyQuestionsContent() {
 }
 
 export default function MyQuestionsScreen() {
-  const { isSignedIn, isLoaded } = useAuth();
-
-  if (!isLoaded || !isSignedIn) {
-    return <LoginRequiredScreen />;
-  }
-
-  return <MyQuestionsContent />;
+  return (
+    <RequireAuth>
+      <MyQuestionsContent />
+    </RequireAuth>
+  );
 }

@@ -280,6 +280,7 @@ export const addDocumentBatch = internalAction({
 });
 
 export const seedDocuments = internalAction({
+  args: {},
   handler: async (ctx) => {
     for (const doc of SEED_DOCUMENTS) {
       await rag.add(ctx, {

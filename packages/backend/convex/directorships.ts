@@ -1,11 +1,12 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { requireIdentity } from "./lib/auth";
 
 export const request = mutation({
   args: { directorId: v.string() },
+  returns: v.id("directorships"),
   handler: async (ctx, { directorId }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Não autenticado");
+    const identity = await requireIdentity(ctx);
 
     const director = await ctx.db
       .query("users")
@@ -22,13 +23,10 @@ export const request = mutation({
 
     const existing = await ctx.db
       .query("directorships")
-      .withIndex("by_directeeId", (q) => q.eq("directeeId", identity.subject))
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("directorId"), directorId),
-          q.neq(q.field("status"), "rejected"),
-        ),
+      .withIndex("by_directorId_directeeId", (q) =>
+        q.eq("directorId", directorId).eq("directeeId", identity.subject),
       )
+      .filter((q) => q.neq(q.field("status"), "rejected"))
       .first();
 
     if (existing) {
@@ -46,9 +44,9 @@ export const request = mutation({
 
 export const accept = mutation({
   args: { directorshipId: v.id("directorships") },
+  returns: v.null(),
   handler: async (ctx, { directorshipId }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Não autenticado");
+    const identity = await requireIdentity(ctx);
 
     const directorship = await ctx.db.get(directorshipId);
     if (!directorship) throw new Error("Solicitação não encontrada.");
@@ -60,14 +58,15 @@ export const accept = mutation({
     }
 
     await ctx.db.patch(directorshipId, { status: "active" });
+    return null;
   },
 });
 
 export const reject = mutation({
   args: { directorshipId: v.id("directorships") },
+  returns: v.null(),
   handler: async (ctx, { directorshipId }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Não autenticado");
+    const identity = await requireIdentity(ctx);
 
     const directorship = await ctx.db.get(directorshipId);
     if (!directorship) throw new Error("Solicitação não encontrada.");
@@ -79,18 +78,21 @@ export const reject = mutation({
     }
 
     await ctx.db.patch(directorshipId, { status: "rejected" });
+    return null;
   },
 });
 
 export const listMyDirectees = query({
+  args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return [];
 
     const directorships = await ctx.db
       .query("directorships")
-      .withIndex("by_directorId", (q) => q.eq("directorId", identity.subject))
-      .filter((q) => q.eq(q.field("status"), "active"))
+      .withIndex("by_directorId_status", (q) =>
+        q.eq("directorId", identity.subject).eq("status", "active"),
+      )
       .collect();
 
     return await Promise.all(
@@ -100,7 +102,11 @@ export const listMyDirectees = query({
           .withIndex("by_clerkId", (q) => q.eq("clerkId", d.directeeId))
           .unique();
         return {
-          ...d,
+          _id: d._id,
+          status: d.status,
+          createdAt: d.createdAt,
+          directeeId: d.directeeId,
+          // Never expose real names — only anonymous label.
           directeeName: user?.anonymousId ?? "Anônimo",
         };
       }),
@@ -109,29 +115,42 @@ export const listMyDirectees = query({
 });
 
 export const getPendingRequests = query({
+  args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return [];
 
     return await ctx.db
       .query("directorships")
-      .withIndex("by_directorId", (q) => q.eq("directorId", identity.subject))
-      .filter((q) => q.eq(q.field("status"), "pending"))
+      .withIndex("by_directorId_status", (q) =>
+        q.eq("directorId", identity.subject).eq("status", "pending"),
+      )
       .collect();
   },
 });
 
 export const getMyDirector = query({
+  args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
 
     const directorship = await ctx.db
       .query("directorships")
-      .withIndex("by_directeeId", (q) => q.eq("directeeId", identity.subject))
-      .filter((q) => q.eq(q.field("status"), "active"))
+      .withIndex("by_directeeId_status", (q) =>
+        q.eq("directeeId", identity.subject).eq("status", "active"),
+      )
       .first();
 
-    return directorship;
+    if (!directorship) return null;
+
+    return {
+      _id: directorship._id,
+      status: directorship.status,
+      createdAt: directorship.createdAt,
+      // Omit directorId from public surface if not needed by UI —
+      // keep for accept/reject ownership flows on director side only.
+      directorId: directorship.directorId,
+    };
   },
 });
